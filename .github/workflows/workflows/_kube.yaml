@@ -1,0 +1,45 @@
+name: Deploy to Kubernetes
+
+on:
+  workflow_call:
+
+env:
+  HELM_RELEASE: ${{ github.event.repository.name }}
+  HELM_NAMESPACE: ${{ github.event.organization.login }}
+  HELM_CHART: chart
+  HELM_TIMEOUT: 1m
+
+jobs:
+  deploy:
+    name: Kubernetes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Install Helm
+        shell: bash
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod +x get_helm.sh
+          ./get_helm.sh
+      - name: Save credentials
+        shell: bash
+        run: |
+          mkdir -p $HOME/.kube
+          echo "${{ secrets.KUBECONFIG }}" > $HOME/.kube/config
+          chmod go-rwx $HOME/.kube/config
+
+          echo "${{ secrets.VALUES }}" > $HOME/values.yaml
+      - name: Update deployment
+        shell: bash
+        run: |
+          helm upgrade \
+            ${{ env.HELM_RELEASE }} \
+            ${{ env.HELM_CHART }} \
+            --kubeconfig $HOME/.kube/config \
+            --namespace ${{ env.HELM_NAMESPACE }} \
+            --values $HOME/values.yaml \
+            --timeout ${{ env.HELM_TIMEOUT }} \
+            --install \
+            --atomic \
+            --wait
