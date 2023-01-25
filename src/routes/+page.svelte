@@ -15,7 +15,7 @@
   };
 
   const [send, receive] = crossfade({
-    fallback(node, params) {
+    fallback(node) {
       const style = getComputedStyle(node);
       const transform = style.transform === "none" ? "" : style.transform;
 

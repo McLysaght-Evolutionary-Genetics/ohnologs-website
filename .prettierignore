@@ -4,6 +4,7 @@ node_modules
 /.svelte-kit
 /package
 /static
+/prisma
 .env
 .env.*
 !.env.example
