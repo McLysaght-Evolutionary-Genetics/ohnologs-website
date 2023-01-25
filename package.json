@@ -6,8 +6,8 @@
     "dev": "prisma generate && vite dev",
     "build": "prisma generate && svelte-kit sync && vite build",
     "preview": "vite preview",
-    "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "check": "prisma generate && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+    "check:watch": "prisma generate && svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "lint": "prettier --plugin-search-dir . --check . && eslint .",
     "format": "prettier --plugin-search-dir . --write ."
   },
