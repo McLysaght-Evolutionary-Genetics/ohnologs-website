@@ -1,17 +1,28 @@
 <script lang="ts">
   import { applyAction, enhance } from "$app/forms";
-  import { Button, ButtonSet, Column, Grid, Row, TextInput, Toggle } from "carbon-components-svelte";
+  import { Button, ButtonSet, Column, Grid, MultiSelect, Row, TextInput, Toggle } from "carbon-components-svelte";
   import { quintOut } from "svelte/easing";
   import { crossfade } from "svelte/transition";
   import { flip } from "svelte/animate";
   import { GeneModel } from "$zod";
   import TrashCan from "carbon-icons-svelte/lib/TrashCan.svelte";
   import type { PageData } from "./$types";
+  import type { Gene } from "@prisma/client";
 
   const addGene = (unk: unknown) => {
     const gene = GeneModel.parse(unk);
 
     data.genes = data.genes.concat(gene);
+  };
+
+  const fetchGenes = async (labels: string[]) => {
+    const res = await fetch(`/api?labels=${labels.join(",")}`);
+    const data = await res.json();
+
+    console.log(data);
+    genes = data;
+
+    data.genes = data;
   };
 
   const [send, receive] = crossfade({
@@ -31,6 +42,8 @@
   });
 
   let submitting = false;
+
+  let genes: Gene[] = [];
 
   export let data: PageData;
 </script>
@@ -84,3 +97,33 @@
 {/each}
 
 <Toggle labelText="break horribly" labelA="No" labelB="Yes" />
+
+{#each genes as gene}
+  <p>{JSON.stringify(gene)}</p>
+{/each}
+
+<MultiSelect
+  titleText="filters"
+  placeholder="Select filters..."
+  spellcheck="false"
+  filterable
+  items={[
+    {
+      id: "gene-tree",
+      text: "gene-tree",
+    },
+    {
+      id: "macro-synteny",
+      text: "macro-synteny",
+    },
+    {
+      id: "micro-synteny",
+      text: "micro-synteny",
+    },
+  ]}
+  on:select={async (event) => {
+    const ids = event.detail.selectedIds;
+
+    fetchGenes(ids);
+  }}
+/>

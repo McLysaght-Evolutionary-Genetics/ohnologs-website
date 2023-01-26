@@ -5,7 +5,7 @@
   import { Content, Header, HeaderNav, HeaderNavItem, HeaderNavMenu, SkipToContent } from "carbon-components-svelte";
 </script>
 
-<Header company="IBM" platformName="Carbon Svelte">
+<Header company="Ohnologs" platformName="OWO">
   <svelte:fragment slot="skip-to-content">
     <SkipToContent />
   </svelte:fragment>

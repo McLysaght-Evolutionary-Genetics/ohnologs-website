@@ -12,6 +12,22 @@ datasource db {
 }
 
 model Gene {
-  id   String @id @default(uuid())
-  name String
+  id     String      @id @default(uuid())
+  name   String
+  labels GeneLabel[]
+}
+
+model Label {
+  id    String      @id @default(uuid())
+  name  String
+  genes GeneLabel[]
+}
+
+model GeneLabel {
+  gene    Gene   @relation(fields: [geneId], references: [id])
+  geneId  String
+  label   Label  @relation(fields: [labelId], references: [id])
+  labelId String
+
+  @@id([geneId, labelId])
 }
