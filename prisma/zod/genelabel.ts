@@ -1,5 +1,5 @@
 import * as z from "zod"
-import * as _ from "./index"
+import { CompleteGene, RelatedGeneModel, CompleteLabel, RelatedLabelModel } from "./index"
 
 export const GeneLabelModel = z.object({
   geneId: z.string(),
@@ -7,8 +7,8 @@ export const GeneLabelModel = z.object({
 })
 
 export interface CompleteGeneLabel extends z.infer<typeof GeneLabelModel> {
-  gene: _.CompleteGene
-  label: _.CompleteLabel
+  gene: CompleteGene
+  label: CompleteLabel
 }
 
 /**
@@ -17,6 +17,6 @@ export interface CompleteGeneLabel extends z.infer<typeof GeneLabelModel> {
  * NOTE: Lazy required in case of potential circular dependencies within schema
  */
 export const RelatedGeneLabelModel: z.ZodSchema<CompleteGeneLabel> = z.lazy(() => GeneLabelModel.extend({
-  gene: _.RelatedGeneModel,
-  label: _.RelatedLabelModel,
+  gene: RelatedGeneModel,
+  label: RelatedLabelModel,
 }))

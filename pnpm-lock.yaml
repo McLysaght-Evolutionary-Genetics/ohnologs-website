@@ -6,6 +6,7 @@ specifiers:
   '@sveltejs/adapter-node': ^1.1.4
   '@sveltejs/kit': ^1.0.0
   '@types/d3': ^7.4.0
+  '@types/uuid': ^9.0.0
   '@typescript-eslint/eslint-plugin': ^5.45.0
   '@typescript-eslint/parser': ^5.45.0
   autoprefixer: ^10.4.13
@@ -23,8 +24,10 @@ specifiers:
   svelte: ^3.54.0
   svelte-check: ^3.0.1
   tailwindcss: ^3.2.4
+  tippy.js: ^6.3.7
   tslib: ^2.4.1
   typescript: ^4.9.3
+  uuid: ^9.0.0
   vite: ^4.0.0
   zod: ^3.20.2
   zod-prisma: ^0.5.4
@@ -37,6 +40,7 @@ devDependencies:
   '@sveltejs/adapter-node': 1.1.4_@sveltejs+kit@1.2.9
   '@sveltejs/kit': 1.2.9_svelte@3.55.1+vite@4.0.4
   '@types/d3': 7.4.0
+  '@types/uuid': 9.0.0
   '@typescript-eslint/eslint-plugin': 5.49.0_iu322prlnwsygkcra5kbpy22si
   '@typescript-eslint/parser': 5.49.0_7uibuqfxkfaozanbtbziikiqje
   autoprefixer: 10.4.13_postcss@8.4.21
@@ -54,8 +58,10 @@ devDependencies:
   svelte: 3.55.1
   svelte-check: 3.0.3_4xcsxbgwqdrvcryxlywpxdpbsu
   tailwindcss: 3.2.4_postcss@8.4.21
+  tippy.js: 6.3.7
   tslib: 2.4.1
   typescript: 4.9.4
+  uuid: 9.0.0
   vite: 4.0.4_sass@1.57.1
   zod: 3.20.2
   zod-prisma: 0.5.4_prisma@4.9.0+zod@3.20.2
@@ -336,6 +342,10 @@ packages:
 
   /@polka/url/1.0.0-next.21:
     resolution: {integrity: sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==}
+    dev: true
+
+  /@popperjs/core/2.11.6:
+    resolution: {integrity: sha512-50/17A98tWUfQ176raKiOGXuYpLyyVMkxxG6oylzL3BPOlA6ADGdK7EYunSa4I064xerltq9TGXs8HmOk5E+vw==}
     dev: true
 
   /@prisma/client/4.9.0_prisma@4.9.0:
@@ -749,6 +759,10 @@ packages:
 
   /@types/semver/7.3.13:
     resolution: {integrity: sha512-21cFJr9z3g5dW8B0CVI9g2O9beqaThGQ6ZFBqHfwhzLDKUxaqTIy3vnfah/UPkfOiF2pLq+tGz+W8RyCskuslw==}
+    dev: true
+
+  /@types/uuid/9.0.0:
+    resolution: {integrity: sha512-kr90f+ERiQtKWMz5rP32ltJ/BtULDI5RVO0uavn1HQUOwjx0R1h0rnDYNL0CepF1zL5bSY6FISAfd9tOdDhU5Q==}
     dev: true
 
   /@typescript-eslint/eslint-plugin/5.49.0_iu322prlnwsygkcra5kbpy22si:
@@ -2607,6 +2621,12 @@ packages:
       globrex: 0.1.2
     dev: true
 
+  /tippy.js/6.3.7:
+    resolution: {integrity: sha512-E1d3oP2emgJ9dRQZdf3Kkn0qJgI6ZLpyS5z6ZkY1DF3kaQaBsGZsndEpHwx+eC+tYM41HaSNvNtLx8tU57FzTQ==}
+    dependencies:
+      '@popperjs/core': 2.11.6
+    dev: true
+
   /to-regex-range/5.0.1:
     resolution: {integrity: sha512-65P7iz6X5yEr1cwcgvQxbbIw7Uk3gOy5dIdtZ4rDveLqhrdJP+Li/Hx6tyK0NEb+2GCyneCMJiGqrADCSNk8sQ==}
     engines: {node: '>=8.0'}
@@ -2688,6 +2708,11 @@ packages:
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
+    dev: true
+
+  /uuid/9.0.0:
+    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
+    hasBin: true
     dev: true
 
   /vite/4.0.4_sass@1.57.1:

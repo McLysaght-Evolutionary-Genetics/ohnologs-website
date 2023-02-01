@@ -1,23 +1,60 @@
 <script lang="ts">
   import * as d3 from "d3";
   import type { D3ZoomEvent } from "d3";
+  import Gene from "./gene.svelte";
+  import { getContext } from "svelte";
 
-  let bindInitZoom: Element;
-  let bindHandleZoom: Element;
+  const rnumber = (max: number) => Math.floor(Math.random() * max);
 
-  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-    d3.select(bindHandleZoom).attr("transform", e.transform.toString());
+  const rcolour = () => `#${rnumber(256).toString(16)}${rnumber(256).toString(16)}${rnumber(256).toString(16)}`;
+
+  const pairs = <T>(arr: T[]): [T, T][] => {
+    const res: [T, T][] = [];
+
+    for (let i = 0; i < arr.length; i++) {
+      for (let j = 0; j < arr.length; j++) {
+        if (i === j) {
+          continue;
+        }
+
+        res.push([arr[i], arr[j]]);
+      }
+    }
+
+    return res;
   };
 
-  const zoom = d3.zoom().on("zoom", handleZoom);
+  const calcLinkCoords = (id_x: string, id_y: string): [[number, number], [number, number]] => {
+    const gene_x = data.genes.find((e) => e.id === id_x);
+    const gene_y = data.genes.find((e) => e.id === id_y);
 
-  $: if (bindInitZoom) {
-    d3.select(bindInitZoom).call(zoom);
-  }
+    // TODO: fix
+    if (gene_x == null || gene_y == null) {
+      return [
+        [0, 0],
+        [0, 0],
+      ];
+    }
 
+    const track_x_idx = data.tracks.findIndex((e) => e.id === gene_x.track);
+    const track_y_idx = data.tracks.findIndex((e) => e.id === gene_y.track);
+
+    const xx = gene_x.start + gene_x.length / 2;
+    const xy = track_x_idx * data.options.trackPadding - data.options.geneHeight / 2;
+
+    const yx = gene_y.start + gene_y.length / 2;
+    const yy = track_y_idx * data.options.trackPadding - data.options.geneHeight / 2;
+
+    return [
+      [xx, xy],
+      [yx, yy],
+    ];
+  };
+
+  // data
   const data = {
     options: {
-      size: { width: 1000, height: 500 },
+      size: { width: 1000, height: 1000 },
       margin: { top: 250, right: 20, bottom: 20, left: 200 },
       trackPadding: 100,
       geneHeight: 20,
@@ -33,6 +70,16 @@
         id: "chr_2",
         label: "Chromosome 2",
         length: 500,
+      },
+      {
+        id: "chr_3",
+        label: "Chromosome 3",
+        length: 400,
+      },
+      {
+        id: "chr_4",
+        label: "Chromosome 4",
+        length: 150,
       },
     ],
     genes: [
@@ -53,11 +100,36 @@
         direction: -1,
       },
       {
+        id: "bbb",
+        label: "Bbb",
+        track: "chr_1",
+        start: 180,
+        length: 10,
+        direction: -1,
+      },
+      {
+        id: "ccc",
+        label: "Ccc",
+        track: "chr_1",
+        start: 250,
+        length: 30,
+        direction: -1,
+      },
+      //
+      {
         id: "idk",
         label: "Idk",
         track: "chr_2",
         start: 20,
         length: 80,
+        direction: 1,
+      },
+      {
+        id: "aaa",
+        label: "Aaa",
+        track: "chr_2",
+        start: 150,
+        length: 20,
         direction: 1,
       },
       {
@@ -68,12 +140,95 @@
         length: 30,
         direction: -1,
       },
+      {
+        id: "ddd",
+        label: "Ddd",
+        track: "chr_2",
+        start: 240,
+        length: 30,
+        direction: -1,
+      },
+    ],
+    anchors: [
+      {
+        ids: ["yfg", "idk"],
+      },
+      {
+        ids: ["i_make_things_glow", "lol"],
+      },
+      {
+        ids: ["ccc", "ddd"],
+      },
     ],
   };
+
+  // scale
+  let bindAxis: Element;
+
+  $: scale = d3.scaleLinear().domain([0, 100]).range([0, data.options.size.width]);
+
+  $: if (bindAxis) {
+    d3.select(bindAxis).call(d3.axisBottom(scale).ticks(data.options.size.width / 100));
+  }
+
+  // brush
+  // const brush = d3.brush().on("brush end", () => {
+  //   console.log("waaaa");
+  // });
+
+  // TODO: tmp
+  let trans: any = null;
+
+  // zoom
+  let bindInitZoom: Element;
+  let bindHandleZoom: Element;
+
+  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
+    d3.select(bindHandleZoom).attr("transform", e.transform.toString());
+
+    // console.log(e.transform);
+    // TODO: tmp
+    trans = e.transform;
+
+    const newScale = e.transform.rescaleX(scale);
+    d3.select(bindAxis).call(d3.axisBottom(newScale).ticks(data.options.size.width / 100));
+  };
+
+  const zoom = d3.zoom().on("zoom", handleZoom);
+
+  $: if (bindInitZoom) {
+    d3.select(bindInitZoom).call(zoom);
+    // d3.select(bindInitZoom).call(brush).call(brush.move);ss
+  }
+
+  let shift = false;
+
+  // $: if (bindInitZoom) {
+  //   if (shift) {
+  //     d3.select(bindInitZoom).call(d3.zoom());
+  //     // d3.select(bindInitZoom).call(brush).call(brush.move);
+  //   } else {
+  //     // d3.select(bindInitZoom).call(d3.brush());
+  //     d3.select(bindInitZoom).call(zoom);
+  //   }
+  // }
 </script>
 
+<svelte:window
+  on:keydown={(e) => {
+    if (e.key === "Shift") {
+      shift = true;
+    }
+  }}
+  on:keyup={(e) => {
+    if (e.key === "Shift") {
+      shift = false;
+    }
+  }}
+/>
+
 <svg bind:this={bindInitZoom} width={data.options.size.width} height={data.options.size.height}>
-  <g bind:this={bindHandleZoom} transform="translate({data.options.margin.left},{data.options.margin.top})">
+  <g bind:this={bindHandleZoom}>
     <g>
       {#each data.tracks as track, i}
         <path
@@ -82,29 +237,73 @@
             [track.length, data.options.trackPadding * i],
           ])}
         />
-      {/each}
-    </g>
-    <g>
-      {#each data.genes as gene, i}
         <g>
-          <rect
-            x={gene.start}
-            y={data.tracks.findIndex((e) => e.id === gene.track) * data.options.trackPadding - data.options.geneHeight}
-            width={gene.length}
-            height={data.options.geneHeight}
-          />
-          <path
-            d={d3.symbol().type(d3.symbolTriangle).size(50)()}
-            transform="translate({gene.start + gene.length / 2},{data.tracks.findIndex((e) => e.id === gene.track) *
-              data.options.trackPadding -
-              data.options.dmarkerHeight}) rotate({90 * gene.direction})"
-          />
+          <text transform="translate({track.length},{data.options.trackPadding * i - 20})">{track.label}</text>
+          <text transform="translate(-50,{data.options.trackPadding * i + 20})"
+            >{Math.min(trans && Math.abs(Math.min(trans.x, 0)) / track.length / trans.k, 1) * 100}% -
+            {Math.min(
+              trans &&
+                Math.abs(Math.min(data.options.size.width - trans.x - track.length * trans.k, 0)) /
+                  track.length /
+                  trans.k,
+              1,
+            ) * 100}%
+          </text>
         </g>
       {/each}
     </g>
+    <g>
+      {#each data.anchors as anchor}
+        {#each pairs(anchor.ids) as [x, y]}
+          <path d={d3.line()(calcLinkCoords(x, y))} />
+        {/each}
+      {/each}
+    </g>
+    <g>
+      {#each data.genes as gene}
+        <Gene
+          id={gene.id}
+          label={gene.label}
+          geneX={gene.start}
+          geneY={data.tracks.findIndex((e) => e.id === gene.track) * data.options.trackPadding -
+            data.options.geneHeight}
+          geneWidth={gene.length}
+          geneHeight={data.options.geneHeight}
+          geneColour={rcolour()}
+          pointerSize={50}
+          pointerOffset={-20}
+          pointerDirection={gene.direction}
+        />
+      {/each}
+    </g>
   </g>
+  <g bind:this={bindAxis} transform="translate(0,{data.options.size.height - 200})" />
 </svg>
 
+<!--
+  TODO:
+
+  - tooltips
+  - links (ensembl?)
+
+  EXTRA:
+
+  - minimap
+  - consistent groupings/colours
+  - gene labels and stuff
+  - actually sync stuff with/use scale
+  - region select actions?
+  - svg clip path
+  - skipped regions?
+  - custom actions
+
+  DONE:
+
+  - anchors/homology
+  - scales
+  - labels
+
+ -->
 <style lang="scss">
   path {
     stroke: black;
