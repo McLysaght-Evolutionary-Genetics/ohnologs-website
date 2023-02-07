@@ -10,9 +10,10 @@
     <SkipToContent />
   </svelte:fragment>
   <HeaderNav>
-    <HeaderNavItem href="/" text="Link 1" />
-    <HeaderNavItem href="/" text="Link 2" />
-    <HeaderNavItem href="/" text="Link 3" />
+    <HeaderNavItem href="/blast" text="BLAST" />
+    <HeaderNavItem href="/synteny" text="Synteny" />
+    <HeaderNavItem href="/circos" text="Circos" />
+    <HeaderNavItem href="/dotplot" text="Dotplot" />
     <HeaderNavMenu text="Menu">
       <HeaderNavItem href="/" text="Link 1" />
       <HeaderNavItem href="/" text="Link 2" />
