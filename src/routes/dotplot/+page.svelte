@@ -46,7 +46,7 @@
   // data
   const dims = {
     size: {
-      width: 1280,
+      width: 900,
       height: 720,
     },
     margin: {
@@ -106,7 +106,7 @@
   const areas: AreaSet[] = [
     {
       id: "random-areas",
-      colour: "#c8fbff",
+      colour: "#ebfbff",
       pos: (() => {
         const pos: [number, number, number, number][] = [];
 
@@ -115,9 +115,8 @@
 
         if (xbounds == null || ybounds == null) {
           return [];
+          scale.y(0);
         }
-
-        console.log(xbounds, ybounds);
 
         for (let i = 0; i < xbounds.length - 1; i++) {
           for (let j = 0; j < ybounds.length - 1; j++) {
@@ -169,10 +168,32 @@
     x: d3.scaleLinear().domain([xMin, xMax]).range([0, innerWidth]),
     y: d3.scaleLinear().domain([yMax, yMin]).range([0, innerHeight]),
   };
+
+  const handleClick = (e: any) => {
+    const x = scale.x.invert(e.offsetX - dims.margin.left);
+    const y = scale.y.invert(e.offsetY - dims.margin.top);
+
+    // TODO: i may have mised up the hlines/vlines...
+    // big dum
+    const cvls = lines.find((e) => e.id === "hlines-primary")?.pos.filter((e) => e < x);
+    const chls = lines.find((e) => e.id === "vlines-primary")?.pos.filter((e) => e < y);
+
+    if (cvls == null || chls == null || cvls.length === 0 || chls.length === 0) {
+      return;
+    }
+
+    const vl = cvls[cvls.length - 1];
+    const hl = chls[chls.length - 1];
+
+    console.log(vl, hl);
+  };
+
+  // TODO: selection
 </script>
 
 <!-- can i use unscaled innerHeight/innerWidth? -->
-<svg width={dims.size.width} height={dims.size.height}>
+<!-- svelte-ignore a11y-click-events-have-key-events -->
+<svg width={dims.size.width} height={dims.size.height} on:click={handleClick}>
   <g transform="translate({dims.margin.left},{dims.margin.top})">
     {#each areas as set}
       <g>

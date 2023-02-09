@@ -1,129 +1,118 @@
 <script lang="ts">
-  import { applyAction, enhance } from "$app/forms";
-  import { Button, ButtonSet, Column, Grid, MultiSelect, Row, TextInput, Toggle } from "carbon-components-svelte";
-  import { quintOut } from "svelte/easing";
-  import { crossfade } from "svelte/transition";
-  import { flip } from "svelte/animate";
-  import { GeneModel } from "$zod";
-  import TrashCan from "carbon-icons-svelte/lib/TrashCan.svelte";
+  import {
+    Button,
+    DataTable,
+    DataTableSkeleton,
+    PaginationNav,
+    Tag,
+    Toolbar,
+    ToolbarBatchActions,
+    ToolbarContent,
+    ToolbarMenu,
+    ToolbarMenuItem,
+    ToolbarSearch,
+  } from "carbon-components-svelte";
+  import { Download, MacShift } from "carbon-icons-svelte";
   import type { PageData } from "./$types";
-  import type { Gene } from "@prisma/client";
-
-  const addGene = (unk: unknown) => {
-    const gene = GeneModel.parse(unk);
-
-    data.genes = data.genes.concat(gene);
-  };
-
-  const fetchGenes = async (labels: string[]) => {
-    const res = await fetch(`/api?labels=${labels.join(",")}`);
-    const data = await res.json();
-
-    console.log(data);
-    genes = data;
-
-    data.genes = data;
-  };
-
-  const [send, receive] = crossfade({
-    fallback(node) {
-      const style = getComputedStyle(node);
-      const transform = style.transform === "none" ? "" : style.transform;
-
-      return {
-        duration: 600,
-        easing: quintOut,
-        css: (t) => `
-					transform: ${transform} scale(${t});
-					opacity: ${t}
-				`,
-      };
-    },
-  });
-
-  let submitting = false;
-
-  let genes: Gene[] = [];
 
   export let data: PageData;
+
+  const handleDownload = () => {
+    const header = "#id,label\n";
+    const items = rows
+      .filter((e) => selectedRowIds.includes(e.id))
+      .map((e) => `${e.id}\t${e.label}`)
+      .join("\n");
+    const content = `${header}${items}`;
+    const tsv = new Blob([content], { type: "text/tsv" });
+    const name = `ohnologs-${Date.now()}.tsv`;
+    const url = URL.createObjectURL(tsv);
+
+    const a = window.document.createElement("a");
+    a.href = url;
+    a.target = "_blank";
+    a.download = name;
+    a.click();
+
+    return;
+  };
+
+  $: rows = data.genes.map((e) => ({
+    id: e.id,
+    label: e.name,
+  }));
+
+  let active: boolean = false;
+  let selectedRowIds: string[] = [];
+  let page: number = 1;
+
+  let shift: "gray" | "green" = "gray";
 </script>
 
-<form
-  method="post"
-  action="?/create"
-  use:enhance={() => {
-    submitting = true;
-
-    // TODO: add optimistic update
-
-    return async ({ result, form }) => {
-      submitting = false;
-
-      if (result.type == "success") {
-        form.reset();
-
-        addGene(result.data);
-      }
-
-      await applyAction(result);
-    };
+<svelte:window
+  on:keydown={(e) => {
+    if (e.key === "Shift") {
+      shift = "green";
+    }
   }}
->
-  <Grid padding>
-    <Row>
-      <Column>
-        <TextInput labelText="gene name" name="name" disabled={submitting} />
-      </Column>
-    </Row>
-    <Row>
-      <ButtonSet>
-        <Button type="reset" kind="secondary" disabled={submitting}>fuck! go back</Button>
-        <Button type="submit" disabled={submitting}>do the thing</Button>
-      </ButtonSet>
-    </Row>
-  </Grid>
-</form>
-
-{#each data.genes as gene (gene.id)}
-  <div in:receive={{ key: gene.id }} out:send={{ key: gene.id }} animate:flip>
-    <Row>
-      <form method="post" action="?/delete">
-        <p>{JSON.stringify(gene)}</p>
-        <input hidden name="id" value={gene.id} />
-        <Button type="submit" disabled={submitting} kind="danger-tertiary" icon={TrashCan} iconDescription="delet" />
-      </form>
-    </Row>
-  </div>
-{/each}
-
-<Toggle labelText="break horribly" labelA="No" labelB="Yes" />
-
-{#each genes as gene}
-  <p>{JSON.stringify(gene)}</p>
-{/each}
-
-<MultiSelect
-  titleText="filters"
-  placeholder="Select filters..."
-  spellcheck="false"
-  filterable
-  items={[
-    {
-      id: "gene-tree",
-      text: "gene-tree",
-    },
-    {
-      id: "macro-synteny",
-      text: "macro-synteny",
-    },
-    {
-      id: "micro-synteny",
-      text: "micro-synteny",
-    },
-  ]}
-  on:select={async (event) => {
-    const ids = event.detail.selectedIds;
-
-    fetchGenes(ids);
+  on:keyup={(e) => {
+    if (e.key === "Shift") {
+      shift = "gray";
+    }
   }}
 />
+
+<DataTable
+  bind:selectedRowIds
+  batchSelection
+  headers={[
+    { key: "id", value: "Gene ID" },
+    { key: "label", value: "Gene Label" },
+  ]}
+  {rows}
+>
+  <Toolbar>
+    <ToolbarBatchActions
+      bind:active
+      on:cancel={(e) => {
+        e.preventDefault();
+        active = false;
+      }}
+    >
+      <Button icon={Download} on:click={handleDownload}>Download</Button>
+    </ToolbarBatchActions>
+    <ToolbarContent>
+      <ToolbarSearch />
+      <ToolbarMenu>
+        <ToolbarMenuItem primaryFocus>do the thing</ToolbarMenuItem>
+        <ToolbarMenuItem>something else owo</ToolbarMenuItem>
+        <ToolbarMenuItem hasDivider danger>catch on fire</ToolbarMenuItem>
+      </ToolbarMenu>
+      <Button>rawrxd</Button>
+    </ToolbarContent>
+  </Toolbar>
+</DataTable>
+
+<br />
+
+<DataTableSkeleton
+  showHeader={false}
+  showToolbar={false}
+  headers={[
+    { key: "id", value: "Gene ID" },
+    { key: "label", value: "Gene Label" },
+  ]}
+/>
+
+<br />
+
+<PaginationNav bind:page total={20} shown={7} />
+
+<Tag
+  interactive
+  type={shift}
+  icon={MacShift}
+  on:click={() => {
+    shift = shift === "gray" ? "green" : "gray";
+  }}>Shift</Tag
+>
