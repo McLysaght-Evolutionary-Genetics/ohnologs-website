@@ -16,6 +16,7 @@ specifiers:
   eslint: ^8.33.0
   eslint-config-prettier: ^8.6.0
   eslint-plugin-svelte3: ^4.0.0
+  newick-js: ^1.1.1
   postcss: ^8.4.21
   prettier: ^2.8.4
   prettier-plugin-svelte: ^2.9.0
@@ -50,6 +51,7 @@ devDependencies:
   eslint: 8.33.0
   eslint-config-prettier: 8.6.0_eslint@8.33.0
   eslint-plugin-svelte3: 4.0.0_4omm2ewoudhgnmf7aocafatnc4
+  newick-js: 1.1.1
   postcss: 8.4.21
   prettier: 2.8.4
   prettier-plugin-svelte: 2.9.0_jrsxveqmsx2uadbqiuq74wlc4u
@@ -2075,6 +2077,10 @@ packages:
 
   /natural-compare/1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+    dev: true
+
+  /newick-js/1.1.1:
+    resolution: {integrity: sha512-RaSmZTOtyMklxxu1BSR2Gr6LU+XGXvK+Oc5WVSAUCe7YO5XtkWZRN9qbXDnxtkfxGmHa5wNrC/DSMAeiVFTruA==}
     dev: true
 
   /node-releases/2.0.10:

@@ -1,7 +1,6 @@
 <script lang="ts">
-  import * as d3 from "d3";
-  import Node from "./Node.svelte";
-  import { parseNewick, type TreeNode } from "./tree";
+  import PhyloTree from "./PhyloTree.svelte";
+  import { parseNewick, type Vertex } from "./tree";
 
   const dims = {
     size: {
@@ -16,70 +15,24 @@
     },
   };
 
-  const tree = "(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);";
+  const newick = "(A:0.1,B:0.2,(C:0.3,D:0.4):0.5);";
 
-  const root = parseNewick(tree);
+  const tree = parseNewick(newick);
 
-  // const root: TreeNode = {
-  //   children: [
-  //     {
-  //       label: "c",
-  //       children: [
-  //         {
-  //           label: "c",
-  //           children: [],
-  //         },
-  //         {
-  //           label: "c",
-  //           children: [],
-  //         },
-  //       ],
-  //     },
-  //     {
-  //       children: [
-  //         {
-  //           label: "a",
-  //           children: [
-  //             {
-  //               children: [
-  //                 {
-  //                   label: "c",
-  //                   children: [],
-  //                 },
-  //                 {
-  //                   label: "c",
-  //                   children: [],
-  //                 },
-  //               ],
-  //             },
-  //           ],
-  //         },
-  //         {
-  //           label: "b",
-  //           children: [
-  //             {
-  //               label: "c",
-  //               children: [],
-  //             },
-  //             {
-  //               label: "c",
-  //               children: [
-  //                 {
-  //                   label: "c",
-  //                   children: [],
-  //                 },
-  //                 {
-  //                   label: "c",
-  //                   children: [],
-  //                 },
-  //               ],
-  //             },
-  //           ],
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // };
+  // const rels: (readonly [Vertex, Vertex, number])[] = [];
+  // tree.graph[1].forEach((e) => rels.push(e));
+
+  // while (true) {
+  //   const n = v.next();
+
+  //   if (n.done) {
+  //     break;
+  //   }
+
+  //   rels.push(n.value);
+  // }
+
+  // console.log(tree);
 
   const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
@@ -87,6 +40,6 @@
 
 <svg width={dims.size.width} height={dims.size.height}>
   <g transform="translate({dims.margin.left},{dims.margin.top})">
-    <Node {...root} />
+    <PhyloTree {tree} />
   </g>
 </svg>
