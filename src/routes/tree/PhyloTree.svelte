@@ -1,30 +1,21 @@
 <script lang="ts">
   import type { Vertex, PhyloTree } from "./tree";
 
-  export let tree: PhyloTree;
+  //
+  type Frame = [Vertex, number, number, number];
 
   //
+  export let tree: PhyloTree;
+
   const rels: (readonly [Vertex, Vertex, number])[] = [];
   tree.graph[1].forEach((e) => rels.push(e));
-
-  // //
-  // export let y: number = 200;
-  // export let height: number = 300;
-  // export let padding: number = 50;
-
-  // //
-  // export let x: number = 0;
-  // export let width: number = 100;
-
-  // //
 
   const x = 0;
   const y = 200;
   const height = 300;
   const width = 100;
 
-  type Frame = [Vertex, number, number, number];
-
+  //
   const stack: Frame[] = [[tree.root, x, y, height]];
 
   while (stack.length > 0) {

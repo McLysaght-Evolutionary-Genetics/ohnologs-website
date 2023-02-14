@@ -61,26 +61,26 @@
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
   const lines: LineSet[] = [
-    {
-      id: "hlines-secondary",
-      type: "x",
-      colour: "#fdc8ff",
-      pos: Array.from({ length: 20 }, () => randInt(0, 950)),
-      label: {
-        text: () => "",
-        skew: 5,
-      },
-    },
-    {
-      id: "vlines-secondary",
-      type: "y",
-      colour: "#fdc8ff",
-      pos: Array.from({ length: 20 }, () => randInt(0, 800)),
-      label: {
-        text: () => "",
-        skew: 5,
-      },
-    },
+    // {
+    //   id: "hlines-secondary",
+    //   type: "x",
+    //   colour: "#fdc8ff",
+    //   pos: Array.from({ length: 20 }, () => randInt(0, 950)),
+    //   label: {
+    //     text: () => "",
+    //     skew: 5,
+    //   },
+    // },
+    // {
+    //   id: "vlines-secondary",
+    //   type: "y",
+    //   colour: "#fdc8ff",
+    //   pos: Array.from({ length: 20 }, () => randInt(0, 800)),
+    //   label: {
+    //     text: () => "",
+    //     skew: 5,
+    //   },
+    // },
     {
       id: "hlines-primary",
       type: "x",
@@ -188,6 +188,18 @@
     console.log(vl, hl);
   };
 
+  //
+
+  let colour = "#ff594f";
+
+  const mouseenter = () => {
+    colour = "black";
+  };
+
+  const mouseleave = () => {
+    colour = "#ff594f";
+  };
+
   // TODO: selection
 </script>
 
@@ -225,7 +237,24 @@
               <!-- TODO: fix text clashing when lines are too close -->
               <!-- TODO: dont add unnecessary text nodes for empty text -->
               <line y2={innerHeight} stroke={set.colour} />
-              <text y={innerHeight} dy={set.label.skew} text-anchor="middle" dominant-baseline="hanging">
+
+              <rect
+                x={0}
+                y={innerHeight}
+                width={scale.x(set.pos[i + 1] - p)}
+                height={50}
+                fill={colour}
+                on:mouseenter={mouseenter}
+                on:mouseleave={mouseleave}
+              />
+
+              <text
+                y={innerHeight}
+                dy={set.label.skew}
+                text-anchor="middle"
+                dominant-baseline="hanging"
+                pointer-events="none"
+              >
                 {set.label.text(p, i, set.pos.length)}
               </text>
             </g>
