@@ -193,18 +193,28 @@
 
     mouse = [e.clientX, e.clientY];
 
+    // dispatch("selection", {
+    //   action,
+    //   x,
+    //   y,
+    //   width,
+    //   height,
+    //   nx,
+    //   ny,
+    //   nw,
+    //   nh,
+    // });
+  };
+
+  $: (() => {
     dispatch("selection", {
       action,
       x,
       y,
       width,
       height,
-      nx,
-      ny,
-      nw,
-      nh,
     });
-  };
+  })();
 </script>
 
 <svelte:window on:mousemove={handleMouseMove} />

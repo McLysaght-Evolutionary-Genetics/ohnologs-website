@@ -561,7 +561,7 @@
   };
 
   const handleSelection = (e: CustomEvent<SelectionEvent>) => {
-    const { nx, ny, nw, nh } = e.detail;
+    const { x: nx, y: ny, width: nw, height: nh } = e.detail;
 
     const tx = scale.x.invert(nx - dims.margin.left);
     const ty = scale.y.invert(ny - dims.margin.top);
@@ -603,23 +603,24 @@
     selection = sel;
   };
 
+  // TODO: zooming breaks some selection area event listeners...
   // zoooooom
   let zoomEnabled = false;
 
   let bindSvg: Element;
   let bindZoom: Element;
 
-  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-    d3.select(bindZoom).attr("transform", e.transform.toString());
-  };
+  // const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
+  //   d3.select(bindZoom).attr("transform", e.transform.toString());
+  // };
 
-  const zoom = d3.zoom().on("zoom", handleZoom);
+  // const zoom = d3.zoom().on("zoom", handleZoom);
 
-  $: if (bindSvg) {
-    d3.select(bindSvg).call(zoom);
-  }
+  // $: if (bindSvg) {
+  //   d3.select(bindSvg).call(zoom);
+  // }
 
-  $: zoomEnabled ? zoom.on("zoom", handleZoom) : zoom.on("zoom", () => {});
+  // $: zoomEnabled ? zoom.on("zoom", handleZoom) : zoom.on("zoom", () => {});
 </script>
 
 <!-- can i use unscaled innerHeight/innerWidth? -->

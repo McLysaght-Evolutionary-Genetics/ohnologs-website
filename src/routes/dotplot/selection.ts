@@ -12,13 +12,9 @@ export type Action =
   | "resize_bot_right";
 
 export interface SelectionEvent {
-  action: Action;
+  action: Action | null;
   x: number;
   y: number;
   width: number;
   height: number;
-  nx: number;
-  ny: number;
-  nw: number;
-  nh: number;
 }
