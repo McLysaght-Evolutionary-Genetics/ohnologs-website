@@ -2,7 +2,7 @@
   import type { Vertex, PhyloTree } from "./tree";
 
   //
-  type Frame = [Vertex, number, number, number];
+  type Frame = [Vertex, number, number, number, number, number];
 
   //
   export let tree: PhyloTree;
@@ -16,25 +16,32 @@
   const width = 100;
 
   //
-  const stack: Frame[] = [[tree.root, x, y, height]];
+  const lines: [number, number, number, number, string][] = [];
+
+  const stack: Frame[] = [[tree.root, x, y, 0, 0, height]];
 
   while (stack.length > 0) {
     // were still in the loop, so pop should not return undefined
-    const [vertex, x, y, height] = stack.pop() as Frame;
+    const [vertex, x, y, dx, dy, height] = stack.pop() as Frame;
 
     // add children
     const children = rels.filter((e) => e[0] === vertex);
-    stack.push(...children.map((e) => [e[1], x, y, height] as Frame));
+    stack.push(...children.map((e, i) => [e[1], x + dx, y + dy, 100, 50 * i, height] as Frame));
+
+    const text = children.length === 0 ? vertex.label ?? "" : "";
+    lines.push([x, y, dx, dy, text]);
   }
-
-  // const children = [];
-
-  //
-  // const newHeight = height / 2;
-  // const spacing = height / (children.length - 1);
 </script>
 
 <g>
+  {#each lines as [x, y, dx, dy, text]}
+    <line x1={x} y1={y} x2={x + dx} y2={y + dy} stroke="black" />
+
+    {#if text.length > 0}
+      <text x={x + dx} y={y + dy}>{text}</text>
+    {/if}
+  {/each}
+
   <!-- {#if children.length > 1}
     <line x1={x} y1={y} x2={x} y2={y + height} stroke="#ff594f" />
 
