@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["filteredRelationCount"]
 }
 
 generator zod {
@@ -11,23 +12,117 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Genome {
+  id      String @id @default(uuid())
+  species String
+  version String
+
+  // present vs reconstruction
+  state   GenomeState @relation(fields: [stateId], references: [id])
+  stateId String
+
+  // ensembl vs refseq
+  source   GenomeSource @relation(fields: [sourceId], references: [id])
+  sourceId String
+
+  // rels
+  Scaffold Scaffold[]
+}
+
+model GenomeState {
+  id   String @id @default(uuid())
+  name String
+
+  // rels
+  Genome Genome[]
+}
+
+model GenomeSource {
+  id   String @id @default(uuid())
+  name String
+
+  // rels
+  Genome Genome[]
+}
+
+model Scaffold {
+  id   String @id @default(uuid())
+  name String
+
+  // bp length on current scaffold
+  length Int
+
+  // parent genome
+  genome   Genome @relation(fields: [genomeId], references: [id])
+  genomeId String
+
+  // rels
+  Segment Segment[]
+  Gene    Gene[]
+}
+
+model Segment {
+  id   String @id @default(uuid())
+  name String
+
+  // bp start/end location of segment on parent scaffold
+  start Int
+  end   Int
+
+  // parent scaffold
+  scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
+  scaffoldId String
+}
+
 model Gene {
-  id     String      @id @default(uuid())
-  name   String
-  labels GeneLabel[]
+  id        String @id @default(uuid())
+  geneId    String
+  proteinId String
+
+  // bp start/end location of gene on parent scaffold
+  start Int
+  end   Int
+
+  // parent scaffold
+  scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
+  scaffoldId String
+
+  // rels
+  GeneLabel GeneLabel[]
+
+  HomologyQuery   Homology[] @relation("HomologyQuery")
+  HomologySubject Homology[] @relation("HomologySubject")
 }
 
 model Label {
-  id    String      @id @default(uuid())
-  name  String
+  id   String @id @default(uuid())
+  name String
+
+  // rels
   genes GeneLabel[]
 }
 
 model GeneLabel {
-  gene    Gene   @relation(fields: [geneId], references: [id])
-  geneId  String
+  // gene
+  gene   Gene   @relation(fields: [geneId], references: [id])
+  geneId String
+
+  // label
   label   Label  @relation(fields: [labelId], references: [id])
   labelId String
 
+  // rels
   @@id([geneId, labelId])
+}
+
+model Homology {
+  id String @id @default(uuid())
+
+  // query gene
+  query   Gene   @relation("HomologyQuery", fields: [queryId], references: [id])
+  queryId String
+
+  // subject gene
+  subject   Gene   @relation("HomologySubject", fields: [subjectId], references: [id])
+  subjectId String
 }

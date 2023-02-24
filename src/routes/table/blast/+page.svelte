@@ -1,7 +1,7 @@
 <script lang="ts">
   import { applyAction, enhance } from "$app/forms";
   import { Button, ButtonSet, Column, DataTable, Grid, InlineLoading, Row, TextArea } from "carbon-components-svelte";
-  import type { PageData } from "./$types";
+  import type { PageData } from "../../blast/$types";
   import type { BlastEntry } from "./+page.server";
 
   export let data: PageData;

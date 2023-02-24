@@ -163,8 +163,8 @@
     const points: Point[] = [];
 
     for (let i = 0; i < size; i++) {
-      const sx = segments.x[rnumber(segments.x.length - 1)];
-      const sy = segments.y[rnumber(segments.y.length - 1)];
+      const sx = segments.x[rnumber(segments.x.length)];
+      const sy = segments.y[rnumber(segments.y.length)];
 
       const ox = rnumber(sx.length - 1);
       const oy = rnumber(sy.length - 1);
@@ -186,7 +186,7 @@
   };
   //
 
-  const points: Point[] = genRandomPoints(50);
+  const points: Point[] = genRandomPoints(100);
 
   // lines
   const vlines: number[] = [
@@ -610,17 +610,17 @@
   let bindSvg: Element;
   let bindZoom: Element;
 
-  // const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-  //   d3.select(bindZoom).attr("transform", e.transform.toString());
-  // };
+  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
+    d3.select(bindZoom).attr("transform", e.transform.toString());
+  };
 
-  // const zoom = d3.zoom().on("zoom", handleZoom);
+  const zoom = d3.zoom().on("zoom", handleZoom);
 
-  // $: if (bindSvg) {
-  //   d3.select(bindSvg).call(zoom);
-  // }
+  $: if (bindSvg) {
+    d3.select(bindSvg).call(zoom);
+  }
 
-  // $: zoomEnabled ? zoom.on("zoom", handleZoom) : zoom.on("zoom", () => {});
+  $: zoomEnabled ? zoom.on("zoom", handleZoom) : zoom.on("zoom", () => {});
 </script>
 
 <!-- can i use unscaled innerHeight/innerWidth? -->
