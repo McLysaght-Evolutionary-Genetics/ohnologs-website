@@ -71,9 +71,9 @@
 
 <svg width={dims.size.width} height={dims.size.height}>
   <g transform="translate({dims.margin.left},{dims.margin.top})">
-    <!-- {#each c as child}
+    {#each c as child}
       <text x={child.x} y={child.y}>{child.x}</text>
-      <line x1={child.x} y1={child.y} x2={child.parent.x} y2={child.parent.y} stroke="#ff594f" />
+      <!-- <line x1={child.x} y1={child.y} x2={child.parent.x} y2={child.parent.y} stroke="#ff594f" /> -->
       <!--
       <path
         d="M{child.y},{child.x}C{child.parent.y + 50},{child.x} {child.parent.y},{child.parent.x} {child.parent
@@ -81,7 +81,7 @@
         stroke="#ff594f"
         style="fill: none"
       /> -->
-    {/each} -->
+    {/each}
   </g>
 
   <!-- <Selection x={0} y={0} width={100} height={100} /> -->
