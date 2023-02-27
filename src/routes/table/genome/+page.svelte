@@ -1,5 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
+  import { intoQuery } from "$lib/util";
   import {
     Button,
     Checkbox,
@@ -20,7 +21,7 @@
     ToolbarSearch,
   } from "carbon-components-svelte";
   import { Download, Launch } from "carbon-icons-svelte";
-  import type { PageData } from "../tables/$types";
+  import type { PageData } from "./$types";
 
   type SpeciesEntry = {
     id: string;
@@ -66,18 +67,6 @@
   let entries: SpeciesEntry[] = [];
 
   //
-  const intoQuery = (params: Record<string, string | number | boolean>): string => {
-    const entries = Object.entries(params);
-
-    if (entries.length === 0) {
-      return "";
-    }
-
-    const query = `?${entries.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join("&")}`;
-
-    return query;
-  };
-
   const fetchGenomes = async (page: number, perPage: number) => {
     const query = intoQuery({ page, perPage });
 
@@ -101,8 +90,6 @@
   };
 
   $: if (browser && loading) {
-    console.log("a");
-
     fetchGenomes(page, perPage);
   }
 
@@ -119,7 +106,7 @@
       <MultiSelect titleText="Source" label="Select genome source..." items={sources} />
     </Column>
     <Column>
-      <Checkbox labelText="Strict" />
+      <Checkbox disabled labelText="Exact" />
     </Column>
   </Row>
 
@@ -130,7 +117,7 @@
       <MultiSelect titleText="State" label="Select genome state..." items={states} />
     </Column>
     <Column>
-      <Checkbox labelText="Strict" />
+      <Checkbox disabled labelText="Exact" />
     </Column>
   </Row>
 

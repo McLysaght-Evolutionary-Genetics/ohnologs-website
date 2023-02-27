@@ -1,7 +1,7 @@
 import { writable } from "svelte/store";
 
-interface Selected {
-  geneId: string;
-}
+export type SelectedEntry = {
+  id: string;
+};
 
-export default writable<Selected[]>([]);
+export const selection = writable<SelectedEntry[]>([]);

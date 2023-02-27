@@ -1,24 +1,9 @@
 import { PrismaClient } from "$lib/prisma";
+import { findQueryOrError } from "$lib/util";
 import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
-
-const findQuery = (url: URL, k: string): string | null => {
-  const v = url.searchParams.get(k);
-
-  return v;
-};
-
-const findQueryOrError = (url: URL, k: string): string => {
-  const v = findQuery(url, k);
-
-  if (v == null) {
-    throw error(400, `could not find query param '${k}'`);
-  }
-
-  return v;
-};
 
 export const GET = (async ({ url }) => {
   // TODO: validation

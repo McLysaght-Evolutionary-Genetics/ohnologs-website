@@ -1,5 +1,5 @@
 import { PrismaClient } from "$lib/prisma";
-import type { PageServerLoad } from "../$types";
+import type { PageServerLoad } from "./$types";
 
 const prisma = new PrismaClient();
 
