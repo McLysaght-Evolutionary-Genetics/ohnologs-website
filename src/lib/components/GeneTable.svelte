@@ -8,19 +8,10 @@
     ToolbarBatchActions,
     ToolbarContent,
   } from "carbon-components-svelte";
+  import type { DataTableRow } from "carbon-components-svelte/types/DataTable/DataTable.svelte";
   import { Download } from "carbon-icons-svelte";
   import { get } from "svelte/store";
-
-  type GeneEntry = {
-    id: string;
-    geneId: string;
-    proteinId: string;
-    species: string;
-    source: string;
-    scaffold: number;
-    segment: number;
-    labels: string;
-  };
+  import type { GeneEntry } from "./geneTable";
 
   export let title: string;
   export let description: string;
@@ -41,24 +32,31 @@
 
   let selectedRowIds: string[] = get(selection).map((e) => e.id);
 
-  $: selectedRowIds,
-    (() => {
-      selection.set(selectedRowIds.map((e) => ({ id: e })));
-    })();
+  selection.subscribe((current) => {
+    selectedRowIds = current.map((e) => e.id);
+  });
+
+  const handleSelect = ({ detail: { selected, row } }: CustomEvent<{ selected: boolean; row: DataTableRow }>) => {
+    const current = get(selection);
+
+    if (selected) {
+      selection.set([...current, { id: row.id, type: "static" }]);
+    } else {
+      const idx = current.findIndex((e) => e.id === row.id);
+
+      if (idx === -1) {
+        return;
+      }
+
+      selection.set([...current.slice(0, idx), ...current.slice(idx + 1)]);
+    }
+  };
 </script>
 
 <div>
   <!-- table -->
   <div class="table">
-    <DataTable
-      bind:selectedRowIds
-      on:click:header--select={(e) => {
-        e.detail.indeterminate = true;
-      }}
-      selectable
-      {headers}
-      rows={entries}
-    >
+    <DataTable {selectedRowIds} on:click:row--select={handleSelect} selectable {headers} rows={entries}>
       <strong slot="title">{title}</strong>
       <span class="description" slot="description">{description}</span>
 

@@ -2,67 +2,29 @@
   import * as d3 from "d3";
   import type { D3ZoomEvent } from "d3";
   import {
-    Button,
+    Column,
     ContextMenu,
     ContextMenuDivider,
     ContextMenuGroup,
     ContextMenuOption,
-    DataTable,
-    Toolbar,
-    ToolbarBatchActions,
-    ToolbarContent,
-    ToolbarMenu,
-    ToolbarMenuItem,
-    ToolbarSearch,
+    Grid,
+    Row,
+    Select,
+    SelectItem,
   } from "carbon-components-svelte";
-  import { Area, AreaCustom, Column, Copy, Download, Row } from "carbon-icons-svelte";
+  import { Area, AreaCustom, Copy, Download } from "carbon-icons-svelte";
   import { set } from "zod";
   import { error } from "@sveltejs/kit";
   import Selection from "./Selection.svelte";
   import type { SelectionEvent } from "./selection";
-  import { rnumber } from "$lib/util";
-
-  // types
-  interface AreaSet {
-    id: string;
-    colour: string;
-    pos: [number, number, number, number][];
-  }
-
-  interface LineSet {
-    id: string;
-    type: "x" | "y";
-    colour: string;
-    pos: number[];
-    label: {
-      text: (p: number, i: number, l: number) => string;
-      skew: number;
-    };
-  }
-
-  interface PointSet {
-    id: string;
-    colour: string;
-    size: number;
-    pos: [number, number][];
-  }
-
-  // helpers
-  const posLabel = (p: number, i: number, l: number): string => p.toString();
-
-  const randInt = (min: number, max: number): number => Math.floor(Math.random() * max - min) + min;
-
-  const genPoints = (n: number, min: number, max: number): [number, number][] => {
-    return Array.from({ length: n }, () => [randInt(min, max), randInt(min, max)]);
-  };
-
-  const sortNumAsc = (a: number, b: number): number => {
-    return a - b;
-  };
-
-  const sortNumDesc = (a: number, b: number): number => {
-    return b - a;
-  };
+  import { intoQuery, rnumber } from "$lib/util";
+  import GeneTable from "../../lib/components/GeneTable.svelte";
+  import type { GeneEntry } from "../../lib/components/geneTable";
+  import type { PageData } from "./$types";
+  import { browser } from "$app/environment";
+  import type { Point, Segment } from "../api/homologs/+server";
+  import { get } from "svelte/store";
+  import { selection, type SelectedEntry } from "$lib/selection";
 
   // data
   const dims = {
@@ -81,24 +43,7 @@
   const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
-  // new!
-  interface Segment {
-    label: string;
-    length: number;
-  }
-
-  interface Point {
-    label: string;
-    x: {
-      label: string;
-      offset: number;
-    };
-    y: {
-      label: string;
-      offset: number;
-    };
-  }
-
+  // old af!
   interface Region {
     x: number;
     y: number;
@@ -108,163 +53,62 @@
   }
 
   // selection
-  let selection: string[] = [];
+  // let selection: string[] = [];
 
   // figure data
-  const segments: { x: Segment[]; y: Segment[] } = {
-    x: [
-      {
-        label: "1a",
-        length: 50,
-      },
-      {
-        label: "2a",
-        length: 100,
-      },
-      {
-        label: "3a",
-        length: 80,
-      },
-      {
-        label: "4a",
-        length: 20,
-      },
-      {
-        label: "5a",
-        length: 70,
-      },
-    ],
-    y: [
-      {
-        label: "1b",
-        length: 50,
-      },
-      {
-        label: "2b",
-        length: 60,
-      },
-      {
-        label: "3b",
-        length: 120,
-      },
-      {
-        label: "4b",
-        length: 30,
-      },
-      {
-        label: "5b",
-        length: 80,
-      },
-    ],
-  };
-
-  // tmp
-  const genRandomPoints = (size: number) => {
-    const points: Point[] = [];
-
-    for (let i = 0; i < size; i++) {
-      const sx = segments.x[rnumber(segments.x.length)];
-      const sy = segments.y[rnumber(segments.y.length)];
-
-      const ox = rnumber(sx.length - 1);
-      const oy = rnumber(sy.length - 1);
-
-      points.push({
-        label: `gene_${i}`,
-        x: {
-          label: sx.label,
-          offset: ox,
-        },
-        y: {
-          label: sy.label,
-          offset: oy,
-        },
-      });
-    }
-
-    return points;
-  };
-  //
-
-  const points: Point[] = genRandomPoints(100);
+  let qsegs: Segment[] = [];
+  let ssegs: Segment[] = [];
+  let points: Point[] = [];
 
   // lines
-  const vlines: number[] = [
-    0,
-    ...segments.x.map(
-      (
-        (sum) => (e) =>
-          (sum += e.length)
-      )(0),
-    ),
-  ];
+  let vlines: number[] = [];
+  $: vlines = [0, ...qsegs.map((e) => e.cumlen)];
 
-  const hlines: number[] = [
-    0,
-    ...segments.y.map(
-      (
-        (sum) => (e) =>
-          (sum += e.length)
-      )(0),
-    ),
-  ];
+  let hlines: number[] = [];
+  $: hlines = [0, ...ssegs.map((e) => e.cumlen)];
 
   // labels
-  const vlabels: [string, number, number][] = segments.x.map(
-    (
-      (sum) => (e) =>
-        [e.label, (sum += e.length), e.length]
-    )(0),
-  );
+  let vlabels: [string, number, number][] = [];
+  $: vlabels = qsegs.map((e) => [e.name, e.cumlen, e.length]);
 
-  const hlabels: [string, number, number][] = segments.y.map(
-    (
-      (sum) => (e) =>
-        [e.label, (sum += e.length), e.length]
-    )(0),
-  );
+  let hlabels: [string, number, number][] = [];
+  $: hlabels = ssegs.map((e) => [e.name, e.cumlen, e.length]);
 
   // points
   const colourSelected = "#ff594f";
   const colourUnselected = "#5fdbff";
 
+  let ppos: [number, number, string][] = [];
+
   $: ppos = points.map((e) => {
-    const isx = segments.x.findIndex((s) => s.label === e.x.label);
-    const isy = segments.y.findIndex((s) => s.label === e.y.label);
+    const current = get(selection);
 
-    if (isx === -1 || isy === -1) {
-      throw error(500, "invalid point data");
-    }
-
-    const sx = segments.x[isx];
-    const sy = segments.y[isy];
-
-    if (sx.length < e.x.offset || sy.length < e.y.offset) {
-      throw error(500, "invalid point data");
-    }
-
-    const x = segments.x.slice(0, isx).reduce((a, c) => a + c.length, 0) + e.x.offset;
-    const y = segments.y.slice(0, isy).reduce((a, c) => a + c.length, 0) + e.y.offset;
-
-    const sel = selection.find((s) => s === e.label);
+    const sel = current.find((c) => c.id === e.qid || c.id === e.sid);
     const c = sel == null ? colourUnselected : colourSelected;
 
-    return [x, y, c];
+    return [e.x, e.y, c];
   }) satisfies [number, number, string][];
 
-  // scales
-  const xmax = vlines[vlines.length - 1];
-  const ymax = hlines[hlines.length - 1];
+  selection.subscribe((current) => {
+    ppos = points.map((e) => {
+      const sel = current.find((c) => c.id === e.qid || c.id === e.sid);
+      const c = sel == null ? colourUnselected : colourSelected;
 
-  const scale = {
+      return [e.x, e.y, c];
+    });
+  });
+
+  // scales
+  $: xmax = vlines[vlines.length - 1];
+  $: ymax = hlines[hlines.length - 1];
+
+  $: scale = {
     x: d3.scaleLinear().domain([0, xmax]).range([0, innerWidth]),
     y: d3.scaleLinear().domain([ymax, 0]).range([0, innerHeight]),
   };
 
   // table
   let active: boolean = false;
-
-  const rows = points.map((e) => ({ id: e.label }));
 
   // highlight current mouse col/row/region
   let ctxOpen = false;
@@ -277,9 +121,8 @@
     const x = scale.x.invert(ox - dims.margin.left);
     const y = scale.y.invert(oy - dims.margin.top);
 
-    // bounds check
-    const mx = segments.x.reduce((a, c) => a + c.length, 0);
-    const my = segments.y.reduce((a, c) => a + c.length, 0);
+    const mx = scale.x.invert(innerWidth);
+    const my = scale.y.invert(0);
 
     if (x < 0 || y < 0 || x > mx || y > my) {
       regions = [];
@@ -287,33 +130,9 @@
       return;
     }
 
-    // find x segment
-    let sx = null;
-    let sxl = 0;
+    const sx = qsegs.find((e) => e.cumlen > x);
+    const sy = ssegs.find((e) => e.cumlen > y);
 
-    for (let s of segments.x) {
-      if (sxl + s.length > x) {
-        sx = s;
-        break;
-      }
-
-      sxl += s.length;
-    }
-
-    // find y segment
-    let sy = null;
-    let syl = 0;
-
-    for (let s of segments.y) {
-      if (syl + s.length > y) {
-        sy = s;
-        break;
-      }
-
-      syl += s.length;
-    }
-
-    // sanity check
     if (sx == null || sy == null) {
       regions = [];
       selReg = null;
@@ -322,31 +141,31 @@
 
     // calculate regions - remember top left corner is origin...
     const col = {
-      x: sxl,
+      x: sx.cumlen - sx.length,
       y: my,
       width: sx.length,
       height: my,
-      colour: "#eefcff",
+      colour: "#c3e3ff",
     };
 
     const row = {
       x: 0,
-      y: syl + sy.length,
+      y: sy.cumlen,
       width: mx,
       height: sy.length,
-      colour: "#eefcff",
+      colour: "#c3e3ff",
     };
 
     const reg = {
-      x: sxl,
-      y: syl + sy.length,
+      x: sx.cumlen - sx.length,
+      y: sy.cumlen,
       width: sx.length,
       height: sy.length,
-      colour: "#e0f6ff",
+      colour: "#aaceee",
     };
 
     regions = [col, row, reg];
-    selReg = [sx.label, sy.label];
+    selReg = [sx.id, sy.id];
   };
 
   const resetMouse = () => {
@@ -412,38 +231,16 @@
 
     const [lx, ly] = selReg;
 
-    // find x segment
-    let sx = null;
-    let sxl = 0;
-
-    for (let s of segments.x) {
-      if (s.label === lx) {
-        sx = s;
-        break;
-      }
-
-      sxl += s.length;
-    }
-
-    // find y segment
-    let sy = null;
-    let syl = 0;
-
-    for (let s of segments.y) {
-      if (s.label === ly) {
-        sy = s;
-        break;
-      }
-
-      syl += s.length;
-    }
+    // find x/y segments
+    const sx = qsegs.find((e) => e.id === lx);
+    const sy = ssegs.find((e) => e.id === ly);
 
     if (sx == null || sy == null) {
       return;
     }
 
-    const tx = scale.x(sxl) + dims.margin.left;
-    const ty = scale.y(xmax) - dims.margin.top;
+    const tx = scale.x(sx.cumlen - sx.length) + dims.margin.left;
+    const ty = dims.margin.top;
     const tw = scale.x(sx.length);
     const th = innerHeight;
 
@@ -461,38 +258,16 @@
 
     const [lx, ly] = selReg;
 
-    // find x segment
-    let sx = null;
-    let sxl = 0;
-
-    for (let s of segments.x) {
-      if (s.label === lx) {
-        sx = s;
-        break;
-      }
-
-      sxl += s.length;
-    }
-
-    // find y segment
-    let sy = null;
-    let syl = 0;
-
-    for (let s of segments.y) {
-      if (s.label === ly) {
-        sy = s;
-        break;
-      }
-
-      syl += s.length;
-    }
+    // find x/y segments
+    const sx = qsegs.find((e) => e.id === lx);
+    const sy = ssegs.find((e) => e.id === ly);
 
     if (sx == null || sy == null) {
       return;
     }
 
     const tx = dims.margin.left;
-    const ty = scale.y(syl + sy.length) + dims.margin.top;
+    const ty = scale.y(sy.cumlen) + dims.margin.top;
     const tw = innerWidth;
     const th = innerHeight - scale.y(sy.length);
 
@@ -510,38 +285,16 @@
 
     const [lx, ly] = selReg;
 
-    // find x segment
-    let sx = null;
-    let sxl = 0;
-
-    for (let s of segments.x) {
-      if (s.label === lx) {
-        sx = s;
-        break;
-      }
-
-      sxl += s.length;
-    }
-
-    // find y segment
-    let sy = null;
-    let syl = 0;
-
-    for (let s of segments.y) {
-      if (s.label === ly) {
-        sy = s;
-        break;
-      }
-
-      syl += s.length;
-    }
+    // find x/y segments
+    const sx = qsegs.find((e) => e.id === lx);
+    const sy = ssegs.find((e) => e.id === ly);
 
     if (sx == null || sy == null) {
       return;
     }
 
-    const tx = scale.x(sxl) + dims.margin.left;
-    const ty = scale.y(syl + sy.length) + dims.margin.top;
+    const tx = scale.x(sx.cumlen - sx.length) + dims.margin.left;
+    const ty = scale.y(sy.cumlen) + dims.margin.top;
     const tw = scale.x(sx.length);
     const th = innerHeight - scale.y(sy.length);
 
@@ -568,39 +321,17 @@
     const tw = scale.x.invert(nw);
     const th = scale.y.invert(innerHeight - nh);
 
-    const pts = points.map((e) => {
-      // find x segment
-      let sxl = 0;
+    const sel = points
+      .filter(({ x, y }) => x > tx && x < tx + tw && y < ty && y > ty - th)
+      // .filter(({ x, y }) => x > tx)
+      .flatMap(({ qid, sid }) => [qid, sid]) as string[];
 
-      for (let s of segments.x) {
-        if (s.label === e.x.label) {
-          break;
-        }
+    const current = get(selection);
 
-        sxl += s.length;
-      }
+    const keep = current.filter((e) => e.type === "static");
+    const extra = sel.map((e) => ({ id: e, type: "transient" })) as SelectedEntry[];
 
-      // find y segment
-      let syl = 0;
-
-      for (let s of segments.y) {
-        if (s.label === e.y.label) {
-          break;
-        }
-
-        syl += s.length;
-      }
-
-      return [sxl + e.x.offset, syl + e.y.offset, e.label];
-    });
-
-    const sel = pts
-      .filter(([x, y]) => x > tx && x < tx + tw && y < ty && y > ty - th)
-      .map(([x, y, label]) => label) as string[];
-
-    // console.log(sel);
-
-    selection = sel;
+    selection.set([...keep, ...extra]);
   };
 
   // TODO: zooming breaks some selection area event listeners...
@@ -610,18 +341,73 @@
   let bindSvg: Element;
   let bindZoom: Element;
 
-  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-    d3.select(bindZoom).attr("transform", e.transform.toString());
+  // const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
+  //   d3.select(bindZoom).attr("transform", e.transform.toString());
+  // };
+
+  // const zoom = d3.zoom().on("zoom", handleZoom);
+
+  // $: if (bindSvg) {
+  //   d3.select(bindSvg).call(zoom);
+  // }
+
+  // $: zoomEnabled ? zoom.on("zoom", handleZoom) : zoom.on("zoom", () => {});
+
+  //
+  export let data: PageData;
+
+  let species: string[] = [];
+  $: species = data.species.map((e) => e[1]);
+
+  //
+  let entries: GeneEntry[] = [];
+
+  //
+  let count: number = 0;
+
+  let page: number = 1;
+  let perPage: number = 10;
+  let shownPages: number = 7;
+
+  let totalPages: number;
+  $: totalPages = Math.ceil(count / perPage);
+
+  //
+  let query: string;
+  let subject: string;
+
+  const updateGenes = async (query: string, subject: string) => {
+    const lookup = Object.fromEntries(data.species.map(([k, v]) => [v, k])) as Record<string, string>;
+
+    const queryId = lookup[subject];
+    const subjectId = lookup[query];
+
+    if (queryId == null || subjectId == null) {
+      return;
+    }
+
+    const qstr = intoQuery({ query: queryId, subject: subjectId });
+
+    const res = await fetch(`/api/homologs${qstr}`);
+    const homologies = await res.json();
+
+    //
+    qsegs = homologies.qsegs;
+    ssegs = homologies.ssegs;
+    points = homologies.points;
+    entries = homologies.genes;
+
+    console.log(qsegs[qsegs.length - 1].cumlen, ssegs[ssegs.length - 1].cumlen, points);
   };
 
-  const zoom = d3.zoom().on("zoom", handleZoom);
-
-  $: if (bindSvg) {
-    d3.select(bindSvg).call(zoom);
-  }
-
-  $: zoomEnabled ? zoom.on("zoom", handleZoom) : zoom.on("zoom", () => {});
+  $: if (browser) updateGenes(query, subject);
 </script>
+
+<!-- make selection shit actually work lol -->
+<!-- quick col/row select - click on axis? -->
+<!-- currently leaving svg via context menu doesnt fire svg mouse leave - keeps selection -->
+<!-- all the key combos? -->
+<!-- TODO: move the fuck away from element-based mouse handlers - they give me the big sad -->
 
 <!-- can i use unscaled innerHeight/innerWidth? -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -705,28 +491,42 @@
 <br />
 <br />
 
-<DataTable bind:selectedRowIds={selection} batchSelection headers={[{ key: "id", value: "label" }]} {rows}>
-  <Toolbar>
-    <ToolbarBatchActions
-      bind:active
-      on:cancel={(e) => {
-        e.preventDefault();
-        active = false;
-      }}
-    >
-      <Button icon={Download} on:click={() => {}}>Download</Button>
-    </ToolbarBatchActions>
-    <ToolbarContent>
-      <ToolbarSearch />
-      <ToolbarMenu>
-        <ToolbarMenuItem primaryFocus>do the thing</ToolbarMenuItem>
-        <ToolbarMenuItem>something else owo</ToolbarMenuItem>
-        <ToolbarMenuItem hasDivider danger>catch on fire</ToolbarMenuItem>
-      </ToolbarMenu>
-      <Button>rawrxd</Button>
-    </ToolbarContent>
-  </Toolbar>
-</DataTable>
+<Grid>
+  <!-- options -->
+  <Row>
+    <Column>
+      <Select bind:selected={query} labelText="Query species">
+        <SelectItem value="none" />
+
+        {#each species as sp}
+          <SelectItem value={sp} />
+        {/each}
+      </Select>
+    </Column>
+    <Column>
+      <Select bind:selected={subject} labelText="Subject species">
+        <SelectItem value="none" />
+
+        {#each species as sp}
+          <SelectItem value={sp} />
+        {/each}
+      </Select>
+    </Column>
+  </Row>
+  <!-- table -->
+  <Row>
+    <Column>
+      <GeneTable
+        title={"Genes"}
+        description={"Genes matching the current filters"}
+        {entries}
+        {page}
+        total={totalPages}
+        shown={shownPages}
+      />
+    </Column>
+  </Row>
+</Grid>
 
 <ContextMenu bind:open={ctxOpen} on:close={handleContextClose}>
   <ContextMenuOption labelText="Copy" icon={Copy} shortcutText="⌘C" indented on:click={handleCopy} />
@@ -749,9 +549,3 @@
     <ContextMenuOption id="1" labelText="Pan" />
   </ContextMenuGroup>
 </ContextMenu>
-
-<!-- make selection shit actually work lol -->
-<!-- quick col/row select - click on axis? -->
-<!-- currently leaving svg via context menu doesnt fire svg mouse leave - keeps selection -->
-<!-- all the key combos? -->
-<!-- TODO: move the fuck away from element-based mouse handlers - they give me the big sad -->

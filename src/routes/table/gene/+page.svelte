@@ -25,7 +25,7 @@
   import Gene from "../../synteny/gene.svelte";
   import type { PageData } from "./$types";
   import { selection, type SelectedEntry } from "$lib/selection";
-  import GeneTable from "./GeneTable.svelte";
+  import GeneTable from "../../../lib/components/GeneTable.svelte";
   import Selection from "../../dotplot/Selection.svelte";
 
   type SpeciesEntry = {
