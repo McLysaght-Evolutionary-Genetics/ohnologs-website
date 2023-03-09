@@ -331,7 +331,10 @@
     const keep = current.filter((e) => e.type === "static");
     const extra = sel.map((e) => ({ id: e, type: "transient" })) as SelectedEntry[];
 
-    selection.set([...keep, ...extra]);
+    const keepIds = keep.map((e) => e.id);
+    const additions = extra.filter((e) => !keepIds.includes(e.id));
+
+    selection.set([...keep, ...additions]);
   };
 
   // TODO: zooming breaks some selection area event listeners...
@@ -379,8 +382,8 @@
   const updateGenes = async (query: string, subject: string) => {
     const lookup = Object.fromEntries(data.species.map(([k, v]) => [v, k])) as Record<string, string>;
 
-    const queryId = lookup[subject];
-    const subjectId = lookup[query];
+    const queryId = lookup[query];
+    const subjectId = lookup[subject];
 
     if (queryId == null || subjectId == null) {
       return;

@@ -3,6 +3,9 @@
   import type { D3ZoomEvent } from "d3";
   import Gene from "./gene.svelte";
   import { getContext } from "svelte";
+  import { Column, Grid, Row, Select } from "carbon-components-svelte";
+  import GeneTable from "$lib/components/GeneTable.svelte";
+  import type { GeneEntry } from "$lib/components/geneTable";
 
   const rnumber = (max: number) => Math.floor(Math.random() * max);
 
@@ -212,6 +215,41 @@
   //     d3.select(bindInitZoom).call(zoom);
   //   }
   // }
+
+  //
+  const dims = {
+    size: {
+      width: 900,
+      height: 720,
+    },
+    margin: {
+      top: 20,
+      right: 20,
+      bottom: 20,
+      left: 180,
+    },
+  };
+
+  const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
+  const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
+
+  //
+  const sections = [];
+
+  const links = [];
+
+  //
+  let entries: GeneEntry[] = [];
+
+  //
+  let count: number = 0;
+
+  let page: number = 1;
+  let perPage: number = 10;
+  let shownPages: number = 7;
+
+  let totalPages: number;
+  $: totalPages = Math.ceil(count / perPage);
 </script>
 
 <svelte:window
@@ -226,6 +264,31 @@
     }
   }}
 />
+
+<!--
+  TODO:
+
+  - tooltips
+  - links (ensembl?)
+
+  EXTRA:
+
+  - minimap
+  - consistent groupings/colours
+  - gene labels and stuff
+  - actually sync stuff with/use scale
+  - region select actions?
+  - svg clip path
+  - skipped regions?
+  - custom actions
+
+  DONE:
+
+  - anchors/homology
+  - scales
+  - labels
+
+ -->
 
 <svg bind:this={bindInitZoom} width={data.options.size.width} height={data.options.size.height}>
   <g bind:this={bindHandleZoom}>
@@ -280,30 +343,25 @@
   <g bind:this={bindAxis} transform="translate(0,{data.options.size.height - 200})" />
 </svg>
 
-<!--
-  TODO:
+<br />
+<br />
+<br />
 
-  - tooltips
-  - links (ensembl?)
+<Grid>
+  <Row>
+    <Column>
+      <GeneTable
+        title={"Genes"}
+        description={"Genes matching the current filters"}
+        {entries}
+        {page}
+        total={totalPages}
+        shown={shownPages}
+      />
+    </Column>
+  </Row>
+</Grid>
 
-  EXTRA:
-
-  - minimap
-  - consistent groupings/colours
-  - gene labels and stuff
-  - actually sync stuff with/use scale
-  - region select actions?
-  - svg clip path
-  - skipped regions?
-  - custom actions
-
-  DONE:
-
-  - anchors/homology
-  - scales
-  - labels
-
- -->
 <style lang="scss">
   path {
     stroke: black;

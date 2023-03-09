@@ -7,8 +7,6 @@ import path from "path";
 import { v4 as uuidv4 } from "uuid";
 import type { Actions, PageServerLoad } from "./$types";
 
-const prisma = new PrismaClient();
-
 export interface BlastEntry {
   qseqid: string;
   sseqid: string;
@@ -23,6 +21,8 @@ export interface BlastEntry {
   evalue: number;
   bitscore: number;
 }
+
+const prisma = new PrismaClient();
 
 const parseBlastEntry = (str: string): BlastEntry => {
   const entries = str.trim().split("\t");
@@ -172,6 +172,34 @@ export const actions = {
 
     const entries = await execDiamond(id, seq, "dataset", 24, 0);
 
-    return entries;
+    // find matching entries in our database
+    const protIds = entries.map((e) => e.sseqid);
+
+    const genes = await prisma.gene.findMany({
+      include: {
+        scaffold: {
+          include: {
+            genome: {
+              include: {
+                source: true,
+              },
+            },
+            Segment: true,
+          },
+        },
+        GeneLabel: {
+          include: {
+            label: true,
+          },
+        },
+      },
+      where: {
+        proteinId: {
+          in: protIds,
+        },
+      },
+    });
+
+    return genes;
   },
 } satisfies Actions;

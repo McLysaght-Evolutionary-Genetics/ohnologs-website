@@ -63,11 +63,13 @@ export const GET = (async ({ url }) => {
             //   ? { every: { id: { ...(segments == null ? {} : { in: segments }) } } }
             //   : { some: { id: { ...(segments == null ? {} : { in: segments }) } } }),
 
-            some: {
-              id: {
-                ...(segments == null ? {} : { in: segments }),
-              },
-            },
+            ...(segments == null ? {} : { some: { id: { in: segments } } }),
+
+            // some: {
+            //   id: {
+            //     ...(segments == null ? {} : { in: segments }),
+            //   },
+            // },
 
             // some: {
             //   id: {
@@ -76,11 +78,11 @@ export const GET = (async ({ url }) => {
             // },
           },
         },
-        // GeneLabel: {
-        //   ...(exactLabels
-        //     ? { every: { labelId: { ...(labels == null ? {} : { in: labels }) } } }
-        //     : { some: { labelId: { ...(labels == null ? {} : { in: labels }) } } }),
-        // },
+        GeneLabel: {
+          ...(exactLabels
+            ? { ...(labels == null ? {} : { every: { labelId: { in: labels } }, some: {} }) }
+            : { ...(labels == null ? {} : { some: { labelId: { in: labels } } }) }),
+        },
       },
       skip: page * perPage,
       take: perPage,

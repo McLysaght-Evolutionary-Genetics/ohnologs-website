@@ -104,6 +104,8 @@
     const res = await fetch(`/api/genes${query}`);
     const data = await res.json();
 
+    console.log(data);
+
     count = data.count;
 
     entries = data.genes.map((e: unknown) => ({
@@ -115,7 +117,7 @@
       scaffold: e.scaffold.name,
       // segments are defined based on homologous gene content
       // therefore, gene coords should be entirely contained within segment coords
-      segment: e.scaffold.Segment.find((e) => e.start <= e.start && e.end >= e.end).name,
+      segment: e.scaffold.Segment.find((e) => e.start <= e.start && e.end >= e.end)?.name ?? "null",
       // TODO: cut off at x max chars
       labels: e.GeneLabel.map((e) => e.label.name).join(", "),
     }));

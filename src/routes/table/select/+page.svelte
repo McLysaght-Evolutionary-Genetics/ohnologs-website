@@ -1,10 +1,14 @@
 <script lang="ts">
+  import type { GeneEntry } from "$lib/components/geneTable";
+  import GeneTable from "$lib/components/GeneTable.svelte";
+  import { intoQuery } from "$lib/util";
   import {
     Column,
     DataTable,
     FileUploaderDropContainer,
     FileUploaderItem,
     Grid,
+    InlineLoading,
     Row,
     TextArea,
   } from "carbon-components-svelte";
@@ -42,12 +46,13 @@
 
   const validSpaceSharacters = [" ", "\t", ","];
 
-  const headers = [
-    { key: "id", value: "Id" },
-    { key: "item", value: "Item" },
-  ];
+  //
+  const shownPages: number = 1;
+  const totalPages: number = 1;
 
-  let entries: { id: string; item: string }[] = [];
+  let page: number = 1;
+  let loading = false;
+  let entries: GeneEntry[] = [];
 
   //
   let files: readonly File[] = [];
@@ -308,12 +313,35 @@
   };
 
   //
+  const fetchGenes = async (query: string[]) => {
+    const qstr = intoQuery({ query: query.join(",") });
+
+    const res = await fetch(`/api/select${qstr}`);
+    const { genes } = await res.json();
+
+    entries = genes.map((e) => ({
+      id: e.id,
+      geneId: e.geneId,
+      proteinId: e.proteinId,
+      species: e.scaffold.genome.species,
+      source: e.scaffold.genome.source.name,
+      scaffold: e.scaffold.name,
+      // segments are defined based on homologous gene content
+      // therefore, gene coords should be entirely contained within segment coords
+      segment: e.scaffold.Segment.find((e) => e.start <= e.start && e.end >= e.end)?.name ?? "null",
+      // TODO: cut off at x max chars
+      labels: e.GeneLabel.map((e) => e.label.name).join(", "),
+    }));
+  };
+
   const handleFileUpload = async () => {
     for (let file of files) {
       const type = await guessFileType(file);
       const content = await processFileContents(file, type);
 
-      entries = content.map((e, i) => ({ id: i.toString(), item: e }));
+      loading = true;
+      await fetchGenes(content);
+      loading = false;
     }
   };
 
@@ -322,11 +350,15 @@
 
     const type = await guessFileType(file);
     const content = await processFileContents(file, type);
-    entries = content.map((e, i) => ({ id: i.toString(), item: e }));
+
+    loading = true;
+    await fetchGenes(content);
+    loading = false;
   };
 </script>
 
 <Grid>
+  <!-- upload -->
   <Row>
     <Column>
       <FileUploaderDropContainer
@@ -338,8 +370,24 @@
       <FileUploaderItem />
 
       <TextArea bind:value labelText="selection" placeholder="lol..." on:input={handleTextareaInput} />
+    </Column>
+  </Row>
 
-      <DataTable {headers} rows={entries} />
+  <!-- table -->
+  <Row>
+    <Column>
+      {#if loading}
+        <InlineLoading />
+      {:else}
+        <GeneTable
+          title={"Genes"}
+          description={"Genes matching the current filters"}
+          {entries}
+          {page}
+          total={totalPages}
+          shown={shownPages}
+        />
+      {/if}
     </Column>
   </Row>
 </Grid>
