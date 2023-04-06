@@ -1,4 +1,4 @@
-import { GeneModel } from "$zod";
+// import { GeneModel } from "$zod";
 import { error } from "@sveltejs/kit";
 import { PrismaClient } from "$lib/prisma";
 import type { Actions, PageServerLoad } from "./$types";

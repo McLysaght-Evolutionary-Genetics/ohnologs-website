@@ -9,11 +9,15 @@
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": "./",
     "paths": {
+      "*": ["./src/lib/@types/*"],
       "$zod": ["./prisma/zod"],
       "$zod/*": ["./prisma/zod/*"],
       "$lib": ["./src/lib"],
       "$lib/*": ["./src/lib/*"]
     }
-  }
+  },
+  "exclude": ["./src/lib/@types"]
 }

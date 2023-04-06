@@ -1,6 +1,5 @@
 <script lang="ts">
-  import * as d3 from "d3";
-  import { parseNewick, type Arc, type Vertex } from "./tree";
+  import PhyloTree from "./PhyloTree.svelte";
 
   const dims = {
     size: {
@@ -15,74 +14,14 @@
     },
   };
 
-  const newick = "(A:0.1,B:0.2,(C:0.3,(D:0.4,E:0.4):0.5):0.5);";
-
-  const tree = parseNewick(newick);
-
-  const rels: Arc[] = [];
-
-  let id = 0;
-
-  tree.graph[0].forEach((e) => (e.id = id++));
-  tree.graph[1].forEach((e) => rels.push(e));
-
-  rels.push([{}, tree.root, 0]);
-
-  const data = {
-    name: "a",
-    children: [
-      {
-        name: "b",
-      },
-      {
-        name: "c",
-      },
-    ],
-  };
-
-  // console.log(rels);
-
-  const cluster = d3
-    .cluster()
-    .size([400, 400])
-    .separation((a, b) => 1);
-
-  const root = d3
-    .stratify()
-    .id((e: unknown) => e[1].id)
-    .parentId((e: unknown) => e[0].id)(rels);
-
-  const c = cluster(root).descendants().slice(1);
-
-  const m = Math.max(...c.map((e) => e.y));
-  const s = c.map((e) => e.y * e.depth * e.data[2]);
-
-  const nm = Math.max(...s);
-
-  const scale = d3.scaleLinear().domain([0, nm]).range([0, m]);
-
-  // c.forEach((e) => {
-  //   e.y = scale(e.y * e.depth * e.data[2]);
-  //   e.parent.y = scale(e.parent.y * e.parent.depth * e.parent.data[2]);
-  // });
-
-  console.log(c);
+  const newick =
+    "(((EELA:0.150276,CONGERA:0.213019):0.230956,(EELB:0.263487,CONGERB:0.202633):0.246917):0.094785,((CAVEFISH:0.451027,(GOLDFISH:0.340495,ZEBRAFISH:0.390163):0.220565):0.067778,((((((NSAM:0.008113,NARG:0.014065):0.052991,SPUN:0.061003,(SMIC:0.027806,SDIA:0.015298,SXAN:0.046873):0.046977):0.009822,(NAUR:0.081298,(SSPI:0.023876,STIE:0.013652):0.058179):0.091775):0.073346,(MVIO:0.012271,MBER:0.039798):0.178835):0.147992,((BFNKILLIFISH:0.317455,(ONIL:0.029217,XCAU:0.084388):0.201166):0.055908,THORNYHEAD:0.252481):0.061905):0.157214,LAMPFISH:0.717196,((SCABBARDA:0.189684,SCABBARDB:0.362015):0.282263,((VIPERFISH:0.318217,BLACKDRAGON:0.109912):0.123642,LOOSEJAW:0.3971):0.287152):0.140663):0.206729):0.222485,(COELACANTH:0.558103,((CLAWEDFROG:0.441842,SALAMANDER:0.299607):0.135307,((CHAMELEON:0.771665,((PIGEON:0.150909,CHICKEN:0.172733):0.082163,ZEBRAFINCH:0.099172):0.272338):0.014055,((BOVINE:0.167569,DOLPHIN:0.15745):0.104783,ELEPHANT:0.166557):0.367205):0.050892):0.114731):0.295021)";
 </script>
 
-<svg width={dims.size.width} height={dims.size.height}>
-  <g transform="translate({dims.margin.left},{dims.margin.top})">
-    {#each c as child}
-      <text x={child.x} y={child.y}>{child.x}</text>
-      <!-- <line x1={child.x} y1={child.y} x2={child.parent.x} y2={child.parent.y} stroke="#ff594f" /> -->
-      <!--
-      <path
-        d="M{child.y},{child.x}C{child.parent.y + 50},{child.x} {child.parent.y},{child.parent.x} {child.parent
-          .y},{child.parent.x}"
-        stroke="#ff594f"
-        style="fill: none"
-      /> -->
-    {/each}
-  </g>
+<!-- <svg width={dims.size.width} height={dims.size.height}> -->
+<!-- <g transform="translate({dims.margin.left},{dims.margin.top})"> -->
+<!--  -->
 
-  <!-- <Selection x={0} y={0} width={100} height={100} /> -->
-</svg>
+<PhyloTree {newick} />
+<!-- </g>
+</svg> -->

@@ -145,6 +145,17 @@
       }
     }
 
+    // console.log(nx);
+
+    // if (nx + nw > 400) {
+    //   nx = 400 - nw;
+    //   // nw = width;
+    // }
+
+    // if (nx < 100) {
+    //   nx = 100;
+    // }
+
     // // bound checks
     // if (nx < minX) {
     //   nx = minX;

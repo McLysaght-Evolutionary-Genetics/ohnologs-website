@@ -3,9 +3,9 @@ generator client {
   previewFeatures = ["filteredRelationCount"]
 }
 
-generator zod {
-  provider = "zod-prisma"
-}
+// generator zod {
+//   provider = "zod-prisma"
+// }
 
 datasource db {
   provider = "postgresql"

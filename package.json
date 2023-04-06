@@ -45,6 +45,7 @@
   },
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^4.10.0"
+    "@prisma/client": "^4.10.0",
+    "phylotree": "^1.2.3"
   }
 }
