@@ -33,6 +33,7 @@
       width: dims.size.width,
       "left-right-spacing": "fit-to-size",
       "top-bottom-spacing": "fit-to-size",
+      "align-tips": true,
     });
 
     if (tree.display) {
