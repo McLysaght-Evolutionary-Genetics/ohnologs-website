@@ -36,6 +36,9 @@
   };
 </script>
 
+<font size="+2">
+  <p>By clicking into the box under 'gene sequence' you can type in and search for a specific gene sequence.</p>
+</font>
 <Grid>
   <!-- form -->
   <form
