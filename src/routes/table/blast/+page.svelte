@@ -4,6 +4,7 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import { Button, ButtonSet, Column, DataTable, Grid, InlineLoading, Row, TextArea } from "carbon-components-svelte";
   import type { PageData } from "../blast/$types";
+  import { NavaidMilitary, NavaidMilitary, NavaidMilitary, NavaidMilitary } from "carbon-icons-svelte";
 
   // >6_2978
   // MESSAKLRTLPTILTFSLLRFSFDFVKCERYKETGRFTFPRLLDMRPYCEFLKSHAHIFDYNAAKNWVSLSTGVASTSFPVSGDAERSTSNGCAAVNEEGNERACAKSADSALEAPNVTSKGDADADGSFNMEERQWFDFDDSCVQPVREQELSLQFEGHGDRSLSEAGLKDGCNLFIWDGIQVGGVPIATGKENEPVLLDLVVSGAAEADGPRGPSACAGGSEPRLGLDSSSSPSWQRGFPKALLLGELRCQSGLELENQSDKGQQSSETPSLRLNIKSGLLDECGAQKSTVELTCRVDTVVSTIKSLALEKMHLEAEAADGYCLRMVDSTGRLLSPSEYFQSLYIENLSPSQAPPMPLAGDWHLRRVNCLTNDTNSFPTGKDGTKRLSHIGDVHISGTAFLDDLRAKRIILTERGLLQVLSLGAVQPEAAAAALALSPRCVRVRLLEEGLKPGKILRNGQQQLRNLGLRGTSKLCVQILPQEEVLGPFDLLLQLQLRIPGSGGTVPLGR
@@ -36,9 +37,10 @@
   };
 </script>
 
-<font size="+2">
-  <p>By clicking into the box under 'gene sequence' you can type in and search for a specific gene sequence.</p>
-</font>
+<u><h3>Info:</h3></u>
+
+<p>1)By clicking into the box under 'gene sequence' you can type in and search for a specific gene sequence.</p>
+
 <Grid>
   <!-- form -->
   <form
@@ -93,3 +95,9 @@
     </Column>
   </Row>
 </Grid>
+
+<style>
+  .paragraph {
+    color: navy;
+  }
+</style>

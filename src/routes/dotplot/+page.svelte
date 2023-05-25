@@ -406,6 +406,20 @@
   $: if (browser) updateGenes(query, subject);
 </script>
 
+<p class="paragraph"><u><h3>Info:</h3></u></p>
+
+<br />
+<li>
+  To generate a dotplot you must select a species in both the 'Query species' box and 'Subject species' box. Note that
+  you can select the same species in both boxes.
+</li>
+<br />
+<li>If a dotplot was generated using two different species, the table below will show data which can be downloaded.</li>
+<br />
+<li>Clicking 'cancel' removes the genes you have selected for the table.</li>
+<br />
+<br />
+
 <!-- make selection shit actually work lol -->
 <!-- quick col/row select - click on axis? -->
 <!-- currently leaving svg via context menu doesnt fire svg mouse leave - keeps selection -->
@@ -552,3 +566,9 @@
     <ContextMenuOption id="1" labelText="Pan" />
   </ContextMenuGroup>
 </ContextMenu>
+
+<style>
+  .paragraph {
+    color: navy;
+  }
+</style>

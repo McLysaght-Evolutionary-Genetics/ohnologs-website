@@ -264,6 +264,18 @@
   });
 </script>
 
+<p class="paragraph"><u><h3>Info:</h3></u></p>
+<br />
+<li>
+  To find specific genes and proteins start by selecting your species of choice then move on to scaffold, segmentation,
+  etc.
+</li>
+<br />
+<li>It is not necessary to select options in all the boxes but it refines what you are searching for.</li>
+<br />
+<br />
+<br />
+
 <!-- svelte-ignore missing-declaration -->
 <Grid>
   <!-- filters -->
@@ -350,3 +362,9 @@
     </Column>
   </Row>
 </Grid>
+
+<style>
+  .paragraph {
+    color: navy;
+  }
+</style>

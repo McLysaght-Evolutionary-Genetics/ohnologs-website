@@ -357,6 +357,15 @@
   };
 </script>
 
+<p class="paragraph"><u><h3>Info:</h3></u></p>
+
+<br />
+<li>Clicking the 'drag and drop' allows you to upload your own files to the site</li>
+<br />
+<li>You can search for specific genes or proteins by clicking into the box under 'selection.</li>
+<br />
+<br />
+<br />
 <Grid>
   <!-- upload -->
   <Row>
@@ -391,3 +400,9 @@
     </Column>
   </Row>
 </Grid>
+
+<style>
+  .paragraph {
+    color: navy;
+  }
+</style>

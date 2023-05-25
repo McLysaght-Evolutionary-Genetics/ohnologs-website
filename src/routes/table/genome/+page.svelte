@@ -98,6 +98,20 @@
   const sources = data.sources.map((e: unknown) => ({ id: e.id, text: e.name }));
 </script>
 
+<p class="paragraph"><u><h3>Info:</h3></u></p>
+<br />
+<li>Selecting a genome/genomes in the table allows you to download the data available.</li>
+<br />
+<li>Clicking 'cancel' removes the genes you have selected for the table.</li>
+<br />
+<li>
+  Clicking the magnifying glass icon (towards the right hand side of the page) allows you to search for a specific
+  genome.
+</li>
+<br />
+<br />
+<br />
+
 <!-- svelte-ignore missing-declaration -->
 <Grid>
   <!-- filters -->
@@ -170,3 +184,9 @@
     </Column>
   </Row>
 </Grid>
+
+<style>
+  .paragraph {
+    color: navy;
+  }
+</style>

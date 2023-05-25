@@ -230,6 +230,24 @@
   $: if (browser) updateGenes(query);
 </script>
 
+<p class="paragraph"><u><h3>Info:</h3></u></p>
+
+<br />
+
+<li>Using the 'Query Species' box allows you to select a species that will be used for creating a circos plot.</li>
+<br />
+<li>Once a species has been selected, you are able to select specific genes you wish to see on the circos plot.</li>
+<br />
+<li>The green line(s) is a gene that you have selected for the plot.</li>
+<br />
+<li>Clicking 'cancel' removes the options you have selected from the table.</li>
+<br />
+<li>
+  CLicking 'download' downloads all the data from the table. If you wish to only download certain data, select the
+  gene(s) of choice and then click 'download.'
+</li>
+<br />
+
 <!-- <button bind:this={update}>update</button> -->
 
 <svg width={dims.size.width} height={dims.size.height}>
@@ -284,5 +302,8 @@
 
   .ribbon > path.active {
     fill: #00ff00;
+  }
+  .paragraph {
+    color: navy;
   }
 </style>

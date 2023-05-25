@@ -252,6 +252,14 @@
   $: totalPages = Math.ceil(count / perPage);
 </script>
 
+<p class="paragraph"><u><h3>Info:</h3></u></p>
+
+<br />
+
+<li>The diagram can be moved around by holding down and moving the image with a mouse.</li>
+<br />
+<li>The image can be enlarged and shrunk by first clicking the image then scrolling up or down on a mouse.</li>
+
 <svelte:window
   on:keydown={(e) => {
     if (e.key === "Shift") {
@@ -365,5 +373,8 @@
 <style lang="scss">
   path {
     stroke: black;
+  }
+  .paragraph {
+    color: navy;
   }
 </style>
