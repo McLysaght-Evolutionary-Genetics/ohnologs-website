@@ -1,10 +1,4 @@
-export type GeneEntry = {
-  id: string;
-  geneId: string;
-  proteinId: string;
-  species: string;
-  source: string;
-  scaffold: number;
-  segment: number;
-  labels: string;
-};
+import type { geneSchema } from "$lib/types";
+import type * as z from "zod";
+
+export type GeneEntry = z.infer<typeof geneSchema>;

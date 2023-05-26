@@ -57,3 +57,15 @@
 - low hanging fruit:tm:
 
 - TODO: remove non-ohnologs from blast database while keeping the e value the same - speedup in theory?
+
+---
+
+- blast page server.ts TODOs and optimisations;
+
+  - only ohnologs in database, but keeping original value
+  - pre-computed searches/caching
+
+- ^ similar TODOs in api/gene
+
+- downloads and optimisations;
+  - prepared download files

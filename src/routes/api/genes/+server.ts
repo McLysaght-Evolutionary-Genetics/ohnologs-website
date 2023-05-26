@@ -23,7 +23,7 @@ export const GET = (async ({ url }) => {
 
   // TODO: some of the exact flags are realistically useless (just make exact the default or something)
   // TODO: segments cant work rn due to how db rels are modelled, fix this before importing all data!!!
-  const [count, data] = await prisma.$transaction([
+  const [count, genes] = await prisma.$transaction([
     prisma.gene.count(),
     prisma.gene.findMany({
       include: {
@@ -88,7 +88,24 @@ export const GET = (async ({ url }) => {
     }),
   ]);
 
-  return new Response(JSON.stringify({ count, genes }));
+  const data = genes.map((e) => ({
+    id: e.id,
+    geneId: e.geneId,
+    proteinId: e.proteinId,
+    // TODO: this is a problem... can we make scaffolds required?
+    // alternatively, link gene directly to species
+    species: e.scaffold?.species.name ?? "",
+    source: e.scaffold?.species.source.name ?? "",
+    version: e.scaffold?.species.version ?? "",
+    completness: e.scaffold?.species.completness ?? "scaffold",
+    scaffold: e.scaffold?.name ?? "",
+    // TODO: this is currently impossible to query for...
+    // we need to link genes directly to scaffolds... somehow
+    segment: "",
+    labels: e.labels.map((e) => e.label.name),
+  }));
+
+  return new Response(JSON.stringify({ count, data }));
 }) satisfies RequestHandler;
 
 export const POST = (async ({ url, request }) => {
