@@ -9,10 +9,10 @@ export const GET = (async ({ url }) => {
 
   const scaffolds = await prisma.scaffold.findMany({
     include: {
-      genome: true,
+      species: true,
     },
     where: {
-      genomeId: {
+      speciesId: {
         in: species,
       },
     },

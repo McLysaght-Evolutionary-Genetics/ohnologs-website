@@ -6,5 +6,10 @@ const prisma = new PrismaClient();
 export const GET = (async () => {
   const sources = await prisma.genomeSource.findMany();
 
-  return new Response(JSON.stringify(sources));
+  const data = sources.map((e) => ({
+    id: e.id,
+    name: e.name,
+  }));
+
+  return new Response(JSON.stringify(data));
 }) satisfies RequestHandler;

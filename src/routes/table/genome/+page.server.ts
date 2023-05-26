@@ -5,7 +5,7 @@ const prisma = new PrismaClient();
 
 export const load = (async () => {
   const [count, states, sources] = await prisma.$transaction([
-    prisma.genome.count(),
+    prisma.species.count(),
     prisma.genomeState.findMany(),
     prisma.genomeSource.findMany(),
   ]);

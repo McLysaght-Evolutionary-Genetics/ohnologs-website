@@ -23,62 +23,61 @@ export const GET = (async ({ url }) => {
 
   // TODO: some of the exact flags are realistically useless (just make exact the default or something)
   // TODO: segments cant work rn due to how db rels are modelled, fix this before importing all data!!!
-  const [count, genes] = await prisma.$transaction([
+  const [count, data] = await prisma.$transaction([
     prisma.gene.count(),
     prisma.gene.findMany({
       include: {
         scaffold: {
           include: {
-            genome: {
+            species: {
               include: {
                 source: true,
               },
             },
-            Segment: true,
           },
         },
-        GeneLabel: {
+        labels: {
           include: {
             label: true,
           },
         },
       },
       where: {
-        scaffold: {
-          id: {
-            ...(scaffolds == null ? {} : { in: scaffolds }),
-          },
-          genome: {
-            id: {
-              ...(species == null ? {} : { in: species }),
-            },
-            source: {
-              id: {
-                ...(sources == null ? {} : { in: sources }),
-              },
-            },
-          },
-          Segment: {
-            // ...(exactSegments
-            //   ? { every: { id: { ...(segments == null ? {} : { in: segments }) } } }
-            //   : { some: { id: { ...(segments == null ? {} : { in: segments }) } } }),
+        // scaffold: {
+        //   id: {
+        //     ...(scaffolds == null ? {} : { in: scaffolds }),
+        //   },
+        //   genome: {
+        //     id: {
+        //       ...(species == null ? {} : { in: species }),
+        //     },
+        //     source: {
+        //       id: {
+        //         ...(sources == null ? {} : { in: sources }),
+        //       },
+        //     },
+        //   },
+        //   Segment: {
+        //     // ...(exactSegments
+        //     //   ? { every: { id: { ...(segments == null ? {} : { in: segments }) } } }
+        //     //   : { some: { id: { ...(segments == null ? {} : { in: segments }) } } }),
 
-            ...(segments == null ? {} : { some: { id: { in: segments } } }),
+        //     ...(segments == null ? {} : { some: { id: { in: segments } } }),
 
-            // some: {
-            //   id: {
-            //     ...(segments == null ? {} : { in: segments }),
-            //   },
-            // },
+        //     // some: {
+        //     //   id: {
+        //     //     ...(segments == null ? {} : { in: segments }),
+        //     //   },
+        //     // },
 
-            // some: {
-            //   id: {
-            //     ...(segments == null ? {} : { in: segments }),
-            //   },
-            // },
-          },
-        },
-        GeneLabel: {
+        //     // some: {
+        //     //   id: {
+        //     //     ...(segments == null ? {} : { in: segments }),
+        //     //   },
+        //     // },
+        //   },
+        // },
+        labels: {
           ...(exactLabels
             ? { ...(labels == null ? {} : { every: { labelId: { in: labels } }, some: {} }) }
             : { ...(labels == null ? {} : { some: { labelId: { in: labels } } }) }),
@@ -101,15 +100,15 @@ export const POST = (async ({ url, request }) => {
     include: {
       scaffold: {
         include: {
-          genome: {
+          species: {
             include: {
               source: true,
             },
           },
-          Segment: true,
+          // Segment: true,
         },
       },
-      GeneLabel: {
+      labels: {
         include: {
           label: true,
         },

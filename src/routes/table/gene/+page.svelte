@@ -1,43 +1,12 @@
 <script lang="ts">
   import { browser } from "$app/environment";
+  import GeneTable from "$lib/components/GeneTable.svelte";
+  import type { GeneEntry } from "$lib/components/geneTable";
+  import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
-  import {
-    Button,
-    Checkbox,
-    Column,
-    DataTable,
-    DataTableSkeleton,
-    Grid,
-    Link,
-    MultiSelect,
-    PaginationNav,
-    Row,
-    SkeletonPlaceholder,
-    Toolbar,
-    ToolbarBatchActions,
-    ToolbarContent,
-    ToolbarMenu,
-    ToolbarMenuItem,
-    ToolbarSearch,
-  } from "carbon-components-svelte";
+  import { Checkbox, Column, Grid, MultiSelect, Row } from "carbon-components-svelte";
   import type { MultiSelectItem } from "carbon-components-svelte/types/MultiSelect/MultiSelect.svelte";
-  import { Download, Launch } from "carbon-icons-svelte";
-  import Gene from "../../synteny/gene.svelte";
   import type { PageData } from "./$types";
-  import { selection, type SelectedEntry } from "$lib/selection";
-  import GeneTable from "../../../lib/components/GeneTable.svelte";
-  import Selection from "../../dotplot/Selection.svelte";
-
-  type SpeciesEntry = {
-    id: string;
-    geneId: string;
-    proteinId: string;
-    species: string;
-    source: string;
-    scaffold: number;
-    segment: number;
-    labels: string;
-  };
 
   //
   export let data: PageData;
@@ -51,25 +20,13 @@
   const shownPages: number = 7;
   const perPage: number = 10;
 
-  // TODO: add type checking
-  const headers = [
-    { key: "id", value: "Gene" },
-    { key: "geneId", value: "Gene Id" },
-    { key: "proteinId", value: "Protein Id" },
-    { key: "species", value: "Species" },
-    { key: "source", value: "Source" },
-    { key: "scaffold", value: "Scaffold" },
-    { key: "segment", value: "Segment" },
-    { key: "labels", value: "Labels" },
-  ];
-
   let count: number = data.count;
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);
 
   let loading = true;
-  let entries: SpeciesEntry[] = [];
+  let entries: GeneEntry[] = [];
 
   //
   const fetchGenes = async (
@@ -104,22 +61,23 @@
     const res = await fetch(`/api/genes${query}`);
     const data = await res.json();
 
-    console.log(data);
-
     count = data.count;
 
     entries = data.genes.map((e: unknown) => ({
       id: e.id,
       geneId: e.geneId,
       proteinId: e.proteinId,
-      species: e.scaffold.genome.species,
-      source: e.scaffold.genome.source.name,
-      scaffold: e.scaffold.name,
+      name: e.scaffold?.species.species,
+      source: e.scaffold?.species.source.name,
+      // scaffold: e.scaffold.name,
       // segments are defined based on homologous gene content
       // therefore, gene coords should be entirely contained within segment coords
-      segment: e.scaffold.Segment.find((e) => e.start <= e.start && e.end >= e.end)?.name ?? "null",
+      // segment: e.scaffold.Segment.find((e) => e.start <= e.start && e.end >= e.end)?.name ?? "null",
       // TODO: cut off at x max chars
-      labels: e.GeneLabel.map((e) => e.label.name).join(", "),
+      labels: e.labels.map((e) => e.label.name).join(", "),
+
+      scaffold: "",
+      segment: "",
     }));
 
     // const entries: SelectedEntry[] = data.genes.map((e: unknown) => ({ id: e.id }));
@@ -129,7 +87,7 @@
   };
 
   //
-  const species: MultiSelectItem[] = data.species.map((e) => ({ id: e.id, text: e.species }));
+  const species: MultiSelectItem[] = data.species.map((e) => ({ id: e.id, text: e.name }));
   const sources: MultiSelectItem[] = data.sources.map((e) => ({ id: e.id, text: e.name }));
   const labels: MultiSelectItem[] = data.labels.map((e) => ({ id: e.id, text: e.name }));
   let scaffolds: MultiSelectItem[] = [];
@@ -264,20 +222,23 @@
   });
 </script>
 
-<p class="paragraph"><u><h3>Info:</h3></u></p>
-<br />
-<li>
-  To find specific genes and proteins start by selecting your species of choice then move on to scaffold, segmentation,
-  etc.
-</li>
-<br />
-<li>It is not necessary to select options in all the boxes but it refines what you are searching for.</li>
-<br />
-<br />
-<br />
-
 <!-- svelte-ignore missing-declaration -->
 <Grid>
+  <div>
+    <p class="paragraph"><u><h3>Info:</h3></u></p>
+    <br />
+    <li>
+      To find specific genes and proteins start by selecting your species of choice then move on to scaffold,
+      segmentation, etc.
+    </li>
+    <br />
+    <li>It is not necessary to select options in all the boxes but it refines what you are searching for.</li>
+  </div>
+
+  <br />
+  <br />
+  <br />
+
   <!-- filters -->
   <Row>
     <Column>
@@ -352,10 +313,10 @@
   <Row>
     <Column>
       <GeneTable
+        bind:page
         title={"Genes"}
         description={"Genes matching the current filters"}
         {entries}
-        {page}
         total={totalPages}
         shown={shownPages}
       />

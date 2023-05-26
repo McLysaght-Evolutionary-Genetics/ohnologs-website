@@ -3,126 +3,176 @@ generator client {
   previewFeatures = ["filteredRelationCount"]
 }
 
-// generator zod {
-//   provider = "zod-prisma"
-// }
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Genome {
-  id      String @id @default(uuid())
-  species String
-  version String
+// TODO: segments
+// TODO: microsynteny
 
-  // present vs reconstruction
-  state   GenomeState @relation(fields: [stateId], references: [id])
-  stateId String
-
-  // ensembl vs refseq
-  source   GenomeSource @relation(fields: [sourceId], references: [id])
-  sourceId String
-
-  // rels
-  Scaffold Scaffold[]
+enum GenomeCompletnesss {
+  chromosome
+  scaffold
 }
 
-model GenomeState {
-  id   String @id @default(uuid())
-  name String
+model Species {
+  id String @id @default(uuid())
 
-  // rels
-  Genome Genome[]
+  //
+  name        String             @unique
+  completness GenomeCompletnesss @default(value: chromosome)
+  version     String             @default(value: "")
+
+  //
+  source         GenomeSource @relation(fields: [genomeSourceId], references: [id])
+  genomeSourceId String
+
+  state         GenomeState @relation(fields: [genomeStateId], references: [id])
+  genomeStateId String
+
+  scaffolds   Scaffold[]
+  treeSpecies TreeSpecies[]
 }
 
 model GenomeSource {
-  id   String @id @default(uuid())
-  name String
+  id String @id @default(uuid())
 
-  // rels
-  Genome Genome[]
+  //
+  name String @unique
+
+  //
+  species Species[]
+}
+
+model GenomeState {
+  id String @id @default(uuid())
+
+  //
+  name String @unique
+
+  //
+  species Species[]
 }
 
 model Scaffold {
-  id   String @id @default(uuid())
-  name String
+  id String @id @default(uuid())
 
-  // bp length on current scaffold
-  length Int
-
-  // parent genome
-  genome   Genome @relation(fields: [genomeId], references: [id])
-  genomeId String
-
-  // rels
-  Segment Segment[]
-  Gene    Gene[]
-}
-
-model Segment {
-  id   String @id @default(uuid())
-  name String
-
-  // bp start/end location of segment on parent scaffold
+  //
+  name  String
   start Int
   end   Int
 
-  // parent scaffold
-  scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
+  //
+  species   Species @relation(fields: [speciesId], references: [id])
+  speciesId String
+
+  genes    Gene[]
+  segments Segment[]
+
+  //
+  @@unique([name, speciesId])
+}
+
+model Segment {
+  id String @id @default(uuid())
+
+  //
+  name  String
+  start Int
+  end   Int
+
+  //
+  Scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
   scaffoldId String
 }
 
 model Gene {
-  id        String @id @default(uuid())
-  geneId    String
-  proteinId String
+  id String @id @default(uuid())
 
-  // bp start/end location of gene on parent scaffold
-  start Int
-  end   Int
+  //
+  geneId    String @unique
+  proteinId String @unique
+  start     Int
+  end       Int
 
-  // parent scaffold
-  scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
-  scaffoldId String
+  //
+  scaffold   Scaffold? @relation(fields: [scaffoldId], references: [id])
+  scaffoldId String?
 
-  // rels
-  GeneLabel GeneLabel[]
+  family   Family? @relation(fields: [familyId], references: [id])
+  familyId String?
 
-  HomologyQuery   Homology[] @relation("HomologyQuery")
-  HomologySubject Homology[] @relation("HomologySubject")
+  labels GeneLabel[]
+  trees  TreeGene[]
 }
 
-model Label {
-  id   String @id @default(uuid())
-  name String
+// orthology/paralogy relationships
+model Family {
+  id String @id @default(uuid())
 
-  // rels
+  //
+  index Int @unique
+
+  //
+  genes Gene[]
+}
+
+// evidence-based labelling
+model Label {
+  id String @id @default(uuid())
+
+  //
+  name String @unique
+
+  //
   genes GeneLabel[]
 }
 
 model GeneLabel {
-  // gene
+  //
   gene   Gene   @relation(fields: [geneId], references: [id])
   geneId String
 
-  // label
   label   Label  @relation(fields: [labelId], references: [id])
   labelId String
 
-  // rels
+  //
   @@id([geneId, labelId])
 }
 
-model Homology {
+// gene tree viewer
+model Tree {
   id String @id @default(uuid())
 
-  // query gene
-  query   Gene   @relation("HomologyQuery", fields: [queryId], references: [id])
-  queryId String
+  //
+  newick String
 
-  // subject gene
-  subject   Gene   @relation("HomologySubject", fields: [subjectId], references: [id])
-  subjectId String
+  //
+  genes   TreeGene[]
+  species TreeSpecies[]
+}
+
+model TreeGene {
+  //
+  tree   Tree   @relation(fields: [treeId], references: [id])
+  treeId String
+
+  gene   Gene   @relation(fields: [geneId], references: [id])
+  geneId String
+
+  //
+  @@id([treeId, geneId])
+}
+
+model TreeSpecies {
+  //
+  tree   Tree   @relation(fields: [treeId], references: [id])
+  treeId String
+
+  species   Species @relation(fields: [speciesId], references: [id])
+  speciesId String
+
+  //
+  @@id([treeId, speciesId])
 }

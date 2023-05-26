@@ -1,6 +1,7 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-  import { intoQuery } from "$lib/util";
+  import { getAllSpecies } from "$lib/api";
+  import type { speciesSchema } from "$lib/types";
   import {
     Button,
     Checkbox,
@@ -21,6 +22,7 @@
     ToolbarSearch,
   } from "carbon-components-svelte";
   import { Download, Launch } from "carbon-icons-svelte";
+  import type * as z from "zod";
   import type { PageData } from "./$types";
 
   type SpeciesEntry = {
@@ -58,66 +60,73 @@
     { key: "genes", value: "Genes" },
   ];
 
-  let count: number = data.count;
+  // filtering
+  let selectedSources: string[] = [];
+  let selectedStates: string[] = [];
+
+  // pagination
+  let total: number = data.count;
 
   let totalPages: number;
-  $: totalPages = Math.ceil(count / perPage);
+  $: totalPages = Math.ceil(total / perPage);
 
+  // table data
   let loading = true;
-  let entries: SpeciesEntry[] = [];
+  let entries: z.infer<typeof speciesSchema>[] = [];
 
   //
-  const fetchGenomes = async (page: number, perPage: number) => {
-    const query = intoQuery({ page, perPage });
+  const updateSpecies = async () => {
+    const { count, data } = await getAllSpecies(page, perPage, selectedSources, selectedStates);
 
-    const res = await fetch(`/api/genomes${query}`);
-    const data = await res.json();
-
-    count = data.count;
-
-    entries = data.genomes.map((e: unknown) => ({
-      id: e.id,
-      species: e.species,
-      version: e.version,
-      source: e.source.name,
-      state: e.state.name,
-      scaffolds: e._count.Scaffold,
-      segments: e.Scaffold.reduce((a, c) => a + c._count.Segment, 0),
-      genes: e.Scaffold.reduce((a, c) => a + c._count.Gene, 0),
-    }));
+    total = count;
+    entries = data;
 
     loading = false;
   };
 
+  //
+  $: (() => {
+    [page];
+
+    loading = true;
+  })();
+
   $: if (browser && loading) {
-    fetchGenomes(page, perPage);
+    updateSpecies();
   }
 
-  // TODO: human readable names
-  const states = data.states.map((e: unknown) => ({ id: e.id, text: e.name }));
-  const sources = data.sources.map((e: unknown) => ({ id: e.id, text: e.name }));
+  const states = data.states.map((e) => ({ id: e.id, text: e.name }));
+  const sources = data.sources.map((e) => ({ id: e.id, text: e.name }));
 </script>
-
-<p class="paragraph"><u><h3>Info:</h3></u></p>
-<br />
-<li>Selecting a genome/genomes in the table allows you to download the data available.</li>
-<br />
-<li>Clicking 'cancel' removes the genes you have selected for the table.</li>
-<br />
-<li>
-  Clicking the magnifying glass icon (towards the right hand side of the page) allows you to search for a specific
-  genome.
-</li>
-<br />
-<br />
-<br />
 
 <!-- svelte-ignore missing-declaration -->
 <Grid>
+  <div>
+    <p class="paragraph"><u><h3>Info:</h3></u></p>
+    <br />
+    <li>Selecting a genome/genomes in the table allows you to download the data available.</li>
+    <br />
+    <li>Clicking 'cancel' removes the genes you have selected for the table.</li>
+    <br />
+    <li>
+      Clicking the magnifying glass icon (towards the right hand side of the page) allows you to search for a specific
+      genome.
+    </li>
+  </div>
+
+  <br />
+  <br />
+  <br />
+
   <!-- filters -->
   <Row>
     <Column>
-      <MultiSelect titleText="Source" label="Select genome source..." items={sources} />
+      <MultiSelect
+        bind:selectedIds={selectedSources}
+        titleText="Source"
+        label="Select genome source..."
+        items={sources}
+      />
     </Column>
     <Column>
       <Checkbox disabled labelText="Exact" />
@@ -128,7 +137,7 @@
 
   <Row>
     <Column>
-      <MultiSelect titleText="State" label="Select genome state..." items={states} />
+      <MultiSelect bind:selectedIds={selectedStates} titleText="State" label="Select genome state..." items={states} />
     </Column>
     <Column>
       <Checkbox disabled labelText="Exact" />

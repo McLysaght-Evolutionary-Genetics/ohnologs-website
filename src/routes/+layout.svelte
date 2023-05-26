@@ -10,14 +10,14 @@
     <SkipToContent />
   </svelte:fragment>
   <HeaderNav>
-    <HeaderNavItem href="/table/blast" text="BLAST" />
-    <HeaderNavItem href="/table/gene" text="Gene" />
-    <HeaderNavItem href="/table/genome" text="Genome" />
-    <HeaderNavItem href="/table/select" text="Select" />
-    <HeaderNavItem href="/circos" text="Circos" />
-    <HeaderNavItem href="/dotplot" text="Dotplot" />
-    <HeaderNavItem href="/synteny" text="Synteny" />
-    <HeaderNavItem href="/tree" text="Tree" />
+    <HeaderNavItem href="/ohnologs/table/blast" text="BLAST" />
+    <HeaderNavItem href="/ohnologs/table/gene" text="Gene" />
+    <HeaderNavItem href="/ohnologs/table/genome" text="Genome" />
+    <HeaderNavItem href="/ohnologs/table/select" text="Select" />
+    <HeaderNavItem href="/ohnologs/circos" text="Circos" />
+    <HeaderNavItem href="/ohnologs/dotplot" text="Dotplot" />
+    <HeaderNavItem href="/ohnologs/synteny" text="Synteny" />
+    <HeaderNavItem href="/ohnologs/tree" text="Tree" />
     <!-- <HeaderNavMenu text="Menu">
       <HeaderNavItem href="/" text="Link 1" />
       <HeaderNavItem href="/" text="Link 2" />

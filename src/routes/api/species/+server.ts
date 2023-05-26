@@ -1,35 +1,32 @@
 import { PrismaClient } from "$lib/prisma";
 import { findQueryOrError } from "$lib/util";
-import { error } from "@sveltejs/kit";
 import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
 
 export const GET = (async ({ url }) => {
-  // TODO: validation
   const page = parseInt(findQueryOrError(url, "page")) - 1;
   const perPage = parseInt(findQueryOrError(url, "perPage"));
 
-  const [count, genomes] = await prisma.$transaction([
-    prisma.genome.count(),
-    prisma.genome.findMany({
+  const [count, species] = await prisma.$transaction([
+    prisma.species.count(),
+    prisma.species.findMany({
       include: {
         state: true,
         source: true,
-        // TODO: these will get VERY slow
-        Scaffold: {
+        scaffolds: {
           include: {
             _count: {
               select: {
-                Gene: true,
-                Segment: true,
+                genes: true,
+                segments: true,
               },
             },
           },
         },
         _count: {
           select: {
-            Scaffold: true,
+            scaffolds: true,
           },
         },
       },
@@ -38,5 +35,21 @@ export const GET = (async ({ url }) => {
     }),
   ]);
 
-  return new Response(JSON.stringify({ count, genomes }));
+  const data = species.map((e) => {
+    const [segments, genes] = e.scaffolds.reduce((a, c) => [a[0] + c._count.segments, a[1] + c._count.genes], [0, 0]);
+
+    return {
+      id: e.id,
+      name: e.name,
+      state: e.state.name,
+      source: e.source.name,
+      version: e.version,
+      completness: e.completness,
+      scaffolds: e._count.scaffolds,
+      segments,
+      genes,
+    };
+  });
+
+  return new Response(JSON.stringify({ count, data }));
 }) satisfies RequestHandler;
