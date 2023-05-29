@@ -3,18 +3,16 @@
 
   import * as d3 from "d3";
 
-  import Chord from "./chord.svelte";
-  import Arc from "./arc.svelte";
+  import { browser } from "$app/environment";
+  import GeneTable from "$lib/components/GeneTable.svelte";
+  import type { GeneEntry } from "$lib/components/geneTable";
+  import { selection } from "$lib/selection";
+  import { intoQuery } from "$lib/util";
   import { error } from "@sveltejs/kit";
   import { Column, Grid, Row, Select, SelectItem } from "carbon-components-svelte";
-  import GeneTable from "$lib/components/GeneTable.svelte";
-  import type { PageData } from "./$types";
-  import type { GeneEntry } from "$lib/components/geneTable";
-  import { browser } from "$app/environment";
-  import { intoQuery } from "$lib/util";
-  import type { Link, Segment } from "../api/circos/+server";
   import { get } from "svelte/store";
-  import { selection } from "$lib/selection";
+  import type { Link, Segment } from "../../api/circos/+server";
+  import type { PageData } from "./$types";
 
   //
   type Scaffold = {
@@ -25,8 +23,8 @@
   //
   const dims = {
     size: {
-      width: 900,
-      height: 720,
+      width: 900 * 1.5,
+      height: 720 * 1.5,
     },
     margin: {
       top: 20,
@@ -80,19 +78,19 @@
   }
 
   //
-  const innerRadius = 240;
-  const radiusPadding = 10;
+  const innerRadius = 240 * 2;
+  const radiusPadding = 5;
   const outerRadius = innerRadius + radiusPadding;
 
   //
-  $: circ = segments.reduce((a, c) => a + c.length, 0);
+  $: totalScaffoldLength = segments.reduce((a, c) => a + c.length, 0);
 
   let arcs = [];
 
   let start = 0;
 
   $: for (let s of segments) {
-    const end = (s.length / circ) * (Math.PI * 2 - padding * segments.length);
+    const end = (s.length / totalScaffoldLength) * (Math.PI * 2 - padding * segments.length);
     const arc = d3
       .arc()
       .innerRadius(innerRadius)
@@ -109,26 +107,41 @@
     arcs = arcs;
   }
 
-  //
-  const geneToCircRad = (scaffold: string, offset: number): number => {
-    let rad = 0;
+  // TODO: benchmark this fn (it may be quite slow rn)
+  const geneToCircRad = (scaffoldId: string, offset: number): number => {
+    // utils
+    let circleRadians = Math.PI * 2;
 
-    for (let scaf of segments) {
-      if (scaf.id === scaffold) {
-        // sanity check
-        if (offset > scaf.length) {
-          throw error(500, `offset cannot exceed scaffold length: ${offset} > ${scaffold.length}`);
-        }
+    let paddingRadians = padding;
+    let totalPaddingRadians = padding * segments.length;
 
-        rad += (offset / circ) * (Math.PI * 2 - padding * segments.length);
+    let totalScaffoldRadians = circleRadians - totalPaddingRadians;
 
-        return rad;
+    // cumulative radian count
+    let radians = 0;
+
+    // for each scaffold;
+    // 1. if the gene is on the current scaffold, add the offset
+    // 2. otherwise, add the scaffold length + padding amount
+    for (let scaffold of segments) {
+      if (scaffold.id !== scaffoldId) {
+        const currentScaffoldRatio = scaffold.length / totalScaffoldLength;
+        const currentScaffoldRadians = currentScaffoldRatio * totalScaffoldRadians;
+
+        radians += currentScaffoldRadians + paddingRadians;
+
+        continue;
       }
 
-      rad += (scaf.length / circ) * (Math.PI * 2 - padding * segments.length);
+      const offsetRatio = offset / totalScaffoldLength;
+      const offsetRadians = offsetRatio * totalScaffoldRadians;
+
+      radians += offsetRadians;
+
+      return radians;
     }
 
-    throw error(500, `scaffold not found: ${scaffold}`);
+    throw error(500, `scaffold not found: ${scaffoldId}`);
   };
 
   const geneToCircPos = (scaffold: string, offset: number, cx: number, cy: number, r: number): [number, number] => {
@@ -170,8 +183,8 @@
     const r2 = geneToCircRad(link.end.scaffold, link.end.offset);
 
     const d = ribbon({
-      source: { startAngle: r1, endAngle: r1 + 0.005, radius: innerRadius },
-      target: { startAngle: r2, endAngle: r2 + 0.005, radius: innerRadius },
+      source: { startAngle: r1, endAngle: r1 + 0.001, radius: innerRadius },
+      target: { startAngle: r2, endAngle: r2 + 0.001, radius: innerRadius },
     }) as unknown as string;
 
     lines.push([d, colour]);
@@ -230,43 +243,64 @@
   $: if (browser) updateGenes(query);
 </script>
 
-<p class="paragraph"><u><h3>Info:</h3></u></p>
-
-<br />
-
-<li>Using the 'Query Species' box allows you to select a species that will be used for creating a circos plot.</li>
-<br />
-<li>Once a species has been selected, you are able to select specific genes you wish to see on the circos plot.</li>
-<br />
-<li>The green line(s) is a gene that you have selected for the plot.</li>
-<br />
-<li>Clicking 'cancel' removes the options you have selected from the table.</li>
-<br />
-<li>
-  CLicking 'download' downloads all the data from the table. If you wish to only download certain data, select the
-  gene(s) of choice and then click 'download.'
-</li>
-<br />
-
-<!-- <button bind:this={update}>update</button> -->
-
-<svg width={dims.size.width} height={dims.size.height}>
-  <g transform="translate({dims.margin.left},{dims.margin.top})">
-    {#each arcs as arc}
-      <path d={arc()} fill="#ff594f" transform="translate({innerWidth / 2},{innerHeight / 2})" />
-    {/each}
-
-    {#each lines as [d, colour]}
-      <path {d} fill={colour} stroke={colour} transform="translate({innerWidth / 2},{innerHeight / 2})" />
-    {/each}
-  </g>
-</svg>
-
-<br />
-<br />
-<br />
-
 <Grid>
+  <!-- tutorial -->
+  <Row>
+    <Column>
+      <p class="paragraph"><u><h3>Info:</h3></u></p>
+
+      <br />
+
+      <li>
+        Using the 'Query Species' box allows you to select a species that will be used for creating a circos plot.
+      </li>
+      <br />
+      <li>
+        Once a species has been selected, you are able to select specific genes you wish to see on the circos plot.
+      </li>
+      <br />
+      <li>The green line(s) is a gene that you have selected for the plot.</li>
+      <br />
+      <li>Clicking 'cancel' removes the options you have selected from the table.</li>
+      <br />
+      <li>
+        CLicking 'download' downloads all the data from the table. If you wish to only download certain data, select the
+        gene(s) of choice and then click 'download.'
+      </li>
+    </Column>
+  </Row>
+
+  <br />
+
+  <!-- figure -->
+  {#if query != null && query != "none"}
+    <Row>
+      <Column>
+        <svg width={dims.size.width} height={dims.size.height}>
+          <g transform="translate({dims.margin.left},{dims.margin.top})">
+            {#each arcs as arc}
+              <path d={arc()} fill="#ff594f" transform="translate({innerWidth / 2},{innerHeight / 2})" />
+            {/each}
+
+            {#each lines as [d, colour]}
+              <path
+                {d}
+                fill={colour}
+                stroke={colour}
+                stroke-width={0.000001}
+                transform="translate({innerWidth / 2},{innerHeight / 2})"
+              />
+            {/each}
+          </g>
+        </svg>
+      </Column>
+    </Row>
+  {/if}
+
+  <br />
+  <br />
+  <br />
+
   <!-- options -->
   <Row>
     <Column>
@@ -303,6 +337,7 @@
   .ribbon > path.active {
     fill: #00ff00;
   }
+
   .paragraph {
     color: navy;
   }

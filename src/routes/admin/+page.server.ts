@@ -1,7 +1,7 @@
 import { readFile } from "fs/promises";
 
 import { PrismaClient } from "$lib/prisma";
-import type { Actions } from "../$types";
+import type { Actions } from "@sveltejs/kit";
 
 // import type { Actions } from "./$types";
 
@@ -182,6 +182,8 @@ export const actions = {
         update: {},
         create: {
           name: species,
+          completness: "chromosome",
+          version: "0",
           source: {
             connectOrCreate: {
               where: {
@@ -242,8 +244,8 @@ export const actions = {
       scaffolds.push({
         species,
         seqname,
-        seqstart: parseInt(seqend),
-        seqend: parseInt(seqstart),
+        seqstart: parseInt(seqstart),
+        seqend: parseInt(seqend),
       });
     }
 
@@ -275,74 +277,74 @@ export const actions = {
       });
     }
 
-    // //
-    // type Gene = {
-    //   species: string;
-    //   scaffold: string;
-    //   geneId: string;
-    //   proteinId: string;
-    //   start: number;
-    //   end: number;
-    // };
+    //
+    type Gene = {
+      species: string;
+      scaffold: string;
+      geneId: string;
+      proteinId: string;
+      start: number;
+      end: number;
+    };
 
-    // const genes: Gene[] = [];
+    const genes: Gene[] = [];
 
-    // for (const line of lines) {
-    //   // TODO: make this an object instead
-    //   const [species, source, version, state, gene, name, start, end, seqname] = line;
+    for (const line of lines) {
+      // TODO: make this an object instead
+      const [species, source, version, state, gene, name, start, end, seqname] = line;
 
-    //   genes.push({
-    //     species,
-    //     scaffold: seqname,
-    //     geneId: gene,
-    //     proteinId: name,
-    //     start: parseInt(start),
-    //     end: parseInt(end),
-    //   });
-    // }
+      genes.push({
+        species,
+        scaffold: seqname,
+        geneId: gene,
+        proteinId: name,
+        start: parseInt(start),
+        end: parseInt(end),
+      });
+    }
 
-    // for (const { species, scaffold: scaf, geneId, proteinId, start, end } of genes) {
-    //   // unknown scaffold
-    //   let scaffoldId: string | null;
+    for (const { species, scaffold: scaf, geneId, proteinId, start, end } of genes) {
+      // unknown scaffold
+      let scaffoldId: string | null;
 
-    //   if (scaf.length > 0) {
-    //     // should be unique
-    //     scaffoldId =
-    //       (
-    //         await prisma.scaffold.findFirst({
-    //           where: {
-    //             name: scaf,
-    //             species: {
-    //               name: species,
-    //             },
-    //           },
-    //         })
-    //       )?.id ?? null;
+      if (scaf.length > 0) {
+        // should be unique
+        scaffoldId =
+          (
+            await prisma.scaffold.findFirst({
+              where: {
+                name: scaf,
+                species: {
+                  name: species,
+                },
+              },
+            })
+          )?.id ?? null;
 
-    //     // scaffold name specified but not in our database
-    //     if (scaffoldId == null) {
-    //       throw new Error(`unknown scaffold: ${scaf}, species: ${species}`);
-    //     }
-    //   } else {
-    //     // scaffold name unknown, should not link gene to scaffold
-    //     scaffoldId = null;
-    //   }
+        // scaffold name specified but not in our database
+        if (scaffoldId == null) {
+          throw new Error(`unknown scaffold: ${scaf}, species: ${species}`);
+        }
+      } else {
+        // scaffold name unknown, should not link gene to scaffold
+        scaffoldId = null;
+      }
 
-    //   await prisma.gene.upsert({
-    //     where: {
-    //       geneId,
-    //     },
-    //     update: {},
-    //     create: {
-    //       geneId,
-    //       proteinId,
-    //       start: scaffoldId == null ? 0 : start,
-    //       end: scaffoldId == null ? 0 : end,
+      await prisma.gene.upsert({
+        where: {
+          geneId,
+        },
+        update: {},
+        create: {
+          geneId,
+          proteinId,
+          start: scaffoldId == null ? 0 : start,
+          end: scaffoldId == null ? 0 : end,
 
-    //       scaffoldId: scaffoldId == null ? undefined : scaffoldId,
-    //     },
-    //   });
-    // }
+          scaffoldId: scaffoldId == null ? undefined : scaffoldId,
+        },
+      });
+    }
 
     const ohnologs = (await readFile(OHNOLOGS_PATH))
       .toString()

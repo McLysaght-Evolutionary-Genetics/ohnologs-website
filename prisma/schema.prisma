@@ -21,8 +21,8 @@ model Species {
 
   //
   name        String             @unique
-  completness GenomeCompletnesss @default(value: chromosome)
-  version     String             @default(value: "")
+  completness GenomeCompletnesss
+  version     String
 
   //
   source         GenomeSource @relation(fields: [genomeSourceId], references: [id])

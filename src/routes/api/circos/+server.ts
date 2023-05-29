@@ -29,20 +29,18 @@ export const GET = (async ({ url }) => {
   // TODO: will this sometimes miss homologs since im only including the subject?
   const scaffolds = await prisma.scaffold.findMany({
     include: {
-      Gene: {
+      genes: {
         include: {
-          HomologyQuery: {
+          family: {
             include: {
-              subject: {
+              genes: {
+                where: {
+                  scaffold: {
+                    speciesId: query,
+                  },
+                },
                 include: {
                   scaffold: true,
-                },
-              },
-            },
-            where: {
-              subject: {
-                scaffold: {
-                  genomeId: query,
                 },
               },
             },
@@ -51,24 +49,63 @@ export const GET = (async ({ url }) => {
       },
     },
     where: {
-      genomeId: query,
+      speciesId: query,
     },
   });
 
-  const segments: Segment[] = scaffolds.map((e) => ({ id: e.id, name: e.name, length: e.length }));
+  const segments: Segment[] = scaffolds.map((e) => ({ id: e.id, name: e.name, length: e.end - e.start }));
 
-  const links: Link[] = scaffolds
-    .flatMap((s) =>
-      s.Gene.flatMap((g) =>
-        g.HomologyQuery.map((h) => ({
-          start: { id: g.id, scaffold: s.id, offset: (g.start + g.end) / 2 },
-          end: { id: h.subject.id, scaffold: h.subject.scaffoldId, offset: (h.subject.start + h.subject.end) / 2 },
-        })),
-      ),
-    )
-    .filter((e) => e.start.id !== e.end.id);
+  console.log(segments);
 
-  const genes = scaffolds.flatMap((s) => s.Gene.map((g) => ({ id: g.id, geneId: g.geneId })));
+  const links: Link[] = [];
 
-  return new Response(JSON.stringify({ segments, links, genes }));
+  for (const qScaf of scaffolds) {
+    for (const qGene of qScaf.genes) {
+      if (qGene.family == null) {
+        continue;
+      }
+
+      const start = {
+        id: qGene.id,
+        scaffold: qScaf.id,
+        offset: (qGene.end + qGene.start) / 2,
+      };
+
+      for (const sGene of qGene.family.genes) {
+        const sScaf = sGene.scaffold;
+
+        if (sScaf == null) {
+          continue;
+        }
+
+        const end = {
+          id: sGene.id,
+          scaffold: sScaf.id,
+          offset: (sGene.end + sGene.start) / 2,
+        };
+
+        links.push({
+          start,
+          end,
+        });
+      }
+    }
+
+    break;
+  }
+
+  // const links: Link[] = scaffolds
+  //   .flatMap((s) =>
+  //     s.Gene.flatMap((g) =>
+  //       g.HomologyQuery.map((h) => ({
+  //         start: { id: g.id, scaffold: s.id, offset: (g.start + g.end) / 2 },
+  //         end: { id: h.subject.id, scaffold: h.subject.scaffoldId, offset: (h.subject.start + h.subject.end) / 2 },
+  //       })),
+  //     ),
+  //   )
+  //   .filter((e) => e.start.id !== e.end.id);
+
+  // const genes = scaffolds.flatMap((s) => s.Gene.map((g) => ({ id: g.id, geneId: g.geneId })));
+
+  return new Response(JSON.stringify({ segments, links, genes: [] }));
 }) satisfies RequestHandler;

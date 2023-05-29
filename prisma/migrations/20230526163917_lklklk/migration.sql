@@ -1,7 +1,12 @@
+-- CreateEnum
+CREATE TYPE "GenomeCompletnesss" AS ENUM ('chromosome', 'scaffold');
+
 -- CreateTable
 CREATE TABLE "Species" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
+    "completness" "GenomeCompletnesss" NOT NULL,
+    "version" TEXT NOT NULL,
     "genomeSourceId" TEXT NOT NULL,
     "genomeStateId" TEXT NOT NULL,
 
@@ -36,6 +41,17 @@ CREATE TABLE "Scaffold" (
 );
 
 -- CreateTable
+CREATE TABLE "Segment" (
+    "id" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
+    "start" INTEGER NOT NULL,
+    "end" INTEGER NOT NULL,
+    "scaffoldId" TEXT NOT NULL,
+
+    CONSTRAINT "Segment_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Gene" (
     "id" TEXT NOT NULL,
     "geneId" TEXT NOT NULL,
@@ -43,8 +59,17 @@ CREATE TABLE "Gene" (
     "start" INTEGER NOT NULL,
     "end" INTEGER NOT NULL,
     "scaffoldId" TEXT,
+    "familyId" TEXT,
 
     CONSTRAINT "Gene_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Family" (
+    "id" TEXT NOT NULL,
+    "index" INTEGER NOT NULL,
+
+    CONSTRAINT "Family_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -106,6 +131,9 @@ CREATE UNIQUE INDEX "Gene_geneId_key" ON "Gene"("geneId");
 CREATE UNIQUE INDEX "Gene_proteinId_key" ON "Gene"("proteinId");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Family_index_key" ON "Family"("index");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Label_name_key" ON "Label"("name");
 
 -- AddForeignKey
@@ -118,7 +146,13 @@ ALTER TABLE "Species" ADD CONSTRAINT "Species_genomeStateId_fkey" FOREIGN KEY ("
 ALTER TABLE "Scaffold" ADD CONSTRAINT "Scaffold_speciesId_fkey" FOREIGN KEY ("speciesId") REFERENCES "Species"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE "Segment" ADD CONSTRAINT "Segment_scaffoldId_fkey" FOREIGN KEY ("scaffoldId") REFERENCES "Scaffold"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE "Gene" ADD CONSTRAINT "Gene_scaffoldId_fkey" FOREIGN KEY ("scaffoldId") REFERENCES "Scaffold"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Gene" ADD CONSTRAINT "Gene_familyId_fkey" FOREIGN KEY ("familyId") REFERENCES "Family"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "GeneLabel" ADD CONSTRAINT "GeneLabel_geneId_fkey" FOREIGN KEY ("geneId") REFERENCES "Gene"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
