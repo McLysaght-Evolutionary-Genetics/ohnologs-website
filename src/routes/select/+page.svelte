@@ -316,7 +316,7 @@
   const fetchGenes = async (query: string[]) => {
     const qstr = intoQuery({ query: query.join(",") });
 
-    const res = await fetch(`/api/select${qstr}`);
+    const res = await fetch(`/ohnologs/api/select${qstr}`);
     const { genes } = await res.json();
 
     entries = genes.map((e) => ({

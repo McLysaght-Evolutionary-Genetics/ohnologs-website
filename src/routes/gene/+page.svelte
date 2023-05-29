@@ -105,7 +105,7 @@
 
     const query = intoQuery({ species: selectedSpeciesIds });
 
-    const res = await fetch(`/api/scaffolds${query}`);
+    const res = await fetch(`/ohnologs/api/scaffolds${query}`);
     const data = await res.json();
 
     scaffolds = data.scaffolds.map((e: unknown) => ({ id: e.id, text: e.name }));
@@ -120,7 +120,7 @@
 
     const query = intoQuery({ scaffold: selectedScaffoldIds });
 
-    const res = await fetch(`/api/segments${query}`);
+    const res = await fetch(`/ohnologs/api/segments${query}`);
     const data = await res.json();
 
     segments = data.segments.map((e: unknown) => ({ id: e.id, text: e.name }));

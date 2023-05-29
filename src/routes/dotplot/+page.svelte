@@ -388,7 +388,7 @@
 
     const qstr = intoQuery({ query: queryId, subject: subjectId });
 
-    const res = await fetch(`/api/homologs${qstr}`);
+    const res = await fetch(`/ohnologs/api/homologs${qstr}`);
     const homologies = await res.json();
 
     //

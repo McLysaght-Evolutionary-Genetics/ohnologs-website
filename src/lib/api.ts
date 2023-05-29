@@ -44,7 +44,7 @@ export const getAllGenes = async (
     segments,
   });
 
-  const res = await fetch(`/api/genes${query}`);
+  const res = await fetch(`/ohnologs/api/genes${query}`);
   const data = await res.json();
 
   const parsed = getAllGenesResponseSchema.safeParse(data);
@@ -64,7 +64,7 @@ export const getAllSpecies = async (
 ): Promise<z.infer<typeof getAllSpeciesResponseSchema>> => {
   const query = intoQuery({ page, perPage, sources, states });
 
-  const res = await fetch(`/api/species${query}`);
+  const res = await fetch(`/ohnologs/api/species${query}`);
   const data = await res.json();
 
   const parsed = getAllSpeciesResponseSchema.safeParse(data);
@@ -77,7 +77,7 @@ export const getAllSpecies = async (
 };
 
 export const getAllStates = async (): Promise<z.infer<typeof getAllStatesResponseSchema>> => {
-  const res = await fetch("/api/species/states");
+  const res = await fetch("/ohnologs/api/species/states");
   const data = await res.json();
 
   const parsed = getAllStatesResponseSchema.safeParse(data);
@@ -90,7 +90,7 @@ export const getAllStates = async (): Promise<z.infer<typeof getAllStatesRespons
 };
 
 export const getAllSources = async (): Promise<z.infer<typeof getAllSourcesResponseSchema>> => {
-  const res = await fetch("/api/species/sources");
+  const res = await fetch("/ohnologs/api/species/sources");
   const data = await res.json();
 
   const parsed = getAllSourcesResponseSchema.safeParse(data);

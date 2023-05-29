@@ -227,7 +227,7 @@
     const qstr = intoQuery({ query: queryId });
 
     const res = await fetch(`/ohnologs/api/circos${qstr}`);
-    const homologies = await res.json();/
+    const homologies = await res.json();
 
     // TODO: gen arcs on server? how would i handle resizing then?
     arcs = [];
