@@ -3,13 +3,14 @@
   import {
     Button,
     DataTable,
+    Link,
     PaginationNav,
     Toolbar,
     ToolbarBatchActions,
     ToolbarContent,
   } from "carbon-components-svelte";
   import type { DataTableRow } from "carbon-components-svelte/types/DataTable/DataTable.svelte";
-  import { Download } from "carbon-icons-svelte";
+  import { Download, Launch } from "carbon-icons-svelte";
   import { get } from "svelte/store";
   import type { GeneEntry } from "./geneTable";
 
@@ -19,6 +20,14 @@
   export let page: number;
   export let total: number;
   export let shown: number;
+
+  function* nextGeneId(i: number) {
+    for (let j = i; j < entries.length; j++) {
+      yield entries[j].geneId;
+    }
+  }
+
+  $: nextId = nextGeneId(0);
 
   const headers = [
     { key: "geneId", value: "Gene" },
@@ -60,6 +69,13 @@
       <strong slot="title">{title}</strong>
       <span class="description" slot="description">{description}</span>
 
+      <svelte:fragment slot="cell" let:cell>
+        {#if cell.key === "source"}
+          <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" icon={Launch}>{cell.value}</Link>
+        {:else}{cell.value}
+        {/if}
+      </svelte:fragment>
+
       <Toolbar>
         <ToolbarContent>
           <Button
@@ -88,9 +104,10 @@
   </div>
 </div>
 
-<style lang="scss">
+<style lang="postcss">
   .table {
     padding-bottom: 1rem;
+    overflow-x: auto;
   }
 
   .description {

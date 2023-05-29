@@ -252,14 +252,6 @@
   $: totalPages = Math.ceil(count / perPage);
 </script>
 
-<p class="paragraph"><u><h3>Info:</h3></u></p>
-
-<br />
-
-<li>The diagram can be moved around by holding down and moving the image with a mouse.</li>
-<br />
-<li>The image can be enlarged and shrunk by first clicking the image then scrolling up or down on a mouse.</li>
-
 <svelte:window
   on:keydown={(e) => {
     if (e.key === "Shift") {
@@ -298,64 +290,76 @@
 
  -->
 
-<svg bind:this={bindInitZoom} width={data.options.size.width} height={data.options.size.height}>
-  <g bind:this={bindHandleZoom}>
-    <g>
-      {#each data.tracks as track, i}
-        <path
-          d={d3.line()([
-            [0, data.options.trackPadding * i],
-            [track.length, data.options.trackPadding * i],
-          ])}
-        />
-        <g>
-          <text transform="translate({track.length},{data.options.trackPadding * i - 20})">{track.label}</text>
-          <text transform="translate(-50,{data.options.trackPadding * i + 20})"
-            >{Math.min(trans && Math.abs(Math.min(trans.x, 0)) / track.length / trans.k, 1) * 100}% -
-            {Math.min(
-              trans &&
-                Math.abs(Math.min(data.options.size.width - trans.x - track.length * trans.k, 0)) /
-                  track.length /
-                  trans.k,
-              1,
-            ) * 100}%
-          </text>
+<Grid padding>
+  <Row>
+    <Column>
+      <p class="paragraph"><u><h3>Info:</h3></u></p>
+
+      <br />
+
+      <li>The diagram can be moved around by holding down and moving the image with a mouse.</li>
+      <br />
+      <li>The image can be enlarged and shrunk by first clicking the image then scrolling up or down on a mouse.</li>
+    </Column>
+  </Row>
+
+  <Row>
+    <Column>
+      <svg bind:this={bindInitZoom} width={data.options.size.width} height={data.options.size.height}>
+        <g bind:this={bindHandleZoom}>
+          <g>
+            {#each data.tracks as track, i}
+              <path
+                d={d3.line()([
+                  [0, data.options.trackPadding * i],
+                  [track.length, data.options.trackPadding * i],
+                ])}
+              />
+              <g>
+                <text transform="translate({track.length},{data.options.trackPadding * i - 20})">{track.label}</text>
+                <text transform="translate(-50,{data.options.trackPadding * i + 20})"
+                  >{Math.min(trans && Math.abs(Math.min(trans.x, 0)) / track.length / trans.k, 1) * 100}% -
+                  {Math.min(
+                    trans &&
+                      Math.abs(Math.min(data.options.size.width - trans.x - track.length * trans.k, 0)) /
+                        track.length /
+                        trans.k,
+                    1,
+                  ) * 100}%
+                </text>
+              </g>
+            {/each}
+          </g>
+          <g>
+            {#each data.anchors as anchor}
+              {#each pairs(anchor.ids) as [x, y]}
+                <path d={d3.line()(calcLinkCoords(x, y))} />
+              {/each}
+            {/each}
+          </g>
+          <g>
+            {#each data.genes as gene}
+              <Gene
+                id={gene.id}
+                label={gene.label}
+                geneX={gene.start}
+                geneY={data.tracks.findIndex((e) => e.id === gene.track) * data.options.trackPadding -
+                  data.options.geneHeight}
+                geneWidth={gene.length}
+                geneHeight={data.options.geneHeight}
+                geneColour={rcolour()}
+                pointerSize={50}
+                pointerOffset={-20}
+                pointerDirection={gene.direction}
+              />
+            {/each}
+          </g>
         </g>
-      {/each}
-    </g>
-    <g>
-      {#each data.anchors as anchor}
-        {#each pairs(anchor.ids) as [x, y]}
-          <path d={d3.line()(calcLinkCoords(x, y))} />
-        {/each}
-      {/each}
-    </g>
-    <g>
-      {#each data.genes as gene}
-        <Gene
-          id={gene.id}
-          label={gene.label}
-          geneX={gene.start}
-          geneY={data.tracks.findIndex((e) => e.id === gene.track) * data.options.trackPadding -
-            data.options.geneHeight}
-          geneWidth={gene.length}
-          geneHeight={data.options.geneHeight}
-          geneColour={rcolour()}
-          pointerSize={50}
-          pointerOffset={-20}
-          pointerDirection={gene.direction}
-        />
-      {/each}
-    </g>
-  </g>
-  <g bind:this={bindAxis} transform="translate(0,{data.options.size.height - 200})" />
-</svg>
+        <g bind:this={bindAxis} transform="translate(0,{data.options.size.height - 200})" />
+      </svg>
+    </Column>
+  </Row>
 
-<br />
-<br />
-<br />
-
-<Grid>
   <Row>
     <Column>
       <GeneTable

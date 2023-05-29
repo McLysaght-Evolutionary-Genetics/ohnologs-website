@@ -165,7 +165,7 @@
 </script>
 
 <!-- svelte-ignore missing-declaration -->
-<Grid>
+<Grid padding>
   <div>
     <p class="paragraph"><u><h3>Info:</h3></u></p>
     <br />
@@ -177,10 +177,6 @@
     <li>It is not necessary to select options in all the boxes but it refines what you are searching for.</li>
   </div>
 
-  <br />
-  <br />
-  <br />
-
   <!-- filters -->
   <Row>
     <Column>
@@ -190,8 +186,6 @@
         label="Select species..."
         items={species}
       />
-
-      <br />
 
       <Checkbox bind:checked={exactSpecies} labelText="Exact" />
     </Column>
@@ -205,8 +199,6 @@
         items={scaffolds}
       />
 
-      <br />
-
       <Checkbox bind:checked={exactScaffolds} disabled={!scaffoldSelectEnabled} labelText="Exact" />
     </Column>
 
@@ -219,37 +211,25 @@
         items={segments}
       />
 
-      <br />
-
       <Checkbox bind:checked={exactSegments} disabled={!segmentSelectEnabled} labelText="Exact" />
     </Column>
   </Row>
-
-  <br />
 
   <Row>
     <Column>
       <MultiSelect bind:selectedIds={selectedSourceIds} titleText="Source" label="Select source" items={sources} />
 
-      <br />
-
       <Checkbox bind:checked={exactSources} labelText="Exact" />
     </Column>
   </Row>
-
-  <br />
 
   <Row>
     <Column>
       <MultiSelect bind:selectedIds={selectedLabelIds} titleText="Labels" label="Select labels..." items={labels} />
 
-      <br />
-
       <Checkbox bind:checked={exactLabels} labelText="Exact" />
     </Column>
   </Row>
-
-  <br />
 
   <!-- table -->
   <Row>

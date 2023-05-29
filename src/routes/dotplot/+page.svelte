@@ -18,7 +18,7 @@
   import { get } from "svelte/store";
   import GeneTable from "../../lib/components/GeneTable.svelte";
   import type { GeneEntry } from "../../lib/components/geneTable";
-  import type { Point, Segment } from "../api/homologs/+server";
+  import type { Point, Segment } from "../api/dotplot/+server";
   import type { PageData } from "./$types";
   import Selection from "./Selection.svelte";
   import type { SelectionEvent } from "./selection";
@@ -26,8 +26,8 @@
   // data
   const dims = {
     size: {
-      width: 900,
-      height: 720,
+      width: 900 * 1.5,
+      height: 720 * 1.5,
     },
     margin: {
       top: 20,
@@ -85,6 +85,8 @@
 
     return [e.x, e.y, c];
   }) satisfies [number, number, string][];
+
+  $: console.log(ppos);
 
   selection.subscribe((current) => {
     ppos = points.map((e) => {
@@ -388,7 +390,7 @@
 
     const qstr = intoQuery({ query: queryId, subject: subjectId });
 
-    const res = await fetch(`/ohnologs/api/homologs${qstr}`);
+    const res = await fetch(`/ohnologs/api/dotplot${qstr}`);
     const homologies = await res.json();
 
     //
@@ -403,109 +405,117 @@
   $: if (browser) updateGenes(query, subject);
 </script>
 
-<p class="paragraph"><u><h3>Info:</h3></u></p>
+<Grid padding>
+  <Row>
+    <Column>
+      <p class="paragraph"><u><h3>Info:</h3></u></p>
 
-<br />
-<li>
-  To generate a dotplot you must select a species in both the 'Query species' box and 'Subject species' box. Note that
-  you can select the same species in both boxes.
-</li>
-<br />
-<li>If a dotplot was generated using two different species, the table below will show data which can be downloaded.</li>
-<br />
-<li>Clicking 'cancel' removes the genes you have selected for the table.</li>
-<br />
-<br />
+      <br />
+      <li>
+        To generate a dotplot you must select a species in both the 'Query species' box and 'Subject species' box. Note
+        that you can select the same species in both boxes.
+      </li>
+      <br />
+      <li>
+        If a dotplot was generated using two different species, the table below will show data which can be downloaded.
+      </li>
+      <br />
+      <li>Clicking 'cancel' removes the genes you have selected for the table.</li>
+    </Column>
+  </Row>
 
-<!-- make selection shit actually work lol -->
-<!-- quick col/row select - click on axis? -->
-<!-- currently leaving svg via context menu doesnt fire svg mouse leave - keeps selection -->
-<!-- all the key combos? -->
-<!-- TODO: move the fuck away from element-based mouse handlers - they give me the big sad -->
+  {#if query != null && query !== "none" && subject != null && subject !== "none"}
+    <Row>
+      <Column>
+        <!-- make selection shit actually work lol -->
+        <!-- quick col/row select - click on axis? -->
+        <!-- currently leaving svg via context menu doesnt fire svg mouse leave - keeps selection -->
+        <!-- all the key combos? -->
+        <!-- TODO: move the fuck away from element-based mouse handlers - they give me the big sad -->
 
-<!-- can i use unscaled innerHeight/innerWidth? -->
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<svg
-  bind:this={bindSvg}
-  width={dims.size.width}
-  height={dims.size.height}
-  on:mousemove={handleMouseMove}
-  on:mouseenter={handleMouseEnter}
-  on:mouseleave={handleMouseLeave}
->
-  <g bind:this={bindZoom}>
-    <g transform="translate({dims.margin.left},{dims.margin.top})">
-      <g>
-        {#each regions as { x, y, width, height, colour }}
-          <rect
-            x={scale.x(x)}
-            y={scale.y(y)}
-            width={scale.x(width)}
-            height={innerHeight - scale.y(height)}
-            style="fill: {colour}"
-          />
-        {/each}
-      </g>
-      <g>
-        {#each vlines as x}
-          <line x1={scale.x(x)} x2={scale.x(x)} y2={innerHeight} stroke="black" />
-        {/each}
-      </g>
-      <g>
-        {#each vlabels as [label, cum, len]}
-          <text
-            x={scale.x(cum)}
-            dx={-scale.x(len / 2)}
-            y={innerHeight}
-            text-anchor="middle"
-            dominant-baseline="hanging"
-            pointer-events="none"
-          >
-            {label}
-          </text>
-        {/each}
-      </g>
-      <g>
-        {#each hlines as y}
-          <line x2={innerWidth} y1={scale.y(y)} y2={scale.y(y)} stroke="black" />
-        {/each}
-      </g>
-      <g>
-        {#each hlabels as [label, cum, len]}
-          <text
-            y={scale.y(cum)}
-            dy={innerHeight - scale.y(len / 2)}
-            text-anchor="end"
-            dominant-baseline="middle"
-            pointer-events="none"
-          >
-            {label}
-          </text>
-        {/each}
-      </g>
-      <g>
-        {#each ppos as [x, y, c]}
-          <circle cx={scale.x(x)} cy={scale.y(y)} r={3} style="fill: {c}" />
-        {/each}
-      </g>
-    </g>
+        <!-- can i use unscaled innerHeight/innerWidth? -->
+        <!-- svelte-ignore a11y-click-events-have-key-events -->
+        <svg
+          bind:this={bindSvg}
+          width={dims.size.width}
+          height={dims.size.height}
+          on:mousemove={handleMouseMove}
+          on:mouseenter={handleMouseEnter}
+          on:mouseleave={handleMouseLeave}
+        >
+          <g bind:this={bindZoom}>
+            <g transform="translate({dims.margin.left},{dims.margin.top})">
+              <g>
+                {#each regions as { x, y, width, height, colour }}
+                  <rect
+                    x={scale.x(x)}
+                    y={scale.y(y)}
+                    width={scale.x(width)}
+                    height={innerHeight - scale.y(height)}
+                    style="fill: {colour}"
+                  />
+                {/each}
+              </g>
+              <g>
+                {#each vlines as x}
+                  <line x1={scale.x(x)} x2={scale.x(x)} y2={innerHeight} stroke="black" />
+                {/each}
+              </g>
+              <g>
+                {#each vlabels as [label, cum, len]}
+                  <text
+                    x={scale.x(cum)}
+                    dx={-scale.x(len / 2)}
+                    y={innerHeight}
+                    text-anchor="middle"
+                    dominant-baseline="hanging"
+                    pointer-events="none"
+                  >
+                    {label}
+                  </text>
+                {/each}
+              </g>
+              <g>
+                {#each hlines as y}
+                  <line x2={innerWidth} y1={scale.y(y)} y2={scale.y(y)} stroke="black" />
+                {/each}
+              </g>
+              <g>
+                {#each hlabels as [label, cum, len]}
+                  <text
+                    y={scale.y(cum)}
+                    dy={innerHeight - scale.y(len / 2)}
+                    text-anchor="end"
+                    dominant-baseline="middle"
+                    pointer-events="none"
+                  >
+                    {label}
+                  </text>
+                {/each}
+              </g>
+              <g>
+                {#each ppos as [x, y, c]}
+                  {console.log(scale.x(x), scale.y(y))}
 
-    <Selection
-      bind:enabled={selectionEnabled}
-      bind:x={selectionX}
-      bind:y={selectionY}
-      bind:width={selectionWidth}
-      bind:height={selectionHeight}
-      on:selection={handleSelection}
-    />
-  </g>
-</svg>
+                  <circle cx={scale.x(x)} cy={scale.y(y)} r={3} style="fill: {c}" />
+                {/each}
+              </g>
+            </g>
 
-<br />
-<br />
-<br />
+            <Selection
+              bind:enabled={selectionEnabled}
+              bind:x={selectionX}
+              bind:y={selectionY}
+              bind:width={selectionWidth}
+              bind:height={selectionHeight}
+              on:selection={handleSelection}
+            />
+          </g>
+        </svg>
+      </Column>
+    </Row>
+  {/if}
 
-<Grid>
   <!-- options -->
   <Row>
     <Column>

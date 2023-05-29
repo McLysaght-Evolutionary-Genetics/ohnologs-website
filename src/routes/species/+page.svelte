@@ -100,7 +100,7 @@
 </script>
 
 <!-- svelte-ignore missing-declaration -->
-<Grid>
+<Grid padding>
   <div>
     <p class="paragraph"><u><h3>Info:</h3></u></p>
     <br />
@@ -113,10 +113,6 @@
       genome.
     </li>
   </div>
-
-  <br />
-  <br />
-  <br />
 
   <!-- filters -->
   <Row>
@@ -133,8 +129,6 @@
     </Column>
   </Row>
 
-  <br />
-
   <Row>
     <Column>
       <MultiSelect bind:selectedIds={selectedStates} titleText="State" label="Select genome state..." items={states} />
@@ -143,8 +137,6 @@
       <Checkbox disabled labelText="Exact" />
     </Column>
   </Row>
-
-  <br />
 
   <!-- table -->
   <Row>
@@ -185,8 +177,6 @@
             </ToolbarContent>
           </Toolbar>
         </DataTable>
-
-        <br />
 
         <PaginationNav bind:page total={totalPages} shown={shownPages} />
       {/if}

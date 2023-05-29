@@ -1,6 +1,6 @@
 <script lang="ts">
+  // import "../app.css";
   import "carbon-components-svelte/css/white.css";
-  import "../app.css";
 
   import { Content, Header, HeaderNav, HeaderNavItem, SkipToContent } from "carbon-components-svelte";
 </script>

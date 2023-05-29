@@ -45,6 +45,7 @@
   "type": "module",
   "dependencies": {
     "@prisma/client": "^4.10.0",
+    "@tailwindcss/ui": "^0.7.2",
     "phylotree": "^1.2.3",
     "prisma": "^4.10.0"
   }

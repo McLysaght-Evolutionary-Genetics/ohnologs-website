@@ -14,7 +14,7 @@
   let entries: z.infer<typeof geneSchema>[] | undefined = [];
 </script>
 
-<Grid>
+<Grid padding>
   <!-- tutorial -->
   <Row>
     <Column>
@@ -29,7 +29,6 @@
   </Row>
 
   <!-- search -->
-
   <Row>
     <Column>
       <form
@@ -55,19 +54,14 @@
           };
         }}
       >
-        <Grid padding>
-          <Row>
-            <Column>
-              <TextArea labelText="gene sequence" name="sequence" />
-            </Column>
-          </Row>
-          <Row>
-            <ButtonSet>
-              <Button type="submit">do the thing</Button>
-              <Button type="reset" kind="secondary">fuck! go back</Button>
-            </ButtonSet>
-          </Row>
-        </Grid>
+        <div class="textarea-padding">
+          <TextArea labelText="gene sequence" name="sequence" />
+        </div>
+        <ButtonSet>
+          <Button class="button-padding" type="submit">Search</Button>
+
+          <Button type="reset" kind="secondary">Clear</Button>
+        </ButtonSet>
       </form>
     </Column>
   </Row>
@@ -92,6 +86,14 @@
 </Grid>
 
 <style>
+  .button-padding {
+    padding-right: 0.2rem;
+  }
+
+  .textarea-padding {
+    padding-bottom: 0.5rem;
+  }
+
   .paragraph {
     color: navy;
   }

@@ -243,7 +243,7 @@
   $: if (browser) updateGenes(query);
 </script>
 
-<Grid>
+<Grid padding>
   <!-- tutorial -->
   <Row>
     <Column>
@@ -270,8 +270,6 @@
     </Column>
   </Row>
 
-  <br />
-
   <!-- figure -->
   {#if query != null && query != "none"}
     <Row>
@@ -296,10 +294,6 @@
       </Column>
     </Row>
   {/if}
-
-  <br />
-  <br />
-  <br />
 
   <!-- options -->
   <Row>
