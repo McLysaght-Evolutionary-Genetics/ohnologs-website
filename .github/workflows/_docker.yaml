@@ -8,7 +8,7 @@ env:
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASS: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
-  DATABASE_URL: postgresql:/postgres:postgres@localhost:5432/app
+  DATABASE_URL: postgresql://postgres:postgres@localhost:5432/app
 
 jobs:
   build:
