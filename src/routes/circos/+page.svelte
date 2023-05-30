@@ -1,6 +1,4 @@
 <script lang="ts">
-  import "./graph.css";
-
   import * as d3 from "d3";
 
   import { browser } from "$app/environment";
