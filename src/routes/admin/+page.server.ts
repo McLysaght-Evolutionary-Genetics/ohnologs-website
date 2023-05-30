@@ -12,116 +12,6 @@ const prisma = new PrismaClient();
 // /mnt/aoifolution/github/trim/tmp/tree/
 
 export const actions = {
-  // loadTrees: async (event) => {
-  //   const form = await event.request.formData();
-  //   const treepath = form.get("path")?.toString();
-
-  //   if (treepath == null) {
-  //     throw error(400, "invalid tree path");
-  //   }
-
-  //   const treefile = (await readFile(treepath)).toString().trimEnd();
-
-  //   // TODO: do something the the pvcs/pgcs
-  //   for (const line of treefile.split("\n")) {
-  //     const [newick, species, genes, pvcs, pgcs] = line.split("\t");
-
-  //     const tree = await prisma.geneTree.create({
-  //       data: {
-  //         file: "unk",
-  //         newick,
-  //       },
-  //     });
-
-  //     for (const sp of species.split(",")) {
-  //       const res = await prisma.genome.findFirst({
-  //         where: {
-  //           species: sp,
-  //         },
-  //       });
-
-  //       if (res != null) {
-  //         continue;
-  //       }
-
-  //       const genome = await prisma.genome.create({
-  //         data: {
-  //           species: sp,
-  //           version: "tree",
-  //           state: {
-  //             create: {
-  //               name: `${sp}-tree`,
-  //             },
-  //           },
-  //           source: {
-  //             create: {
-  //               name: `${sp}-tree`,
-  //             },
-  //           },
-  //         },
-  //       });
-
-  //       await prisma.scaffold.create({
-  //         data: {
-  //           name: `${sp}-unk`,
-  //           length: 1000,
-
-  //           genomeId: genome.id,
-  //         },
-  //       });
-
-  //       // tree connection
-  //       await prisma.treeSpecies.create({
-  //         data: {
-  //           treeId: tree.id,
-  //           speciesId: genome.id,
-  //         },
-  //       });
-  //     }
-
-  //     for (const gene of genes.split(",")) {
-  //       // TODO: obviously tmp
-  //       const s = species.split(",");
-  //       const sp = s[Math.floor(Math.random() * s.length)];
-
-  //       const res = await prisma.gene.findFirst({
-  //         where: {
-  //           proteinId: gene,
-  //         },
-  //       });
-
-  //       if (res != null) {
-  //         continue;
-  //       }
-
-  //       const scaffold = await prisma.scaffold.findFirstOrThrow({
-  //         where: {
-  //           name: `${sp}-unk`,
-  //         },
-  //       });
-
-  //       const g = await prisma.gene.create({
-  //         data: {
-  //           geneId: "unk",
-  //           proteinId: gene,
-
-  //           start: 0,
-  //           end: 0,
-
-  //           scaffoldId: scaffold.id,
-  //         },
-  //       });
-
-  //       // tree connection
-  //       await prisma.treeGene.create({
-  //         data: {
-  //           treeId: tree.id,
-  //           geneId: g.id,
-  //         },
-  //       });
-  //     }
-  //   }
-  // },
   loadMeta: async () => {
     const META_PATH = "/home/niezabil/Desktop/ohnologs/scripts/filtered.tsv";
     const OHNOLOGS_PATH = "/home/niezabil/Desktop/ohnologs/scripts/ohnologs.tsv";
@@ -385,6 +275,75 @@ export const actions = {
           },
         }),
       ]);
+    }
+  },
+  loadTrees: async (event) => {
+    const TREE_PATH = "/home/niezabil/Desktop/ohnologs/scripts/trees.tsv";
+
+    const lines = (await readFile(TREE_PATH))
+      .toString()
+      .trimEnd()
+      .split("\n")
+      .map((e) => e.split("\t"));
+
+    const speciesLookup: Record<string, string> = {};
+
+    for (const line of lines) {
+      const [species, genes, pvcs, pgcs] = line.slice(0, 4).map((e) => e.split(","));
+      const newick = line[4];
+
+      const speciesToFetch = species.filter((e) => !Object.keys(speciesLookup).includes(e));
+
+      const [tree, fetchedSpecies, fetchedGenes] = await prisma.$transaction([
+        prisma.tree.create({
+          data: {
+            newick,
+          },
+        }),
+        prisma.species.findMany({
+          where: {
+            name: {
+              in: speciesToFetch,
+            },
+          },
+        }),
+        prisma.gene.findMany({
+          where: {
+            proteinId: {
+              in: genes,
+            },
+          },
+        }),
+      ]);
+
+      for (const sp of fetchedSpecies) {
+        speciesLookup[sp.name] = sp.id;
+      }
+
+      const geneLookup = Object.fromEntries(fetchedGenes.map((e) => [e.proteinId, e.id]));
+
+      const addSpecies = species.map((e) =>
+        prisma.treeSpecies.create({
+          data: {
+            treeId: tree.id,
+            speciesId: speciesLookup[e],
+          },
+        }),
+      );
+
+      // TODO: import tree genes properly so we dont need this filter
+      const addGenes = genes
+        .filter((e) => geneLookup[e] != null)
+        .map((e) =>
+          prisma.treeGene.create({
+            data: {
+              treeId: tree.id,
+              geneId: geneLookup[e],
+            },
+          }),
+        );
+
+      await prisma.$transaction([...addSpecies, ...addGenes]);
     }
   },
 } satisfies Actions;

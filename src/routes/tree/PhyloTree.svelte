@@ -1,4 +1,6 @@
 <script lang="ts">
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   import { phylotree as PhyloTree } from "phylotree";
   import { onMount } from "svelte";
 

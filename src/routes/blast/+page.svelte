@@ -7,10 +7,10 @@
   import * as z from "zod";
 
   //
-  const shownPages: number = 1;
-  const totalPages: number = 1;
+  const shownPages = 1;
+  const totalPages = 1;
 
-  let page: number = 1;
+  let page = 1;
   let entries: z.infer<typeof geneSchema>[] | undefined = [];
 </script>
 
@@ -86,10 +86,6 @@
 </Grid>
 
 <style>
-  .button-padding {
-    padding-right: 0.2rem;
-  }
-
   .textarea-padding {
     padding-bottom: 0.5rem;
   }

@@ -10,7 +10,7 @@
     ToolbarContent,
   } from "carbon-components-svelte";
   import type { DataTableRow } from "carbon-components-svelte/types/DataTable/DataTable.svelte";
-  import { Download, Launch } from "carbon-icons-svelte";
+  import { Download, Launch, Scale, TreeView } from "carbon-icons-svelte";
   import { get } from "svelte/store";
   import type { GeneEntry } from "./geneTable";
 
@@ -72,6 +72,12 @@
       <svelte:fragment slot="cell" let:cell>
         {#if cell.key === "source"}
           <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" icon={Launch}>{cell.value}</Link>
+        {:else if cell.key === "proteinId"}
+          <span
+            >{cell.value}
+            <Link href="/ohnologs/tree?protein={cell.value}" icon={TreeView} />
+            <Link href="/ohnologs/synteny?protein={cell.value}" icon={Scale} /></span
+          >
         {:else}{cell.value}
         {/if}
       </svelte:fragment>

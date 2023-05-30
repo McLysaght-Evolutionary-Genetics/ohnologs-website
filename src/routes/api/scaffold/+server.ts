@@ -5,7 +5,7 @@ import type { RequestHandler } from "../$types";
 const prisma = new PrismaClient();
 
 export const GET = (async ({ url }) => {
-  const species = findQueryArray(url, "species") ?? [];
+  const speciesIds = findQueryArray(url, "speciesIds") ?? [];
 
   const scaffolds = await prisma.scaffold.findMany({
     include: {
@@ -13,10 +13,15 @@ export const GET = (async ({ url }) => {
     },
     where: {
       speciesId: {
-        in: species,
+        in: speciesIds,
       },
     },
   });
 
-  return new Response(JSON.stringify({ scaffolds }));
+  const data = scaffolds.map((e) => ({
+    id: e.id,
+    name: e.name,
+  }));
+
+  return new Response(JSON.stringify(data));
 }) satisfies RequestHandler;

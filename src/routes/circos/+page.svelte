@@ -11,7 +11,7 @@
   import { error } from "@sveltejs/kit";
   import { Column, Grid, Row, Select, SelectItem } from "carbon-components-svelte";
   import { get } from "svelte/store";
-  import type { Link, Segment } from "../../api/circos/+server";
+  import type { Link, Segment } from "../api/circos/+server";
   import type { PageData } from "./$types";
 
   //
@@ -85,23 +85,26 @@
   //
   $: totalScaffoldLength = segments.reduce((a, c) => a + c.length, 0);
 
-  let arcs = [];
+  let arcs: {
+    innerRadius: number;
+    outerRadius: number;
+    startAngle: number;
+    endAngle: number;
+  }[] = [];
 
   let start = 0;
 
   $: for (let s of segments) {
     const end = (s.length / totalScaffoldLength) * (Math.PI * 2 - padding * segments.length);
-    const arc = d3
-      .arc()
-      .innerRadius(innerRadius)
-      .outerRadius(outerRadius)
-      .startAngle(start)
-      .endAngle(start + end);
 
-    console.log(start, start + end);
+    arcs.push({
+      innerRadius,
+      outerRadius,
+      startAngle: start,
+      endAngle: start + end,
+    });
 
     start = start + end + padding;
-    arcs.push(arc);
 
     // keep svelte happy
     arcs = arcs;
@@ -203,11 +206,11 @@
   let entries: GeneEntry[] = [];
 
   //
-  let count: number = 0;
+  let count = 0;
 
-  let page: number = 1;
-  let perPage: number = 10;
-  let shownPages: number = 7;
+  let page = 1;
+  let perPage = 10;
+  let shownPages = 7;
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);
@@ -276,8 +279,8 @@
       <Column>
         <svg width={dims.size.width} height={dims.size.height}>
           <g transform="translate({dims.margin.left},{dims.margin.top})">
-            {#each arcs as arc}
-              <path d={arc()} fill="#ff594f" transform="translate({innerWidth / 2},{innerHeight / 2})" />
+            {#each arcs as params}
+              <path d={d3.arc()(params)} fill="#ff594f" transform="translate({innerWidth / 2},{innerHeight / 2})" />
             {/each}
 
             {#each lines as [d, colour]}
@@ -323,15 +326,6 @@
 </Grid>
 
 <style lang="scss">
-  .ribbon > path {
-    fill: #ff594f;
-    stroke: black;
-  }
-
-  .ribbon > path.active {
-    fill: #00ff00;
-  }
-
   .paragraph {
     color: navy;
   }

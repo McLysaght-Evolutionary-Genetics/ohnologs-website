@@ -1,6 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
-  import { getAllGenes } from "$lib/api";
+  import { getAllGenes, getAllScaffolds, getAllSegments } from "$lib/api";
   import GeneTable from "$lib/components/GeneTable.svelte";
   import type { GeneEntry } from "$lib/components/geneTable";
   import { selection } from "$lib/selection";
@@ -13,13 +13,11 @@
   export let data: PageData;
 
   //
-  export let page: number = 1;
-  export let active: boolean = false;
-  export let selected: string[] = [];
+  export let page = 1;
 
   //
-  const shownPages: number = 7;
-  const perPage: number = 10;
+  const shownPages = 7;
+  const perPage = 10;
 
   let total: number = data.count;
 
@@ -36,11 +34,11 @@
   let scaffolds: MultiSelectItem[] = [];
   let segments: MultiSelectItem[] = [];
 
-  let exactSpecies: boolean = false;
-  let exactSources: boolean = false;
-  let exactLabels: boolean = false;
-  let exactScaffolds: boolean = false;
-  let exactSegments: boolean = false;
+  let exactSpecies = false;
+  let exactSources = false;
+  let exactLabels = false;
+  let exactScaffolds = false;
+  let exactSegments = false;
 
   let selectedSpeciesIds: string[] = [];
   let selectedScaffoldIds: string[] = [];
@@ -48,10 +46,10 @@
   let selectedSegmentIds: string[] = [];
   let selectedSourceIds: string[] = [];
 
-  let scaffoldSelectEnabled: boolean = false;
+  let scaffoldSelectEnabled = false;
   $: scaffoldSelectEnabled = selectedSpeciesIds.length > 0;
 
-  let segmentSelectEnabled: boolean = false;
+  let segmentSelectEnabled = false;
   $: segmentSelectEnabled = selectedScaffoldIds.length > 0;
 
   //
@@ -103,12 +101,9 @@
       return;
     }
 
-    const query = intoQuery({ species: selectedSpeciesIds });
+    const data = await getAllScaffolds(selectedSpeciesIds);
 
-    const res = await fetch(`/ohnologs/api/scaffolds${query}`);
-    const data = await res.json();
-
-    scaffolds = data.scaffolds.map((e: unknown) => ({ id: e.id, text: e.name }));
+    scaffolds = data.map((e) => ({ id: e.id, text: e.name }));
   })();
 
   $: (async () => {
@@ -118,12 +113,9 @@
       return;
     }
 
-    const query = intoQuery({ scaffold: selectedScaffoldIds });
+    const data = await getAllSegments(selectedScaffoldIds);
 
-    const res = await fetch(`/ohnologs/api/segments${query}`);
-    const data = await res.json();
-
-    segments = data.segments.map((e: unknown) => ({ id: e.id, text: e.name }));
+    segments = data.map((e) => ({ id: e.id, text: e.name }));
   })();
 
   $: if (browser && loading) {

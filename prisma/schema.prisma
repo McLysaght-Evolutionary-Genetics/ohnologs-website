@@ -83,7 +83,7 @@ model Segment {
   end   Int
 
   //
-  Scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
+  scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
   scaffoldId String
 }
 

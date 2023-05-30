@@ -40,13 +40,13 @@
   export let data: PageData;
 
   //
-  export let page: number = 1;
-  export let active: boolean = false;
+  export let page = 1;
+  export let active = false;
   export let selected: string[] = [];
 
   //
-  const shownPages: number = 7;
-  const perPage: number = 10;
+  const shownPages = 7;
+  const perPage = 10;
 
   // TODO: add type checking
   const headers = [
@@ -164,7 +164,12 @@
                 active = false;
               }}
             >
-              <Button icon={Download} on:click={() => {}}>Download</Button>
+              <Button
+                icon={Download}
+                on:click={() => {
+                  alert("TODO: download");
+                }}>Download</Button
+              >
             </ToolbarBatchActions>
             <ToolbarContent>
               <ToolbarSearch />

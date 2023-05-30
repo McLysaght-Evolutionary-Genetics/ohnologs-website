@@ -8,16 +8,16 @@
   // TODO: action constraints
 
   // params
-  export let enabled: boolean = true;
-  export let allowDrag: boolean = true;
-  export let allowResizeTop: boolean = true;
-  export let allowResizeBot: boolean = true;
-  export let allowResizeLeft: boolean = true;
-  export let allowResizeRight: boolean = true;
-  export let allowResizeTopLeft: boolean = true;
-  export let allowResizeTopRight: boolean = true;
-  export let allowResizeBotLeft: boolean = true;
-  export let allowResizeBotRight: boolean = true;
+  export let enabled = true;
+  export let allowDrag = true;
+  export let allowResizeTop = true;
+  export let allowResizeBot = true;
+  export let allowResizeLeft = true;
+  export let allowResizeRight = true;
+  export let allowResizeTopLeft = true;
+  export let allowResizeTopRight = true;
+  export let allowResizeBotLeft = true;
+  export let allowResizeBotRight = true;
 
   export let x: number;
   export let y: number;
@@ -34,8 +34,8 @@
   // export let maxWidth: number = 200;
   // export let maxHeight: number = 200;
 
-  export let offset: number = 3;
-  export let size: number = 6;
+  export let offset = 3;
+  export let size = 6;
 
   // events
   const dispatch = createEventDispatcher<{ selection: SelectionEvent }>();

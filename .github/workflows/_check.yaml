@@ -36,6 +36,9 @@ jobs:
       - name: Check
         run: |
           pnpm check
+      - name: Format
+        run: |
+          pnpm format
       - name: Lint
         run: |
           pnpm lint

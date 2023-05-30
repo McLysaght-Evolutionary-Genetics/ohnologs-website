@@ -7,6 +7,8 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import type { GeneEntry } from "$lib/components/geneTable";
 
+  type GeneDirection = 1 | -1;
+
   const rnumber = (max: number) => Math.floor(Math.random() * max);
 
   const rcolour = () => `#${rnumber(256).toString(16)}${rnumber(256).toString(16)}${rnumber(256).toString(16)}`;
@@ -92,7 +94,7 @@
         track: "chr_1",
         start: 10,
         length: 50,
-        direction: 1,
+        direction: 1 as GeneDirection,
       },
       {
         id: "i_make_things_glow",
@@ -100,7 +102,7 @@
         track: "chr_1",
         start: 80,
         length: 20,
-        direction: -1,
+        direction: -1 as GeneDirection,
       },
       {
         id: "bbb",
@@ -108,7 +110,7 @@
         track: "chr_1",
         start: 180,
         length: 10,
-        direction: -1,
+        direction: -1 as GeneDirection,
       },
       {
         id: "ccc",
@@ -116,7 +118,7 @@
         track: "chr_1",
         start: 250,
         length: 30,
-        direction: -1,
+        direction: -1 as GeneDirection,
       },
       //
       {
@@ -125,7 +127,7 @@
         track: "chr_2",
         start: 20,
         length: 80,
-        direction: 1,
+        direction: 1 as GeneDirection,
       },
       {
         id: "aaa",
@@ -133,7 +135,7 @@
         track: "chr_2",
         start: 150,
         length: 20,
-        direction: 1,
+        direction: 1 as GeneDirection,
       },
       {
         id: "lol",
@@ -141,7 +143,7 @@
         track: "chr_2",
         start: 200,
         length: 30,
-        direction: -1,
+        direction: -1 as GeneDirection,
       },
       {
         id: "ddd",
@@ -149,7 +151,7 @@
         track: "chr_2",
         start: 240,
         length: 30,
-        direction: -1,
+        direction: -1 as GeneDirection,
       },
     ],
     anchors: [
@@ -171,6 +173,8 @@
   $: scale = d3.scaleLinear().domain([0, 100]).range([0, data.options.size.width]);
 
   $: if (bindAxis) {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     d3.select(bindAxis).call(d3.axisBottom(scale).ticks(data.options.size.width / 100));
   }
 
@@ -194,6 +198,8 @@
     trans = e.transform;
 
     const newScale = e.transform.rescaleX(scale);
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     d3.select(bindAxis).call(d3.axisBottom(newScale).ticks(data.options.size.width / 100));
   };
 
@@ -242,11 +248,11 @@
   let entries: GeneEntry[] = [];
 
   //
-  let count: number = 0;
+  let count = 0;
 
-  let page: number = 1;
-  let perPage: number = 10;
-  let shownPages: number = 7;
+  let page = 1;
+  let perPage = 10;
+  let shownPages = 7;
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);

@@ -9,17 +9,17 @@ export const GET = (async ({ url }) => {
   const page = parseInt(findQueryOrError(url, "page")) - 1;
   const perPage = parseInt(findQueryOrError(url, "perPage"));
 
-  const exactSpecies = findQueryOrError(url, "exactSpecies") === "true";
-  const exactSources = findQueryOrError(url, "exactSources") === "true";
+  // const exactSpecies = findQueryOrError(url, "exactSpecies") === "true";
+  // const exactSources = findQueryOrError(url, "exactSources") === "true";
   const exactLabels = findQueryOrError(url, "exactLabels") === "true";
-  const exactScaffolds = findQueryOrError(url, "exactScaffolds") === "true";
-  const exactSegments = findQueryOrError(url, "exactSegments") === "true";
+  // const exactScaffolds = findQueryOrError(url, "exactScaffolds") === "true";
+  // const exactSegments = findQueryOrError(url, "exactSegments") === "true";
 
-  const species = findQueryArray(url, "species") ?? (exactSpecies ? [] : null);
-  const sources = findQueryArray(url, "sources") ?? (exactSources ? [] : null);
+  // const species = findQueryArray(url, "species") ?? (exactSpecies ? [] : null);
+  // const sources = findQueryArray(url, "sources") ?? (exactSources ? [] : null);
   const labels = findQueryArray(url, "labels") ?? (exactLabels ? [] : null);
-  const scaffolds = findQueryArray(url, "scaffolds") ?? (exactScaffolds ? [] : null);
-  const segments = findQueryArray(url, "segments") ?? (exactSegments ? [] : null);
+  // const scaffolds = findQueryArray(url, "scaffolds") ?? (exactScaffolds ? [] : null);
+  // const segments = findQueryArray(url, "segments") ?? (exactSegments ? [] : null);
 
   // TODO: some of the exact flags are realistically useless (just make exact the default or something)
   // TODO: segments cant work rn due to how db rels are modelled, fix this before importing all data!!!

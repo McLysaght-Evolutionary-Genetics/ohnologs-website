@@ -8,13 +8,13 @@
   export let geneY: number;
   export let geneWidth: number;
   export let geneHeight: number;
-  export let geneColour: string = "#000000";
+  export let geneColour = "#000000";
 
   export let pointerSize: number;
-  export let pointerSkew: number = 0;
-  export let pointerOffset: number = 0;
+  export let pointerSkew = 0;
+  export let pointerOffset = 0;
   export let pointerDirection: 1 | -1 = 1;
-  export let pointerColour: string = "#000000";
+  export let pointerColour = "#000000";
 </script>
 
 <g>

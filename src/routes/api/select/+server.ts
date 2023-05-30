@@ -7,41 +7,74 @@ const prisma = new PrismaClient();
 export const GET = (async ({ url }) => {
   const query = findQueryOrError(url, "query").split(",");
 
-  const genes = await prisma.gene.findMany({
-    include: {
-      scaffold: {
-        include: {
-          genome: {
-            include: {
-              source: true,
+  const [count, genes] = await prisma.$transaction([
+    prisma.gene.count({
+      where: {
+        OR: [
+          {
+            geneId: {
+              in: query,
             },
           },
-          Segment: true,
-        },
+          {
+            proteinId: {
+              in: query,
+            },
+          },
+        ],
       },
-      GeneLabel: {
-        include: {
-          label: true,
-        },
-      },
-    },
-    where: {
-      OR: [
-        {
-          geneId: {
-            in: query,
+    }),
+    prisma.gene.findMany({
+      include: {
+        scaffold: {
+          include: {
+            species: {
+              include: {
+                source: true,
+              },
+            },
+            segments: true,
           },
         },
-        {
-          proteinId: {
-            in: query,
+        labels: {
+          include: {
+            label: true,
           },
         },
-      ],
-    },
-  });
+      },
+      where: {
+        OR: [
+          {
+            geneId: {
+              in: query,
+            },
+          },
+          {
+            proteinId: {
+              in: query,
+            },
+          },
+        ],
+      },
+    }),
+  ]);
 
-  console.log(query);
+  const data = genes.map((e) => ({
+    id: e.id,
+    geneId: e.geneId,
+    proteinId: e.proteinId,
+    // TODO: this is a problem... can we make scaffolds required?
+    // alternatively, link gene directly to species
+    species: e.scaffold?.species.name ?? "",
+    source: e.scaffold?.species.source.name ?? "",
+    version: e.scaffold?.species.version ?? "",
+    completness: e.scaffold?.species.completness ?? "scaffold",
+    scaffold: e.scaffold?.name ?? "",
+    // TODO: this is currently impossible to query for...
+    // we need to link genes directly to scaffolds... somehow
+    segment: "",
+    labels: e.labels.map((e) => e.label.name),
+  }));
 
-  return new Response(JSON.stringify({ genes }));
+  return new Response(JSON.stringify({ count, data }));
 }) satisfies RequestHandler;

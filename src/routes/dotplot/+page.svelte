@@ -107,7 +107,7 @@
   };
 
   // table
-  let active: boolean = false;
+  let active = false;
 
   // highlight current mouse col/row/region
   let ctxOpen = false;
@@ -212,9 +212,13 @@
   };
 
   // context menu
-  const handleCopy = () => {};
+  const handleCopy = () => {
+    alert("TODO: copy");
+  };
 
-  const handleExport = () => {};
+  const handleExport = () => {
+    alert("TODO: export");
+  };
 
   // selection
   let selectionX = 50;
@@ -365,11 +369,11 @@
   let entries: GeneEntry[] = [];
 
   //
-  let count: number = 0;
+  let count = 0;
 
-  let page: number = 1;
-  let perPage: number = 10;
-  let shownPages: number = 7;
+  let page = 1;
+  let perPage = 10;
+  let shownPages = 7;
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);
