@@ -8,11 +8,25 @@ env:
   REGISTRY_USER: ${{ github.actor }}
   REGISTRY_PASS: ${{ secrets.GITHUB_TOKEN }}
   IMAGE_NAME: ${{ github.repository }}
+  DATABASE_URL: postgresql:/postgres:postgres@localhost:5432/app
 
 jobs:
   build:
     name: Docker
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -44,3 +58,5 @@ jobs:
           platforms: linux/amd64
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          build-args: |
+            DATABASE_URL=${{ env.DATABASE_URL }}
