@@ -55,18 +55,14 @@
   //
   const updateGenes = async () => {
     const { count, data } = await getAllGenes(
-      page,
-      perPage,
-      exactSpecies,
-      exactSources,
-      exactLabels,
-      exactScaffolds,
-      exactSegments,
       selectedSpeciesIds,
-      selectedSourceIds,
-      selectedLabelIds,
       selectedScaffoldIds,
       selectedSegmentIds,
+      selectedSourceIds,
+      selectedLabelIds,
+      exactLabels,
+      page,
+      perPage,
     );
 
     total = count;

@@ -1,30 +1,68 @@
 import { PrismaClient } from "$lib/prisma";
 import { findQuery, findQueryArray, findQueryOrError } from "$lib/util";
+import * as z from "zod";
 import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
+
+const partialLabelQuerySchema = z.array(z.object({ id: z.string().uuid() }));
 
 export const GET = (async ({ url }) => {
   // TODO: validation
   const page = parseInt(findQueryOrError(url, "page")) - 1;
   const perPage = parseInt(findQueryOrError(url, "perPage"));
 
-  // const exactSpecies = findQueryOrError(url, "exactSpecies") === "true";
-  // const exactSources = findQueryOrError(url, "exactSources") === "true";
   const exactLabels = findQueryOrError(url, "exactLabels") === "true";
-  // const exactScaffolds = findQueryOrError(url, "exactScaffolds") === "true";
-  // const exactSegments = findQueryOrError(url, "exactSegments") === "true";
 
-  // const species = findQueryArray(url, "species") ?? (exactSpecies ? [] : null);
-  // const sources = findQueryArray(url, "sources") ?? (exactSources ? [] : null);
+  const species = findQueryArray(url, "species") ?? [];
+  const scaffolds = findQueryArray(url, "scaffolds") ?? [];
+  const segments = findQueryArray(url, "segments") ?? [];
+  const sources = findQueryArray(url, "sources") ?? [];
   const labels = findQueryArray(url, "labels") ?? (exactLabels ? [] : null);
-  // const scaffolds = findQueryArray(url, "scaffolds") ?? (exactScaffolds ? [] : null);
-  // const segments = findQueryArray(url, "segments") ?? (exactSegments ? [] : null);
+
+  // TODO: remove this abomination
+  // i hate it so much but it works so whatevs
+  let geneIds: string[] = [];
+
+  if (exactLabels) {
+    const raw =
+      await prisma.$queryRaw`select g.*, array_agg(gl."labelId") as labels from "Gene" g join "GeneLabel" gl on g.id = gl."geneId" group by g.id having array_agg(gl."labelId") @> ${labels};`;
+
+    const parsed = partialLabelQuerySchema.parse(raw);
+
+    geneIds = parsed.map((e) => e.id);
+  }
 
   // TODO: some of the exact flags are realistically useless (just make exact the default or something)
   // TODO: segments cant work rn due to how db rels are modelled, fix this before importing all data!!!
   const [count, genes] = await prisma.$transaction([
-    prisma.gene.count(),
+    prisma.gene.count({
+      where: {
+        // TODO: this is terrible, refer to the TODO up top
+        // pls fix this at some point!!!
+        ...(exactLabels
+          ? {
+              id: {
+                in: geneIds,
+              },
+            }
+          : {}),
+
+        scaffold: {
+          species: {
+            AND: [
+              ...(species.length === 0 ? [] : [{ id: { in: species } }]),
+              ...(sources.length === 0 ? [] : [{ genomeSourceId: { in: sources } }]),
+            ],
+          },
+        },
+        labels: {
+          ...(exactLabels
+            ? { ...(labels == null ? {} : { every: { labelId: { in: labels } }, some: {} }) }
+            : { ...(labels == null ? {} : { some: { labelId: { in: labels } } }) }),
+        },
+      },
+    }),
     prisma.gene.findMany({
       include: {
         scaffold: {
@@ -43,40 +81,24 @@ export const GET = (async ({ url }) => {
         },
       },
       where: {
-        // scaffold: {
-        //   id: {
-        //     ...(scaffolds == null ? {} : { in: scaffolds }),
-        //   },
-        //   genome: {
-        //     id: {
-        //       ...(species == null ? {} : { in: species }),
-        //     },
-        //     source: {
-        //       id: {
-        //         ...(sources == null ? {} : { in: sources }),
-        //       },
-        //     },
-        //   },
-        //   Segment: {
-        //     // ...(exactSegments
-        //     //   ? { every: { id: { ...(segments == null ? {} : { in: segments }) } } }
-        //     //   : { some: { id: { ...(segments == null ? {} : { in: segments }) } } }),
+        // TODO: this is terrible, refer to the TODO up top
+        // pls fix this at some point!!!
+        ...(exactLabels
+          ? {
+              id: {
+                in: geneIds,
+              },
+            }
+          : {}),
 
-        //     ...(segments == null ? {} : { some: { id: { in: segments } } }),
-
-        //     // some: {
-        //     //   id: {
-        //     //     ...(segments == null ? {} : { in: segments }),
-        //     //   },
-        //     // },
-
-        //     // some: {
-        //     //   id: {
-        //     //     ...(segments == null ? {} : { in: segments }),
-        //     //   },
-        //     // },
-        //   },
-        // },
+        scaffold: {
+          species: {
+            AND: [
+              ...(species.length === 0 ? [] : [{ id: { in: species } }]),
+              ...(sources.length === 0 ? [] : [{ genomeSourceId: { in: sources } }]),
+            ],
+          },
+        },
         labels: {
           ...(exactLabels
             ? { ...(labels == null ? {} : { every: { labelId: { in: labels } }, some: {} }) }

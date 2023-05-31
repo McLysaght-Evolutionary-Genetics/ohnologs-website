@@ -1,16 +1,54 @@
 import { PrismaClient } from "$lib/prisma";
-import { findQueryOrError } from "$lib/util";
+import { findQuery, findQueryArray, findQueryOrError } from "$lib/util";
 import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
 
 export const GET = (async ({ url }) => {
+  const sources = findQueryArray(url, "sources") ?? [];
+  const states = findQueryArray(url, "states") ?? [];
+
   const page = parseInt(findQueryOrError(url, "page")) - 1;
   const perPage = parseInt(findQueryOrError(url, "perPage"));
 
+  console.log(sources);
+
   const [count, species] = await prisma.$transaction([
-    prisma.species.count(),
+    prisma.species.count({
+      where: {
+        ...(sources.length === 0
+          ? {}
+          : {
+              genomeSourceId: {
+                in: sources,
+              },
+            }),
+        ...(states.length === 0
+          ? {}
+          : {
+              genomeStateId: {
+                in: states,
+              },
+            }),
+      },
+    }),
     prisma.species.findMany({
+      where: {
+        ...(sources.length === 0
+          ? {}
+          : {
+              genomeSourceId: {
+                in: sources,
+              },
+            }),
+        ...(states.length === 0
+          ? {}
+          : {
+              genomeStateId: {
+                in: states,
+              },
+            }),
+      },
       include: {
         state: true,
         source: true,

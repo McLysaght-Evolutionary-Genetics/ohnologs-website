@@ -34,32 +34,24 @@ export const getAllSegmentsResponseSchema = z.array(
 );
 
 export const getAllGenes = async (
-  page: number,
-  perPage: number,
-  exactSpecies: boolean,
-  exactSources: boolean,
-  exactLabels: boolean,
-  exactScaffolds: boolean,
-  exactSegments: boolean,
   species: string[],
-  sources: string[],
-  labels: string[],
   scaffolds: string[],
   segments: string[],
+  sources: string[],
+  labels: string[],
+  exactLabels: boolean,
+  page: number,
+  perPage: number,
 ): Promise<z.infer<typeof getAllGenesResponseSchema>> => {
   const query = intoQuery({
-    page,
-    perPage,
-    exactSpecies,
-    exactSources,
-    exactLabels,
-    exactScaffolds,
-    exactSegments,
     species,
-    sources,
-    labels,
     scaffolds,
     segments,
+    sources,
+    labels,
+    exactLabels,
+    page,
+    perPage,
   });
 
   const res = await fetch(`/ohnologs/api/gene${query}`);
@@ -90,10 +82,10 @@ export const getSelection = async (idents: string[]): Promise<z.infer<typeof get
 };
 
 export const getAllSpecies = async (
-  page: number,
-  perPage: number,
   sources: string[],
   states: string[],
+  page: number,
+  perPage: number,
 ): Promise<z.infer<typeof getAllSpeciesResponseSchema>> => {
   const query = intoQuery({ page, perPage, sources, states });
 

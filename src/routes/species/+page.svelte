@@ -51,7 +51,7 @@
   // TODO: add type checking
   const headers = [
     { key: "id", value: "Genome" },
-    { key: "species", value: "Species" },
+    { key: "name", value: "Species" },
     { key: "state", value: "State" },
     { key: "source", value: "Source" },
     { key: "version", value: "Version" },
@@ -76,7 +76,7 @@
 
   //
   const updateSpecies = async () => {
-    const { count, data } = await getAllSpecies(page, perPage, selectedSources, selectedStates);
+    const { count, data } = await getAllSpecies(selectedSources, selectedStates, page, perPage);
 
     total = count;
     entries = data;
@@ -86,7 +86,7 @@
 
   //
   $: (() => {
-    [page];
+    [page, selectedSources, selectedStates];
 
     loading = true;
   })();

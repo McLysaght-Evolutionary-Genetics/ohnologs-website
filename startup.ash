@@ -1,4 +1,4 @@
 #! /bin/ash
 
-pnpm prisma migrate
+pnpm prisma migrate deploy
 node ./build
