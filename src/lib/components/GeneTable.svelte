@@ -3,6 +3,7 @@
   import {
     Button,
     DataTable,
+    DataTableSkeleton,
     Link,
     PaginationNav,
     Toolbar,
@@ -18,8 +19,10 @@
   export let description: string;
   export let entries: GeneEntry[] = [];
   export let page: number;
+  export let perPage: number;
   export let total: number;
   export let shown: number;
+  export let loading: boolean;
 
   function* nextGeneId(i: number) {
     for (let j = i; j < entries.length; j++) {
@@ -34,7 +37,7 @@
     { key: "proteinId", value: "Protein" },
     { key: "species", value: "Species" },
     { key: "source", value: "Source" },
-    { key: "scaffold", value: "Scaffold" },
+    { key: "scaffold", value: "Chromosome" },
     { key: "segment", value: "Segment" },
     { key: "labels", value: "Labels" },
   ];
@@ -65,43 +68,47 @@
 <div>
   <!-- table -->
   <div class="table">
-    <DataTable {selectedRowIds} on:click:row--select={handleSelect} selectable {headers} rows={entries}>
-      <strong slot="title">{title}</strong>
-      <span class="description" slot="description">{description}</span>
+    {#if loading}
+      <DataTableSkeleton {headers} rows={perPage} />
+    {:else}
+      <DataTable {selectedRowIds} on:click:row--select={handleSelect} selectable {headers} rows={entries}>
+        <strong slot="title">{title}</strong>
+        <span class="description" slot="description">{description}</span>
 
-      <svelte:fragment slot="cell" let:cell>
-        {#if cell.key === "source"}
-          <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" icon={Launch}>{cell.value}</Link>
-        {:else if cell.key === "proteinId"}
-          <span
-            >{cell.value}
-            <Link href="/ohnologs/tree?protein={cell.value}" icon={TreeView} />
-            <Link href="/ohnologs/synteny?protein={cell.value}" icon={Scale} /></span
-          >
-        {:else}{cell.value}
-        {/if}
-      </svelte:fragment>
+        <svelte:fragment slot="cell" let:cell>
+          {#if cell.key === "source"}
+            <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" icon={Launch}>{cell.value}</Link>
+          {:else if cell.key === "proteinId"}
+            <span
+              >{cell.value}
+              <Link href="/ohnologs/tree?protein={cell.value}" icon={TreeView} />
+              <Link href="/ohnologs/synteny?protein={cell.value}" icon={Scale} /></span
+            >
+          {:else}{cell.value}
+          {/if}
+        </svelte:fragment>
 
-      <Toolbar>
-        <ToolbarContent>
-          <Button
-            disabled={entries.length === 0}
-            icon={Download}
-            on:click={() => {
-              alert("TODO: download");
-            }}>Download</Button
-          >
-        </ToolbarContent>
-        <ToolbarBatchActions>
-          <Button
-            icon={Download}
-            on:click={() => {
-              alert("TODO: download");
-            }}>Download</Button
-          >
-        </ToolbarBatchActions>
-      </Toolbar>
-    </DataTable>
+        <Toolbar>
+          <ToolbarContent>
+            <Button
+              disabled={entries.length === 0}
+              icon={Download}
+              on:click={() => {
+                alert("TODO: download");
+              }}>Download</Button
+            >
+          </ToolbarContent>
+          <ToolbarBatchActions>
+            <Button
+              icon={Download}
+              on:click={() => {
+                alert("TODO: download");
+              }}>Download</Button
+            >
+          </ToolbarBatchActions>
+        </Toolbar>
+      </DataTable>
+    {/if}
   </div>
 
   <!-- pagination -->

@@ -71,6 +71,18 @@
     loading = false;
   };
 
+  const updateScaffolds = async () => {
+    const data = await getAllScaffolds(selectedSpeciesIds);
+
+    scaffolds = data.map((e) => ({ id: e.id, text: e.name }));
+  };
+
+  const updateSegments = async () => {
+    const data = await getAllSegments(selectedScaffoldIds);
+
+    segments = data.map((e) => ({ id: e.id, text: e.name }));
+  };
+
   //
   $: (() => {
     [
@@ -90,28 +102,24 @@
     loading = true;
   })();
 
-  $: (async () => {
+  $: (() => {
     [selectedSpeciesIds];
 
     if (!browser) {
       return;
     }
 
-    const data = await getAllScaffolds(selectedSpeciesIds);
-
-    scaffolds = data.map((e) => ({ id: e.id, text: e.name }));
+    updateScaffolds();
   })();
 
-  $: (async () => {
+  $: (() => {
     [selectedScaffoldIds];
 
     if (!browser) {
       return;
     }
 
-    const data = await getAllSegments(selectedScaffoldIds);
-
-    segments = data.map((e) => ({ id: e.id, text: e.name }));
+    updateSegments();
   })();
 
   $: if (browser && loading) {
@@ -174,20 +182,16 @@
         label="Select species..."
         items={species}
       />
-
-      <Checkbox bind:checked={exactSpecies} labelText="Exact" />
     </Column>
 
     <Column>
       <MultiSelect
         bind:selectedIds={selectedScaffoldIds}
         disabled={!scaffoldSelectEnabled}
-        titleText="Scaffold"
-        label="Select scaffold..."
+        titleText="Chromosome"
+        label="Select chromosome..."
         items={scaffolds}
       />
-
-      <Checkbox bind:checked={exactScaffolds} disabled={!scaffoldSelectEnabled} labelText="Exact" />
     </Column>
 
     <Column>
@@ -198,24 +202,22 @@
         label="Select segment..."
         items={segments}
       />
-
-      <Checkbox bind:checked={exactSegments} disabled={!segmentSelectEnabled} labelText="Exact" />
     </Column>
   </Row>
 
   <Row>
     <Column>
-      <MultiSelect bind:selectedIds={selectedSourceIds} titleText="Source" label="Select source" items={sources} />
-
-      <Checkbox bind:checked={exactSources} labelText="Exact" />
+      <MultiSelect bind:selectedIds={selectedSourceIds} titleText="Source" label="Select source..." items={sources} />
     </Column>
   </Row>
 
   <Row>
     <Column>
-      <MultiSelect bind:selectedIds={selectedLabelIds} titleText="Labels" label="Select labels..." items={labels} />
+      <div style="padding-bottom: 0.5rem;">
+        <MultiSelect bind:selectedIds={selectedLabelIds} titleText="Labels" label="Select labels..." items={labels} />
+      </div>
 
-      <Checkbox bind:checked={exactLabels} labelText="Exact" />
+      <Checkbox bind:checked={exactLabels} labelText="Strict match" />
     </Column>
   </Row>
 
@@ -224,8 +226,10 @@
     <Column>
       <GeneTable
         bind:page
-        title={"Genes"}
-        description={"Genes matching the current filters"}
+        bind:loading
+        title={"Ohnologs"}
+        description={"The ohnologs matching your currently selected filters are displayed below"}
+        {perPage}
         {entries}
         total={totalPages}
         shown={shownPages}

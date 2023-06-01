@@ -130,7 +130,7 @@ export const getAllSources = async (): Promise<z.infer<typeof getAllSourcesRespo
 export const getAllScaffolds = async (speciesIds: string[]): Promise<z.infer<typeof getAllScaffoldsResponseSchema>> => {
   const query = intoQuery({ speciesIds });
 
-  const res = await fetch(`/ohnologs/api/scaffold?${query}`);
+  const res = await fetch(`/ohnologs/api/scaffold${query}`);
   const data = await res.json();
 
   const parsed = getAllScaffoldsResponseSchema.safeParse(data);
@@ -145,7 +145,7 @@ export const getAllScaffolds = async (speciesIds: string[]): Promise<z.infer<typ
 export const getAllSegments = async (scaffoldIds: string[]): Promise<z.infer<typeof getAllSegmentsResponseSchema>> => {
   const query = intoQuery({ scaffoldIds });
 
-  const res = await fetch(`/ohnologs/api/segment?${query}`);
+  const res = await fetch(`/ohnologs/api/segment${query}`);
   const data = await res.json();
 
   const parsed = getAllScaffoldsResponseSchema.safeParse(data);

@@ -20,6 +20,8 @@ export const GET = (async ({ url }) => {
   const sources = findQueryArray(url, "sources") ?? [];
   const labels = findQueryArray(url, "labels") ?? (exactLabels ? [] : null);
 
+  console.log(scaffolds);
+
   // TODO: remove this abomination
   // i hate it so much but it works so whatevs
   let geneIds: string[] = [];
@@ -55,6 +57,8 @@ export const GET = (async ({ url }) => {
               ...(sources.length === 0 ? [] : [{ genomeSourceId: { in: sources } }]),
             ],
           },
+
+          ...(scaffolds.length === 0 ? {} : { id: { in: scaffolds } }),
         },
         labels: {
           ...(exactLabels
@@ -98,6 +102,8 @@ export const GET = (async ({ url }) => {
               ...(sources.length === 0 ? [] : [{ genomeSourceId: { in: sources } }]),
             ],
           },
+
+          ...(scaffolds.length === 0 ? {} : { id: { in: scaffolds } }),
         },
         labels: {
           ...(exactLabels
