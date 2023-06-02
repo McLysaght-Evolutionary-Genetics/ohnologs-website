@@ -68,6 +68,21 @@ export const getAllGenes = async (
   return parsed.data;
 };
 
+export const getSelection = async (idents: string[]): Promise<z.infer<typeof getSelectionResponseSchema>> => {
+  const query = intoQuery({ query: idents });
+
+  const res = await fetch(`/ohnologs/api/select${query}`);
+  const data = await res.json();
+
+  const parsed = getSelectionResponseSchema.safeParse(data);
+
+  if (!parsed.success) {
+    throw new Error("getSelection - invalid gene response from api");
+  }
+
+  return parsed.data;
+};
+
 export const getAllSpecies = async (
   sources: string[],
   states: string[],
