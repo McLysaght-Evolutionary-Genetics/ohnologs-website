@@ -364,31 +364,31 @@
     <Column>
       <FileUploaderDropContainer
         bind:files
-        labelText="Drag and drop files or click to upload"
+        labelText="Upload FASTA, TSV, or CSV files..."
         on:change={handleFileUpload}
       />
 
-      <FileUploaderItem />
-
-      <TextArea bind:value labelText="selection" placeholder="lol..." on:input={handleTextareaInput} />
+      <TextArea
+        bind:value
+        placeholder="...or paste gene and protein names here to search the database."
+        on:input={handleTextareaInput}
+      />
     </Column>
   </Row>
 
   <!-- table -->
   <Row>
     <Column>
-      {#if loading}
-        <InlineLoading />
-      {:else}
-        <GeneTable
-          title={"Genes"}
-          description={"Genes matching the current filters"}
-          {entries}
-          {page}
-          total={totalPages}
-          shown={shownPages}
-        />
-      {/if}
+      <GeneTable
+        bind:page
+        bind:loading
+        title={"Genes"}
+        description={"Genes matching the current filters"}
+        perPage={10}
+        {entries}
+        total={totalPages}
+        shown={shownPages}
+      />
     </Column>
   </Row>
 </Grid>

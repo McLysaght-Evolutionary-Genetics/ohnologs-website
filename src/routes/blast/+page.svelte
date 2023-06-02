@@ -10,6 +10,8 @@
   const shownPages = 1;
   const totalPages = 1;
 
+  let loading = false;
+
   let page = 1;
   let entries: z.infer<typeof geneSchema>[] | undefined = [];
 </script>
@@ -36,6 +38,7 @@
         action="?/search"
         use:enhance={() => {
           entries = undefined;
+          loading = true;
 
           return async ({ result, form }) => {
             if (result.type === "success") {
@@ -48,6 +51,7 @@
               }
 
               entries = parsed.data;
+              loading = false;
             }
 
             await applyAction(result);
@@ -55,7 +59,11 @@
         }}
       >
         <div class="textarea-padding">
-          <TextArea labelText="gene sequence" name="sequence" />
+          <TextArea
+            labelText="Protein sequence"
+            placeholder="Paste a protein sequence to search the database with BLAST."
+            name="sequence"
+          />
         </div>
         <ButtonSet>
           <Button class="button-padding" type="submit">Search</Button>
@@ -69,18 +77,16 @@
   <!-- table -->
   <Row>
     <Column>
-      {#if entries == undefined}
-        <InlineLoading />
-      {:else}
-        <GeneTable
-          bind:page
-          title={"Genes"}
-          description={"Genes matching the current filters"}
-          {entries}
-          total={totalPages}
-          shown={shownPages}
-        />
-      {/if}
+      <GeneTable
+        bind:page
+        bind:loading
+        title={"Genes"}
+        description={"Genes matching the current filters"}
+        perPage={10}
+        {entries}
+        total={totalPages}
+        shown={shownPages}
+      />
     </Column>
   </Row>
 </Grid>

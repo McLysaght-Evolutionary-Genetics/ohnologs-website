@@ -63,3 +63,16 @@ export const findQueryOrError = (url: URL, k: string): string => {
 
   return v;
 };
+
+export const downloadFile = (name: string, content: string) => {
+  const blob = new Blob([content], { type: "text/tsv" });
+
+  const elem = window.document.createElement("a");
+  elem.href = window.URL.createObjectURL(blob);
+  elem.download = name;
+
+  document.body.appendChild(elem);
+  elem.click();
+
+  document.body.removeChild(elem);
+};

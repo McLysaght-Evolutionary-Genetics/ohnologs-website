@@ -1,11 +1,11 @@
 import { PrismaClient } from "$lib/prisma";
-import { findQueryOrError } from "$lib/util";
+import { findQueryArray, findQueryOrError } from "$lib/util";
 import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
 
 export const GET = (async ({ url }) => {
-  const query = findQueryOrError(url, "query").split(",");
+  const query = findQueryArray(url, "query") ?? [];
 
   const [count, genes] = await prisma.$transaction([
     prisma.gene.count({
@@ -68,7 +68,7 @@ export const GET = (async ({ url }) => {
     species: e.scaffold?.species.name ?? "",
     source: e.scaffold?.species.source.name ?? "",
     version: e.scaffold?.species.version ?? "",
-    completness: e.scaffold?.species.completness ?? "scaffold",
+    completeness: e.scaffold?.species.completeness ?? "scaffold",
     scaffold: e.scaffold?.name ?? "",
     // TODO: this is currently impossible to query for...
     // we need to link genes directly to scaffolds... somehow

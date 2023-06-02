@@ -211,7 +211,7 @@ export const actions = {
       species: e.scaffold?.species.name ?? "",
       source: e.scaffold?.species.source.name ?? "",
       version: e.scaffold?.species.version ?? "",
-      completness: e.scaffold?.species.completness ?? "scaffold",
+      completeness: e.scaffold?.species.completeness ?? "scaffold",
       scaffold: e.scaffold?.name ?? "",
       // TODO: this is currently impossible to query for...
       // we need to link genes directly to scaffolds... somehow

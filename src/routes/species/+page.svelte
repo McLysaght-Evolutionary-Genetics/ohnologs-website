@@ -24,6 +24,7 @@
   import { Download, Launch } from "carbon-icons-svelte";
   import type * as z from "zod";
   import type { PageData } from "./$types";
+  import SpeciesTable from "$lib/components/SpeciesTable.svelte";
 
   type SpeciesEntry = {
     id: string;
@@ -124,67 +125,27 @@
         items={sources}
       />
     </Column>
-    <Column>
-      <Checkbox disabled labelText="Exact" />
-    </Column>
   </Row>
 
   <Row>
     <Column>
       <MultiSelect bind:selectedIds={selectedStates} titleText="State" label="Select genome state..." items={states} />
     </Column>
-    <Column>
-      <Checkbox disabled labelText="Exact" />
-    </Column>
   </Row>
 
   <!-- table -->
   <Row>
     <Column>
-      <!-- TODO: style this -->
-      {#if loading}
-        <DataTableSkeleton showHeader={false} showToolbar={false} {headers} />
-
-        <SkeletonPlaceholder />
-      {:else}
-        <DataTable bind:selectedRowIds={selected} batchSelection {headers} rows={entries}>
-          <svelte:fragment slot="cell" let:row let:cell>
-            {#if cell.key === "source"}
-              <Link icon={Launch} href={""} target="_blank">{cell.value}</Link>
-            {:else}
-              {cell.value}
-            {/if}
-          </svelte:fragment>
-
-          <Toolbar>
-            <ToolbarBatchActions
-              bind:active
-              on:cancel={(e) => {
-                e.preventDefault();
-                active = false;
-              }}
-            >
-              <Button
-                icon={Download}
-                on:click={() => {
-                  alert("TODO: download");
-                }}>Download</Button
-              >
-            </ToolbarBatchActions>
-            <ToolbarContent>
-              <ToolbarSearch />
-              <ToolbarMenu>
-                <ToolbarMenuItem primaryFocus>do the thing</ToolbarMenuItem>
-                <ToolbarMenuItem>something else owo</ToolbarMenuItem>
-                <ToolbarMenuItem hasDivider danger>catch on fire</ToolbarMenuItem>
-              </ToolbarMenu>
-              <Button>rawrxd</Button>
-            </ToolbarContent>
-          </Toolbar>
-        </DataTable>
-
-        <PaginationNav bind:page total={totalPages} shown={shownPages} />
-      {/if}
+      <SpeciesTable
+        bind:page
+        bind:loading
+        title={"Species"}
+        description={"The species matching your currently selected filters are displayed below"}
+        {perPage}
+        {entries}
+        total={totalPages}
+        shown={shownPages}
+      />
     </Column>
   </Row>
 </Grid>

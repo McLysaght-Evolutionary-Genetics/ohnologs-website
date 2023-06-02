@@ -11,7 +11,7 @@ datasource db {
 // TODO: segments
 // TODO: microsynteny
 
-enum GenomeCompletnesss {
+enum GenomeCompleteness {
   chromosome
   scaffold
 }
@@ -20,9 +20,9 @@ model Species {
   id String @id @default(uuid())
 
   //
-  name        String             @unique
-  completness GenomeCompletnesss
-  version     String
+  name         String             @unique
+  completeness GenomeCompleteness @default(chromosome)
+  version      String
 
   //
   source         GenomeSource @relation(fields: [genomeSourceId], references: [id])

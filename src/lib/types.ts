@@ -1,7 +1,7 @@
 import * as z from "zod";
 
 // common
-export const genomeCompletnessSchema = z.enum(["chromosome", "scaffold"]);
+export const genomeCompletenessSchema = z.enum(["chromosome", "scaffold"]);
 
 export const stateSchema = z.object({
   id: z.string().uuid(),
@@ -21,7 +21,7 @@ export const geneSchema = z.object({
   species: z.string(),
   source: z.string(),
   version: z.string(),
-  completness: genomeCompletnessSchema,
+  completeness: genomeCompletenessSchema,
   scaffold: z.string(),
   segment: z.string(),
   labels: z.array(z.string()),
@@ -34,7 +34,7 @@ export const speciesSchema = z.object({
   state: z.string(),
   source: z.string(),
   version: z.string(),
-  completness: genomeCompletnessSchema,
+  completeness: genomeCompletenessSchema,
   scaffolds: z.number(),
   segments: z.number(),
   genes: z.number(),

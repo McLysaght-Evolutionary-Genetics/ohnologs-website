@@ -4,7 +4,6 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import type { GeneEntry } from "$lib/components/geneTable";
   import { selection } from "$lib/selection";
-  import { intoQuery } from "$lib/util";
   import { Checkbox, Column, Grid, MultiSelect, Row } from "carbon-components-svelte";
   import type { MultiSelectItem } from "carbon-components-svelte/types/MultiSelect/MultiSelect.svelte";
   import type { PageData } from "./$types";
@@ -197,7 +196,7 @@
     <Column>
       <MultiSelect
         bind:selectedIds={selectedSegmentIds}
-        disabled={!segmentSelectEnabled}
+        disabled
         titleText="Segment"
         label="Select segment..."
         items={segments}

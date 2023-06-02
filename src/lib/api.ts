@@ -67,10 +67,12 @@ export const getAllGenes = async (
 };
 
 export const getSelection = async (idents: string[]): Promise<z.infer<typeof getSelectionResponseSchema>> => {
-  const query = intoQuery({ idents });
+  const query = intoQuery({ query: idents });
 
   const res = await fetch(`/ohnologs/api/select${query}`);
   const data = await res.json();
+
+  console.log(data);
 
   const parsed = getSelectionResponseSchema.safeParse(data);
 

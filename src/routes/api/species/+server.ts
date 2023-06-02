@@ -82,7 +82,7 @@ export const GET = (async ({ url }) => {
       state: e.state.name,
       source: e.source.name,
       version: e.version,
-      completness: e.completness,
+      completeness: e.completeness,
       scaffolds: e._count.scaffolds,
       segments,
       genes,
