@@ -42,8 +42,8 @@
 
   //
   export let page = 1;
-  export let active = false;
-  export let selected: string[] = [];
+  let active = false;
+  let selected: string[] = [];
 
   //
   const shownPages = 7;

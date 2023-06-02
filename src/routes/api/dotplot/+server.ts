@@ -69,6 +69,7 @@ export const GET = (async ({ url }) => {
   // );
 
   const qGenes = queries.flatMap((e) => e.genes);
+  const sGenes: { id: string; geneId: string }[] = [];
 
   const points: Point[] = [];
 
@@ -105,11 +106,16 @@ export const GET = (async ({ url }) => {
         y,
       };
 
+      sGenes.push({
+        id: sGene.id,
+        geneId: sGene.geneId,
+      });
+
       points.push(point);
     }
   }
 
-  // const genes = [...qgenes, ...sgenes].map((e) => ({ id: e.id, geneId: e.geneId }));
+  const genes = [...qGenes, ...sGenes].map((e) => ({ id: e.id, geneId: e.geneId }));
 
-  return new Response(JSON.stringify({ qsegs, ssegs, points, genes: [] }));
+  return new Response(JSON.stringify({ qsegs, ssegs, points, genes }));
 }) satisfies RequestHandler;

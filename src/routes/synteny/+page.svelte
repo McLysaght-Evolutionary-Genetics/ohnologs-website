@@ -256,6 +256,8 @@
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);
+
+  let loading = false;
 </script>
 
 <svelte:window
@@ -369,10 +371,12 @@
   <Row>
     <Column>
       <GeneTable
-        title={"Genes"}
-        description={"Genes matching the current filters"}
+        bind:page
+        bind:loading
+        title={"Ohnologs"}
+        description={"The ohnologs matching your currently selected filters are displayed below"}
+        {perPage}
         {entries}
-        {page}
         total={totalPages}
         shown={shownPages}
       />

@@ -12,6 +12,8 @@ export const GET = (async ({ url }) => {
   const page = parseInt(findQueryOrError(url, "page")) - 1;
   const perPage = parseInt(findQueryOrError(url, "perPage"));
 
+  const geneIds = findQueryArray(url, "geneIds") ?? [];
+
   const exactLabels = findQueryOrError(url, "exactLabels") === "true";
 
   const species = findQueryArray(url, "species") ?? [];
@@ -20,11 +22,9 @@ export const GET = (async ({ url }) => {
   const sources = findQueryArray(url, "sources") ?? [];
   const labels = findQueryArray(url, "labels") ?? (exactLabels ? [] : null);
 
-  console.log(scaffolds);
-
   // TODO: remove this abomination
   // i hate it so much but it works so whatevs
-  let geneIds: string[] = [];
+  let labelGeneIds: string[] = [];
 
   if (exactLabels) {
     const raw =
@@ -32,7 +32,7 @@ export const GET = (async ({ url }) => {
 
     const parsed = partialLabelQuerySchema.parse(raw);
 
-    geneIds = parsed.map((e) => e.id);
+    labelGeneIds = parsed.map((e) => e.id);
   }
 
   // TODO: some of the exact flags are realistically useless (just make exact the default or something)
@@ -45,10 +45,18 @@ export const GET = (async ({ url }) => {
         ...(exactLabels
           ? {
               id: {
-                in: geneIds,
+                in: labelGeneIds,
               },
             }
           : {}),
+
+        ...(geneIds.length === 0
+          ? {}
+          : {
+              id: {
+                in: geneIds,
+              },
+            }),
 
         scaffold: {
           species: {
@@ -94,6 +102,14 @@ export const GET = (async ({ url }) => {
               },
             }
           : {}),
+
+        ...(geneIds.length === 0
+          ? {}
+          : {
+              id: {
+                in: geneIds,
+              },
+            }),
 
         scaffold: {
           species: {

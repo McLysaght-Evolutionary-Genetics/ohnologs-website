@@ -54,6 +54,7 @@
   //
   const updateGenes = async () => {
     const { count, data } = await getAllGenes(
+      [],
       selectedSpeciesIds,
       selectedScaffoldIds,
       selectedSegmentIds,

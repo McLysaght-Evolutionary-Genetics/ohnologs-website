@@ -34,6 +34,7 @@ export const getAllSegmentsResponseSchema = z.array(
 );
 
 export const getAllGenes = async (
+  geneIds: string[],
   species: string[],
   scaffolds: string[],
   segments: string[],
@@ -44,6 +45,7 @@ export const getAllGenes = async (
   perPage: number,
 ): Promise<z.infer<typeof getAllGenesResponseSchema>> => {
   const query = intoQuery({
+    geneIds,
     species,
     scaffolds,
     segments,
@@ -61,23 +63,6 @@ export const getAllGenes = async (
 
   if (!parsed.success) {
     throw new Error("getAllGenes - invalid gene response from api");
-  }
-
-  return parsed.data;
-};
-
-export const getSelection = async (idents: string[]): Promise<z.infer<typeof getSelectionResponseSchema>> => {
-  const query = intoQuery({ query: idents });
-
-  const res = await fetch(`/ohnologs/api/select${query}`);
-  const data = await res.json();
-
-  console.log(data);
-
-  const parsed = getSelectionResponseSchema.safeParse(data);
-
-  if (!parsed.success) {
-    throw new Error("getSelection - invalid gene response from api");
   }
 
   return parsed.data;

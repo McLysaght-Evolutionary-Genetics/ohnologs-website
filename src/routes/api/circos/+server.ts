@@ -55,8 +55,6 @@ export const GET = (async ({ url }) => {
 
   const segments: Segment[] = scaffolds.map((e) => ({ id: e.id, name: e.name, length: e.end - e.start }));
 
-  console.log(segments);
-
   const links: Link[] = [];
 
   for (const qScaf of scaffolds) {
@@ -94,18 +92,7 @@ export const GET = (async ({ url }) => {
     break;
   }
 
-  // const links: Link[] = scaffolds
-  //   .flatMap((s) =>
-  //     s.Gene.flatMap((g) =>
-  //       g.HomologyQuery.map((h) => ({
-  //         start: { id: g.id, scaffold: s.id, offset: (g.start + g.end) / 2 },
-  //         end: { id: h.subject.id, scaffold: h.subject.scaffoldId, offset: (h.subject.start + h.subject.end) / 2 },
-  //       })),
-  //     ),
-  //   )
-  //   .filter((e) => e.start.id !== e.end.id);
+  const genes = scaffolds.flatMap((s) => s.genes.map((g) => ({ id: g.id, geneId: g.geneId })));
 
-  // const genes = scaffolds.flatMap((s) => s.Gene.map((g) => ({ id: g.id, geneId: g.geneId })));
-
-  return new Response(JSON.stringify({ segments, links, genes: [] }));
+  return new Response(JSON.stringify({ segments, links, genes }));
 }) satisfies RequestHandler;

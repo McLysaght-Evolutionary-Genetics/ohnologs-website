@@ -72,7 +72,7 @@ export const actions = {
         update: {},
         create: {
           name: species,
-          completness: "chromosome",
+          completeness: "chromosome",
           version: "0",
           source: {
             connectOrCreate: {

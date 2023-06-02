@@ -11,6 +11,7 @@
   import { get } from "svelte/store";
   import type { Link, Segment } from "../api/circos/+server";
   import type { PageData } from "./$types";
+  import { getAllGenes } from "$lib/api";
 
   //
   type Scaffold = {
@@ -201,9 +202,6 @@
   $: species = data.species.map((e) => e[1]);
 
   //
-  let entries: GeneEntry[] = [];
-
-  //
   let count = 0;
 
   let page = 1;
@@ -212,6 +210,12 @@
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);
+
+  let loading = false;
+
+  //
+  let genes: GeneEntry[] = [];
+  let entries: GeneEntry[] = [];
 
   //
   let query: string;
@@ -238,8 +242,31 @@
 
     links = homologies.links;
     segments = homologies.segments;
-    entries = homologies.genes;
+    genes = homologies.genes;
+    count = homologies.genes.length;
   };
+
+  const updateTableEntries = async (geneIds: string[]) => {
+    const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+
+    entries = data;
+  };
+
+  $: (() => {
+    [genes, page];
+
+    if (!browser) {
+      return;
+    }
+
+    if (genes.length === 0) {
+      return;
+    }
+
+    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
+
+    updateTableEntries(geneIds);
+  })();
 
   $: if (browser) updateGenes(query);
 </script>
@@ -312,10 +339,12 @@
   <Row>
     <Column>
       <GeneTable
-        title={"Genes"}
-        description={"Genes matching the current filters"}
+        bind:page
+        bind:loading
+        title={"Ohnologs"}
+        description={"The ohnologs matching your currently selected filters are displayed below"}
+        {perPage}
         {entries}
-        {page}
         total={totalPages}
         shown={shownPages}
       />

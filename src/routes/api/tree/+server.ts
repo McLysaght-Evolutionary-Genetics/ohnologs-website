@@ -8,8 +8,6 @@ export const GET = (async ({ url }) => {
   const species = findQuery(url, "species");
   const protein = findQuery(url, "protein");
 
-  console.log(protein);
-
   const trees = await prisma.tree.findMany({
     where: {
       ...(species == null
@@ -36,7 +34,16 @@ export const GET = (async ({ url }) => {
             },
           }),
     },
+    include: {
+      genes: {
+        include: {
+          gene: true,
+        },
+      },
+    },
   });
 
-  return new Response(JSON.stringify({ trees }));
+  const genes = trees.flatMap((e) => e.genes).map((e) => ({ id: e.gene.id, geneId: e.gene.geneId }));
+
+  return new Response(JSON.stringify({ trees, genes }));
 }) satisfies RequestHandler;

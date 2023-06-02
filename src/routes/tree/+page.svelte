@@ -3,7 +3,10 @@
   import PhyloTree from "./PhyloTree.svelte";
   import { browser } from "$app/environment";
   import { intoQuery } from "$lib/util";
-  import { page } from "$app/stores";
+  import { page as svpage } from "$app/stores";
+  import GeneTable from "$lib/components/GeneTable.svelte";
+  import type { GeneEntry } from "$lib/components/geneTable";
+  import { getAllGenes } from "$lib/api";
 
   const dims = {
     size: {
@@ -27,7 +30,19 @@
   let species: string | null = null;
   let protein: string | null = null;
 
-  $: console.log(species);
+  //
+  let count = 0;
+
+  let page = 1;
+  let perPage = 10;
+  let shownPages = 7;
+
+  let totalPages: number;
+  $: totalPages = Math.ceil(count / perPage);
+
+  //
+  let genes: GeneEntry[] = [];
+  let entries: GeneEntry[] = [];
 
   const updateTree = async () => {
     const params: Record<string, string> = {};
@@ -44,22 +59,48 @@
 
     const res = await fetch(`/ohnologs/api/tree${query}`);
 
-    const { trees } = await res.json();
+    const { trees, genes: treeGenes } = await res.json();
 
     data = trees.map((e: any) => e.newick);
+    genes = treeGenes;
+    count = treeGenes.length;
 
     loading = false;
   };
 
+  const updateTableEntries = async (geneIds: string[]) => {
+    const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+
+    console.log(geneIds.length, count, data);
+
+    entries = data;
+  };
+
+  $: (() => {
+    [genes, page];
+
+    if (!browser) {
+      return;
+    }
+
+    if (genes.length === 0) {
+      return;
+    }
+
+    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
+
+    updateTableEntries(geneIds);
+  })();
+
   // search on initial page load
-  if ($page.url.searchParams.get("species")) {
-    species = $page.url.searchParams.get("species");
+  if ($svpage.url.searchParams.get("species")) {
+    species = $svpage.url.searchParams.get("species");
 
     loading = true;
   }
 
-  if ($page.url.searchParams.get("protein")) {
-    protein = $page.url.searchParams.get("protein");
+  if ($svpage.url.searchParams.get("protein")) {
+    protein = $svpage.url.searchParams.get("protein");
 
     loading = true;
   }
@@ -116,6 +157,22 @@
           loading = true;
         }}>Search</Button
       >
+    </Column>
+  </Row>
+
+  <!-- table -->
+  <Row>
+    <Column>
+      <GeneTable
+        bind:page
+        bind:loading
+        title={"Ohnologs"}
+        description={"The ohnologs matching your currently selected filters are displayed below"}
+        {perPage}
+        {entries}
+        total={totalPages}
+        shown={shownPages}
+      />
     </Column>
   </Row>
 </Grid>
