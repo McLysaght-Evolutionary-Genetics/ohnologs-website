@@ -88,7 +88,7 @@
   };
 
   const handleDownloadSelected = async () => {
-    const query = intoQuery({ speciesIds: selectedRowIds });
+    const query = intoQuery({ geneIds: selectedRowIds });
 
     const res = await fetch(`/ohnologs/api/download${query}`);
     const data = await res.json();

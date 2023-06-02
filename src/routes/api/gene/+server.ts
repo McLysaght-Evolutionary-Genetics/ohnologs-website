@@ -98,7 +98,7 @@ export const GET = (async ({ url }) => {
         ...(exactLabels
           ? {
               id: {
-                in: geneIds,
+                in: labelGeneIds,
               },
             }
           : {}),
