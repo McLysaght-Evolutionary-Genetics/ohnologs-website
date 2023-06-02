@@ -50,6 +50,8 @@
   });
 
   const handleSelect = ({ detail: { selected, row } }: CustomEvent<{ selected: boolean; row: DataTableRow }>) => {
+    console.log("a");
+
     const current = get(selection);
 
     if (selected) {
@@ -63,6 +65,10 @@
 
       selection.set([...current.slice(0, idx), ...current.slice(idx + 1)]);
     }
+  };
+
+  const handleCancel = () => {
+    selection.set([]);
   };
 
   const handleDownloadAll = async () => {
@@ -127,7 +133,7 @@
           <ToolbarContent>
             <Button disabled={entries.length === 0} icon={Download} on:click={handleDownloadAll}>Download</Button>
           </ToolbarContent>
-          <ToolbarBatchActions>
+          <ToolbarBatchActions on:cancel={handleCancel}>
             <Button icon={Download} on:click={handleDownloadSelected}>Download</Button>
           </ToolbarBatchActions>
         </Toolbar>

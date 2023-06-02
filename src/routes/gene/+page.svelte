@@ -126,34 +126,6 @@
     updateGenes();
   }
 
-  // TODO: premade download files with common selections?
-  // TODO: species listing page quick filter links/download buttons - same for gene page, a jump to species link
-  // TODO: specify which cols to export? - this is extra!!!
-  // const handleDownload = async (all: boolean) => {
-  //   const query = intoQuery({ all });
-  //   const genes: string[] = selected;
-
-  //   const res = await fetch(`/api/genes${query}`, { method: "POST", body: JSON.stringify({ genes }) });
-  //   const data = await res.json();
-
-  //   const header = "#id\n";
-  //   const items: string = data.genes.map((e: unknown) => `${e.id}`).join("\n");
-
-  //   const content = `${header}${items}`;
-
-  //   const tsv = new Blob([content], { type: "text/tsv" });
-  //   const name = `ohnologs-${Date.now()}.tsv`;
-  //   const url = URL.createObjectURL(tsv);
-
-  //   const a = window.document.createElement("a");
-  //   a.href = url;
-  //   a.target = "_blank";
-  //   a.download = name;
-  //   a.click();
-
-  //   return;
-  // };
-
   //
   selection.subscribe((e) => {
     console.log("selected:", e);
