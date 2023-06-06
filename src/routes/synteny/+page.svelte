@@ -302,12 +302,20 @@
   <Row>
     <Column>
       <p class="paragraph"><u><h3>Info:</h3></u></p>
-
       <br />
-
-      <li>The diagram can be moved around by holding down and moving the image with a mouse.</li>
+      <li>
+        The plot shows a block of conserved micro-synteny: Chromosomes are represented by horizontal lines. Genes are
+        displayed as coloured boxes. The direction of each gene is shows above.
+      </li>
       <br />
-      <li>The image can be enlarged and shrunk by first clicking the image then scrolling up or down on a mouse.</li>
+      <li>The plot can be moved by dragging it with your mouse. It can also be resized by using your scroll wheel.</li>
+      <br />
+      <li style="font-style: italic">
+        <span style="background-color: tomato">This page is in early development.</span> Anything on this page is meant only
+        as a demonstration. Any feedback, such as ways to make it more user-friendly or feature requests would be highly
+        appreciated!
+      </li>
+      <br />
     </Column>
   </Row>
 

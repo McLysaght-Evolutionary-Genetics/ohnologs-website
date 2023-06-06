@@ -119,14 +119,21 @@
   <div>
     <p class="paragraph"><u><h3>Info:</h3></u></p>
     <br />
-    <li>Selecting a genome/genomes in the table allows you to download the data available.</li>
-    <br />
-    <li>Clicking 'cancel' removes the genes you have selected for the table.</li>
+    <li>
+      You can use the dropdown menus below to filter species according to your needs - any species matching your filters
+      will be displayed in the table below.
+    </li>
     <br />
     <li>
-      Clicking the magnifying glass icon (towards the right hand side of the page) allows you to search for a specific
-      genome.
+      All species data can be downloaded by clicking the download button above the table. Alternatively, individual
+      species data can be downloaded by selecting the relevant rows.
     </li>
+    <br />
+    <li style="font-style: italic">
+      <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find. Any
+      feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+    </li>
+    <br />
   </div>
 
   <!-- filters -->

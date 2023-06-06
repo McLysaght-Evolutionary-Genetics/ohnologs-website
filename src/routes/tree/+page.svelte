@@ -123,25 +123,27 @@
 
 <!-- <svg width={dims.size.width} height={dims.size.height}> -->
 <!-- <g transform="translate({dims.margin.left},{dims.margin.top})"> -->
-<!--  -->
 
 <Grid padding>
   <Row>
     <Column>
       <p class="paragraph"><u><h3>Info:</h3></u></p>
-
-      <li>
-        If you hover over any particular branch on the tree you can click it which highlights it in red. Clicking that
-        same branch again removes the highlighting.
-      </li>
-
       <br />
-
       <li>
-        You can highlight multiple parts of the tree in blue, dotted lines by clicking and dragging the screen (on a
-        part other than a branch). This box can then be dragged around the screen which will highlight other parts of
-        the tree. Right clicking then left clicking removes the blue highlighting.
+        You can enter a protein name into the textbox below to display the gene tree that it is part of. Clicking the
+        search button will display the tree.
       </li>
+      <br />
+      <li>
+        This page is a work in progress. Any feedback, such as ways to make it more user-friendly or feature requests
+        would be highly appreciated!
+      </li>
+      <br />
+      <li style="font-style: italic">
+        <span style="background-color: orange">This page is in development.</span> Not all planned features are present.
+        Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+      </li>
+      <br />
     </Column>
   </Row>
 

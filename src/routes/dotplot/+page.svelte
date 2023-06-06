@@ -28,13 +28,13 @@
   // data
   const dims = {
     size: {
-      width: 900 * 1.5,
-      height: 720 * 1.5,
+      width: 900 * 1.3,
+      height: 720 * 1.3,
     },
     margin: {
       top: 20,
       right: 20,
-      bottom: 20,
+      bottom: 60,
       left: 180,
     },
   };
@@ -454,18 +454,31 @@
   <Row>
     <Column>
       <p class="paragraph"><u><h3>Info:</h3></u></p>
-
       <br />
       <li>
-        To generate a dotplot you must select a species in both the 'Query species' box and 'Subject species' box. Note
-        that you can select the same species in both boxes.
+        You can select the query and subject species to display in the plot using the dropdown menus below. Selecting
+        both species will display a dot plot.
       </li>
       <br />
       <li>
-        If a dotplot was generated using two different species, the table below will show data which can be downloaded.
+        <span style="color: blue">Blue</span> dots represent orthologs. <span style="color: red">Red</span> dots represent
+        orthologs that are currently in your selection.
       </li>
       <br />
-      <li>Clicking 'cancel' removes the genes you have selected for the table.</li>
+      <li>
+        Ohnologs can be selected either graphically by right clicking anywhere on the plot, or using the table below.
+      </li>
+      <br />
+      <li>
+        All plot data can be downloaded by clicking the download button above the table. Alternatively, individual
+        ohnologs can be downloaded by selecting the relevant rows.
+      </li>
+      <br />
+      <li style="font-style: italic">
+        <span style="background-color: yellow">This page is in development.</span> Most planned features should be present.
+        Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+      </li>
+      <br />
     </Column>
   </Row>
 
@@ -507,18 +520,25 @@
                 {/each}
               </g>
               <g>
-                {#each vlabels as [label, cum, len]}
-                  <text
-                    x={scale.x(cum)}
-                    dx={-scale.x(len / 2)}
-                    y={innerHeight}
-                    text-anchor="middle"
-                    dominant-baseline="hanging"
-                    pointer-events="none"
+                <g>
+                  {#each vlabels as [label, cum, len]}
+                    <text
+                      x={scale.x(cum)}
+                      dx={-scale.x(len / 2)}
+                      y={innerHeight}
+                      text-anchor="middle"
+                      dominant-baseline="hanging"
+                      pointer-events="none"
+                    >
+                      {label}
+                    </text>
+                  {/each}
+                </g>
+                <g>
+                  <text x={(dims.size.width - dims.margin.left) / 2} y={dims.size.height - 25} font-size="large"
+                    >{query}</text
                   >
-                    {label}
-                  </text>
-                {/each}
+                </g>
               </g>
               <g>
                 {#each hlines as y}
@@ -526,17 +546,27 @@
                 {/each}
               </g>
               <g>
-                {#each hlabels as [label, cum, len]}
+                <g>
+                  {#each hlabels as [label, cum, len]}
+                    <text
+                      y={scale.y(cum)}
+                      dy={innerHeight - scale.y(len / 2)}
+                      text-anchor="end"
+                      dominant-baseline="middle"
+                      pointer-events="none"
+                    >
+                      {label}
+                    </text>
+                  {/each}
+                </g>
+                <g>
                   <text
-                    y={scale.y(cum)}
-                    dy={innerHeight - scale.y(len / 2)}
-                    text-anchor="end"
-                    dominant-baseline="middle"
-                    pointer-events="none"
+                    x={-50}
+                    y={(dims.size.height - dims.margin.top) / 2}
+                    transform="rotate(-90, {-50}, {(dims.size.height - dims.margin.top) / 2})"
+                    font-size="large">{subject}</text
                   >
-                    {label}
-                  </text>
-                {/each}
+                </g>
               </g>
               <g>
                 {#each ppos as [x, y, c]}

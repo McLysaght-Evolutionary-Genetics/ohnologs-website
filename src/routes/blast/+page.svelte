@@ -22,10 +22,19 @@
     <Column>
       <div>
         <p class="paragraph"><u><h3>Info:</h3></u></p>
-
-        <p>
-          1) By clicking into the box under 'gene sequence' you can type in and search for a specific gene sequence.
-        </p>
+        <br />
+        <li>
+          You can search the database using BLAST - any ohnologs matching your search query will be displayed in the
+          table below.
+        </li>
+        <br />
+        <li>The query should be entered into the text box below in FASTA format - header followed by sequence.</li>
+        <br />
+        <li style="font-style: italic">
+          <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find.
+          Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+        </li>
+        <br />
       </div>
     </Column>
   </Row>

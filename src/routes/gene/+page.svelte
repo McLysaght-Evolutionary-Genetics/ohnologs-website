@@ -152,11 +152,20 @@
     <p class="paragraph"><u><h3>Info:</h3></u></p>
     <br />
     <li>
-      To find specific genes and proteins start by selecting your species of choice then move on to scaffold,
-      segmentation, etc.
+      You can use the dropdown menus below to filter ohnologs according to your needs - any ohnologs matching your
+      filters will be displayed in the table below.
     </li>
     <br />
-    <li>It is not necessary to select options in all the boxes but it refines what you are searching for.</li>
+    <li>
+      All ohnolog data can be downloaded by clicking the download button above the table. Alternatively, individual
+      ohnolog data can be downloaded by selecting the relevant rows.
+    </li>
+    <br />
+    <li style="font-style: italic">
+      <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find. Any
+      feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+    </li>
+    <br />
   </div>
 
   <!-- filters -->

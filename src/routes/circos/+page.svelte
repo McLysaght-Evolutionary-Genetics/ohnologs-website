@@ -22,8 +22,8 @@
   //
   const dims = {
     size: {
-      width: 900 * 1.5,
-      height: 720 * 1.5,
+      width: 900 * 1.3,
+      height: 720 * 1.3,
     },
     margin: {
       top: 20,
@@ -77,7 +77,7 @@
   }
 
   //
-  const innerRadius = 240 * 2;
+  const innerRadius = 240 * 1.7;
   const radiusPadding = 5;
   const outerRadius = innerRadius + radiusPadding;
 
@@ -85,6 +85,7 @@
   $: totalScaffoldLength = segments.reduce((a, c) => a + c.length, 0);
 
   let arcs: {
+    name: string;
     innerRadius: number;
     outerRadius: number;
     startAngle: number;
@@ -97,6 +98,7 @@
     const end = (s.length / totalScaffoldLength) * (Math.PI * 2 - padding * segments.length);
 
     arcs.push({
+      name: s.name,
       innerRadius,
       outerRadius,
       startAngle: start,
@@ -289,25 +291,28 @@
   <Row>
     <Column>
       <p class="paragraph"><u><h3>Info:</h3></u></p>
-
       <br />
-
       <li>
-        Using the 'Query Species' box allows you to select a species that will be used for creating a circos plot.
+        You can select the species to display in the plot using the dropdown menu below. Selecting a species will
+        display a circos plot.
       </li>
       <br />
       <li>
-        Once a species has been selected, you are able to select specific genes you wish to see on the circos plot.
+        <span style="color: red">Red</span> arcs represent chromosomes. <span style="color: blue">Blue</span>
+        connections highlight paralogy relationships. <span style="color: green">Green</span> lines show paralogs that are
+        currently in your selection - ohnologs can be selected using the table below.
       </li>
-      <br />
-      <li>The green line(s) is a gene that you have selected for the plot.</li>
-      <br />
-      <li>Clicking 'cancel' removes the options you have selected from the table.</li>
       <br />
       <li>
-        CLicking 'download' downloads all the data from the table. If you wish to only download certain data, select the
-        gene(s) of choice and then click 'download.'
+        All plot data can be downloaded by clicking the download button above the table. Alternatively, individual
+        ohnologs can be downloaded by selecting the relevant rows.
       </li>
+      <br />
+      <li style="font-style: italic">
+        <span style="background-color: yellow">This page is in development.</span> Most planned features should be present.
+        Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+      </li>
+      <br />
     </Column>
   </Row>
 
@@ -317,19 +322,32 @@
       <Column>
         <svg width={dims.size.width} height={dims.size.height}>
           <g transform="translate({dims.margin.left},{dims.margin.top})">
-            {#each arcs as params}
-              <path d={d3.arc()(params)} fill="#ff594f" transform="translate({innerWidth / 2},{innerHeight / 2})" />
-            {/each}
-
-            {#each lines as [d, colour]}
-              <path
-                {d}
-                fill={colour}
-                stroke={colour}
-                stroke-width={0.000001}
-                transform="translate({innerWidth / 2},{innerHeight / 2})"
-              />
-            {/each}
+            <g>
+              {#each arcs as { name, innerRadius, outerRadius, startAngle, endAngle }}
+                <g
+                  transform="translate({Math.sin((startAngle + endAngle) / 2) * (outerRadius + 30) +
+                    innerWidth / 2}, {-Math.cos((startAngle + endAngle) / 2) * (outerRadius + 30) + innerHeight / 2})"
+                >
+                  <text text-anchor="middle">{name}</text>
+                </g>
+                <path
+                  d={d3.arc()({ innerRadius, outerRadius, startAngle, endAngle })}
+                  fill="#ff594f"
+                  transform="translate({innerWidth / 2},{innerHeight / 2})"
+                />
+              {/each}
+            </g>
+            <g>
+              {#each lines as [d, colour]}
+                <path
+                  {d}
+                  fill={colour}
+                  stroke={colour}
+                  stroke-width={0.000001}
+                  transform="translate({innerWidth / 2},{innerHeight / 2})"
+                />
+              {/each}
+            </g>
           </g>
         </svg>
       </Column>

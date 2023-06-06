@@ -351,11 +351,17 @@
   <Row>
     <Column>
       <p class="paragraph"><u><h3>Info:</h3></u></p>
-
       <br />
-      <li>Clicking the 'drag and drop' allows you to upload your own files to the site</li>
+      <li>
+        You can search the database by providing FASTA files, gene tables, or gene lists - any ohnologs matching your
+        search query will be displayed in the table below.
+      </li>
       <br />
-      <li>You can search for specific genes or proteins by clicking into the box under 'selection.</li>
+      <li style="font-style: italic">
+        <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find. Any
+        feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
+      </li>
+      <br />
     </Column>
   </Row>
 
