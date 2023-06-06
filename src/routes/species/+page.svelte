@@ -86,8 +86,22 @@
   };
 
   //
+  const resetPage = () => {
+    if (page === 1) {
+      loading = true;
+    }
+
+    page = 1;
+  };
+
   $: (() => {
-    [page, selectedSources, selectedStates];
+    [selectedSources, selectedStates];
+
+    resetPage();
+  })();
+
+  $: (() => {
+    [page];
 
     loading = true;
   })();

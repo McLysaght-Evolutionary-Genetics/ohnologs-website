@@ -416,23 +416,36 @@
     const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
 
     entries = data;
+
+    loading = false;
+  };
+
+  //
+  const resetPage = () => {
+    if (page === 1) {
+      loading = true;
+    }
+
+    page = 1;
   };
 
   $: (() => {
-    [genes, page];
+    [genes];
 
-    if (!browser) {
-      return;
-    }
+    resetPage();
+  })();
 
-    if (genes.length === 0) {
-      return;
-    }
+  $: (() => {
+    [page];
 
+    loading = true;
+  })();
+
+  $: if (browser && loading && genes.length > 0) {
     const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
 
     updateTableEntries(geneIds);
-  })();
+  }
 
   $: if (browser) updateGenes(query, subject);
 </script>
@@ -569,21 +582,24 @@
       </Select>
     </Column>
   </Row>
+
   <!-- table -->
-  <Row>
-    <Column>
-      <GeneTable
-        bind:page
-        bind:loading
-        title={"Ohnologs"}
-        description={"The ohnologs matching your currently selected filters are displayed below"}
-        {perPage}
-        {entries}
-        total={totalPages}
-        shown={shownPages}
-      />
-    </Column>
-  </Row>
+  {#if query != null && subject != null && query !== "none" && subject !== "none"}
+    <Row>
+      <Column>
+        <GeneTable
+          bind:page
+          bind:loading
+          title={"Ohnologs"}
+          description={"The ohnologs matching your currently selected filters are displayed below"}
+          {perPage}
+          {entries}
+          total={totalPages}
+          shown={shownPages}
+        />
+      </Column>
+    </Row>
+  {/if}
 </Grid>
 
 <ContextMenu bind:open={ctxOpen} on:close={handleContextClose}>

@@ -26,7 +26,9 @@
 
   let data: string[] = [];
 
-  let loading = false;
+  let loadingTable = false;
+  let loadingTree = false;
+
   let species: string | null = null;
   let protein: string | null = null;
 
@@ -39,6 +41,15 @@
 
   let totalPages: number;
   $: totalPages = Math.ceil(count / perPage);
+
+  // search on initial page load
+  if ($svpage.url.searchParams.get("species")) {
+    species = $svpage.url.searchParams.get("species");
+  }
+
+  if ($svpage.url.searchParams.get("protein")) {
+    protein = $svpage.url.searchParams.get("protein");
+  }
 
   //
   let genes: GeneEntry[] = [];
@@ -65,52 +76,49 @@
     genes = treeGenes;
     count = treeGenes.length;
 
-    loading = false;
+    loadingTree = false;
+    loadingTable = true;
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
     const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
 
-    console.log(geneIds.length, count, data);
-
     entries = data;
+
+    loadingTable = false;
+  };
+
+  //
+  const resetPage = () => {
+    page = 1;
   };
 
   $: (() => {
-    [genes, page];
+    [genes];
 
-    if (!browser) {
-      return;
-    }
-
-    if (genes.length === 0) {
-      return;
-    }
-
-    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
-
-    updateTableEntries(geneIds);
+    resetPage();
   })();
 
-  // search on initial page load
-  if ($svpage.url.searchParams.get("species")) {
-    species = $svpage.url.searchParams.get("species");
+  $: (() => {
+    [page];
 
-    loading = true;
-  }
+    loadingTable = true;
+  })();
 
-  if ($svpage.url.searchParams.get("protein")) {
-    protein = $svpage.url.searchParams.get("protein");
-
-    loading = true;
-  }
-
-  // search on user input
-  $: if (browser && loading) {
+  $: if (browser && loadingTree) {
     updateTree();
   }
 
-  $: console.log("a", loading);
+  $: if (browser && loadingTable && genes.length > 0) {
+    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
+
+    updateTableEntries(geneIds);
+  }
+
+  // search on user input
+  $: if (browser) {
+    loadingTree = true;
+  }
 </script>
 
 <!-- <svg width={dims.size.width} height={dims.size.height}> -->
@@ -137,44 +145,46 @@
     </Column>
   </Row>
 
-  {#if !loading && data.length !== 0}
+  {#if !loadingTree}
     <Row>
       <Column>
-        <PhyloTree newick={data[0]} />
+        <PhyloTree bind:loading={loadingTree} newick={data[0]} />
       </Column>
     </Row>
   {/if}
 
   <Row>
     <Column>
-      <TextInput bind:value={species} labelText="Species" />
+      <!-- <TextInput bind:value={species} labelText="Species" /> -->
       <TextInput bind:value={protein} labelText="Protein" />
 
       <br />
 
       <Button
         on:click={() => {
-          loading = true;
+          loadingTree = true;
         }}>Search</Button
       >
     </Column>
   </Row>
 
   <!-- table -->
-  <Row>
-    <Column>
-      <GeneTable
-        bind:page
-        bind:loading
-        title={"Ohnologs"}
-        description={"The ohnologs matching your currently selected filters are displayed below"}
-        {perPage}
-        {entries}
-        total={totalPages}
-        shown={shownPages}
-      />
-    </Column>
-  </Row>
+  {#if (species != null && species !== "") || (protein != null && protein !== "")}
+    <Row>
+      <Column>
+        <GeneTable
+          bind:page
+          bind:loading={loadingTable}
+          title={"Ohnologs"}
+          description={"The ohnologs matching your currently selected filters are displayed below"}
+          {perPage}
+          {entries}
+          total={totalPages}
+          shown={shownPages}
+        />
+      </Column>
+    </Row>
+  {/if}
 </Grid>
 
 <style>

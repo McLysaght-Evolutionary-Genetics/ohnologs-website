@@ -24,6 +24,7 @@
   $: totalPages = Math.ceil(total / perPage);
 
   let loading = true;
+  let reset = false;
   let entries: GeneEntry[] = [];
 
   //
@@ -84,9 +85,16 @@
   };
 
   //
+  const resetPage = () => {
+    if (page === 1) {
+      loading = true;
+    }
+
+    page = 1;
+  };
+
   $: (() => {
     [
-      page,
       exactSpecies,
       exactSources,
       exactLabels,
@@ -98,6 +106,12 @@
       selectedScaffoldIds,
       selectedSegmentIds,
     ];
+
+    resetPage();
+  })();
+
+  $: (() => {
+    [page];
 
     loading = true;
   })();

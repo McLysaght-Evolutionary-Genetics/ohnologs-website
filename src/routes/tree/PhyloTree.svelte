@@ -6,6 +6,7 @@
 
   import "./phylotree.css";
   import { Paragraph } from "carbon-icons-svelte";
+  import { browser } from "$app/environment";
 
   // const
   const dims = {
@@ -23,6 +24,7 @@
 
   // params
   export let newick: string;
+  export let loading = false;
 
   //
   let container: HTMLElement;
@@ -45,6 +47,14 @@
       container.appendChild(svg);
     }
   });
+
+  // $: if (loading) {
+  //   updateTree();
+
+  //   console.log(newick);
+
+  //   loading = false;
+  // }
 </script>
 
 <div bind:this={container} />
