@@ -25,7 +25,7 @@
   const dims = {
     size: {
       width: 900 * 1.3,
-      height: 720 * 1.3,
+      height: 720 * 1.4,
     },
     margin: {
       top: 20,
@@ -301,8 +301,6 @@
 
   $: {
     if (canvas != null) {
-      console.log("update");
-
       const fragment = document.createDocumentFragment();
 
       if (g != null) {
@@ -311,8 +309,6 @@
 
       g = document.createElementNS("http://www.w3.org/2000/svg", "g");
       canvas.appendChild(g);
-
-      console.log(lines.length);
 
       for (const [d, colour, scaffoldId] of lines) {
         const c = scaffoldId === selectedChromosome ? colour : "#bdccff22";
@@ -364,45 +360,47 @@
 
   <!-- figure -->
   {#if query != null && query != "none"}
-    <Row>
-      <Column>
-        <svg width={dims.size.width} height={dims.size.height}>
-          <g transform="translate({dims.margin.left},{dims.margin.top})">
-            <g>
-              {#each arcs as { scaffoldId, scaffoldName, innerRadius, outerRadius, startAngle, endAngle }}
-                <g transform="translate({innerWidth / 2},{innerHeight / 2})">
-                  <polygon
-                    on:mouseenter={() => {
-                      selectedChromosome = scaffoldId;
-                    }}
-                    on:mouseleave={() => {
-                      selectedChromosome = null;
-                    }}
-                    points="{Math.sin(startAngle - padding / 2) * innerRadius},{-Math.cos(startAngle - padding / 2) *
-                      innerRadius} {Math.sin(endAngle + padding / 2) * innerRadius},{-Math.cos(endAngle + padding / 2) *
-                      innerRadius} {Math.sin(endAngle) * (innerRadius + 100)},{-Math.cos(endAngle) *
-                      (innerRadius + 100)} {Math.sin(startAngle) * (innerRadius + 100)},{-Math.cos(startAngle) *
-                      (innerRadius + 100)}"
-                  />
-                </g>
-                <g
-                  transform="translate({Math.sin((startAngle + endAngle) / 2) * (outerRadius + 30) +
-                    innerWidth / 2}, {-Math.cos((startAngle + endAngle) / 2) * (outerRadius + 30) + innerHeight / 2})"
-                >
-                  <text text-anchor="middle" pointer-events="none">{scaffoldName}</text>
-                </g>
-                <g>
-                  <path
-                    d={d3.arc()({ innerRadius, outerRadius, startAngle, endAngle })}
-                    fill="#ff594f"
-                    transform="translate({innerWidth / 2},{innerHeight / 2})"
-                    pointer-events="none"
-                  />
-                </g>
-              {/each}
-            </g>
-            <g bind:this={canvas} transform="translate({innerWidth / 2},{innerHeight / 2})">
-              <!-- {#each lines as [d, colour, scaffoldId]}
+    <div class="plot">
+      <!-- <Row>
+      <Column> -->
+      <svg width={dims.size.width} height={dims.size.height}>
+        <g transform="translate({dims.margin.left},{dims.margin.top})">
+          <g>
+            {#each arcs as { scaffoldId, scaffoldName, innerRadius, outerRadius, startAngle, endAngle }}
+              <g transform="translate({innerWidth / 2},{innerHeight / 2})">
+                <polygon
+                  on:mouseenter={() => {
+                    selectedChromosome = scaffoldId;
+                  }}
+                  on:mouseleave={() => {
+                    selectedChromosome = null;
+                  }}
+                  points="{Math.sin(startAngle - padding / 2) * innerRadius},{-Math.cos(startAngle - padding / 2) *
+                    innerRadius} {Math.sin(endAngle + padding / 2) * innerRadius},{-Math.cos(endAngle + padding / 2) *
+                    innerRadius} {Math.sin(endAngle) * (innerRadius + 100)},{-Math.cos(endAngle) *
+                    (innerRadius + 100)} {Math.sin(startAngle) * (innerRadius + 100)},{-Math.cos(startAngle) *
+                    (innerRadius + 100)}"
+                  fill="#fff0f0"
+                />
+              </g>
+              <g
+                transform="translate({Math.sin((startAngle + endAngle) / 2) * (outerRadius + 30) +
+                  innerWidth / 2}, {-Math.cos((startAngle + endAngle) / 2) * (outerRadius + 30) + innerHeight / 2})"
+              >
+                <text text-anchor="middle" pointer-events="none">{scaffoldName}</text>
+              </g>
+              <g>
+                <path
+                  d={d3.arc()({ innerRadius, outerRadius, startAngle, endAngle })}
+                  fill="#ff594f"
+                  transform="translate({innerWidth / 2},{innerHeight / 2})"
+                  pointer-events="none"
+                />
+              </g>
+            {/each}
+          </g>
+          <g bind:this={canvas} transform="translate({innerWidth / 2},{innerHeight / 2})">
+            <!-- {#each lines as [d, colour, scaffoldId]}
                 {#if selectedChromosome != null && scaffoldId != selectedChromosome}
                   <path
                     {d}
@@ -424,12 +422,13 @@
                 {/if}
               {/each} -->
 
-              <!-- <text>wtf</text> -->
-            </g>
+            <!-- <text>wtf</text> -->
           </g>
-        </svg>
-      </Column>
-    </Row>
+        </g>
+      </svg>
+      <!-- </Column>
+    </Row> -->
+    </div>
   {/if}
 
   <!-- options -->
@@ -465,6 +464,11 @@
 </Grid>
 
 <style lang="scss">
+  .plot {
+    display: flex;
+    justify-content: center;
+  }
+
   .paragraph {
     color: navy;
   }

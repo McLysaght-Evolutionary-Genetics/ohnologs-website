@@ -19,7 +19,6 @@
     ChartScatter,
     CircleDash,
     Data_2,
-    Fade,
     Home,
     LetterGg,
     LetterSs,
@@ -78,3 +77,29 @@
 <Content>
   <slot />
 </Content>
+
+<footer>
+  <div>
+    <p>
+      2023 Lukasz Niezabitowski @ McLysaght lab. I make code things on
+      <a href="https:/github.com/Dragon1320">GitHub</a>.
+    </p>
+  </div>
+</footer>
+
+<style>
+  footer {
+    position: relative;
+    width: 100%;
+    height: 4rem;
+    left: 0;
+    bottom: 0;
+    background-color: #cccccc;
+    color: black;
+    text-align: center;
+  }
+
+  footer > div {
+    padding-top: 1rem;
+  }
+</style>
