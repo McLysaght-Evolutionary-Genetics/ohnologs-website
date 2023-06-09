@@ -45,10 +45,14 @@
   // search on initial page load
   if ($svpage.url.searchParams.get("species")) {
     species = $svpage.url.searchParams.get("species");
+
+    loadingTree = true;
   }
 
   if ($svpage.url.searchParams.get("protein")) {
     protein = $svpage.url.searchParams.get("protein");
+
+    loadingTree = true;
   }
 
   //
@@ -115,10 +119,10 @@
     updateTableEntries(geneIds);
   }
 
-  // search on user input
-  $: if (browser) {
-    loadingTree = true;
-  }
+  // // search on user input
+  // $: if (browser) {
+  //   loadingTree = true;
+  // }
 </script>
 
 <!-- <svg width={dims.size.width} height={dims.size.height}> -->
@@ -147,7 +151,7 @@
     </Column>
   </Row>
 
-  {#if !loadingTree}
+  {#if !loadingTree && data.length > 0}
     <Row>
       <Column>
         <PhyloTree bind:loading={loadingTree} newick={data[0]} />

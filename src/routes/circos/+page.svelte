@@ -12,6 +12,8 @@
   import type { Link, Segment } from "../api/circos/+server";
   import type { PageData } from "./$types";
   import { getAllGenes } from "$lib/api";
+  import c from "tinycolor2";
+  import { onMount } from "svelte";
 
   //
   type Scaffold = {
@@ -85,7 +87,8 @@
   $: totalScaffoldLength = segments.reduce((a, c) => a + c.length, 0);
 
   let arcs: {
-    name: string;
+    scaffoldId: string;
+    scaffoldName: string;
     innerRadius: number;
     outerRadius: number;
     startAngle: number;
@@ -98,7 +101,8 @@
     const end = (s.length / totalScaffoldLength) * (Math.PI * 2 - padding * segments.length);
 
     arcs.push({
-      name: s.name,
+      scaffoldId: s.id,
+      scaffoldName: s.name,
       innerRadius,
       outerRadius,
       startAngle: start,
@@ -168,33 +172,37 @@
   // console.log(px, py);
 
   //
-  let lines: [string, string][] = [];
+  let lines: [string, string, string][] = [];
 
   const ribbon = d3.ribbon();
 
-  $: for (const link of links) {
-    //
-    let colour = "#0000ff";
+  $: {
+    lines = [];
 
-    let selectedIds = current.map((e) => e.id);
+    for (const link of links) {
+      //
+      let colour = "#0000ff";
 
-    if (selectedIds.includes(link.start.id) || selectedIds.includes(link.end.id)) {
-      colour = "#00ff00";
+      let selectedIds = current.map((e) => e.id);
+
+      if (selectedIds.includes(link.start.id) || selectedIds.includes(link.end.id)) {
+        colour = "#00ff00";
+      }
+
+      //
+      const r1 = geneToCircRad(link.start.scaffold, link.start.offset);
+      const r2 = geneToCircRad(link.end.scaffold, link.end.offset);
+
+      const d = ribbon({
+        source: { startAngle: r1, endAngle: r1 + 0.001, radius: innerRadius },
+        target: { startAngle: r2, endAngle: r2 + 0.001, radius: innerRadius },
+      }) as unknown as string;
+
+      lines.push([d, colour, link.start.scaffold]);
+
+      // // pls no hit me daddy svelte
+      // lines = lines;
     }
-
-    //
-    const r1 = geneToCircRad(link.start.scaffold, link.start.offset);
-    const r2 = geneToCircRad(link.end.scaffold, link.end.offset);
-
-    const d = ribbon({
-      source: { startAngle: r1, endAngle: r1 + 0.001, radius: innerRadius },
-      target: { startAngle: r2, endAngle: r2 + 0.001, radius: innerRadius },
-    }) as unknown as string;
-
-    lines.push([d, colour]);
-
-    // pls no hit me daddy svelte
-    lines = lines;
   }
 
   // species select + gene table
@@ -214,6 +222,9 @@
   $: totalPages = Math.ceil(count / perPage);
 
   let loading = false;
+
+  //
+  let selectedChromosome: string | null = null;
 
   //
   let genes: GeneEntry[] = [];
@@ -284,6 +295,41 @@
   }
 
   $: if (browser) updateGenes(query);
+
+  let canvas: SVGElement;
+  let g: SVGElement;
+
+  $: {
+    if (canvas != null) {
+      console.log("update");
+
+      const fragment = document.createDocumentFragment();
+
+      if (g != null) {
+        canvas.removeChild(g);
+      }
+
+      g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+      canvas.appendChild(g);
+
+      console.log(lines.length);
+
+      for (const [d, colour, scaffoldId] of lines) {
+        const c = scaffoldId === selectedChromosome ? colour : "#bdccff22";
+
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", d);
+        path.setAttribute("fill", c);
+        path.setAttribute("stroke", c);
+        path.setAttribute("stroke-width", "0.000001");
+        path.setAttribute("pointer-events", "none");
+
+        fragment.appendChild(path);
+      }
+
+      g.appendChild(fragment);
+    }
+  }
 </script>
 
 <Grid padding>
@@ -323,30 +369,62 @@
         <svg width={dims.size.width} height={dims.size.height}>
           <g transform="translate({dims.margin.left},{dims.margin.top})">
             <g>
-              {#each arcs as { name, innerRadius, outerRadius, startAngle, endAngle }}
+              {#each arcs as { scaffoldId, scaffoldName, innerRadius, outerRadius, startAngle, endAngle }}
+                <g transform="translate({innerWidth / 2},{innerHeight / 2})">
+                  <polygon
+                    on:mouseenter={() => {
+                      selectedChromosome = scaffoldId;
+                    }}
+                    on:mouseleave={() => {
+                      selectedChromosome = null;
+                    }}
+                    points="{Math.sin(startAngle - padding / 2) * innerRadius},{-Math.cos(startAngle - padding / 2) *
+                      innerRadius} {Math.sin(endAngle + padding / 2) * innerRadius},{-Math.cos(endAngle + padding / 2) *
+                      innerRadius} {Math.sin(endAngle) * (innerRadius + 100)},{-Math.cos(endAngle) *
+                      (innerRadius + 100)} {Math.sin(startAngle) * (innerRadius + 100)},{-Math.cos(startAngle) *
+                      (innerRadius + 100)}"
+                  />
+                </g>
                 <g
                   transform="translate({Math.sin((startAngle + endAngle) / 2) * (outerRadius + 30) +
                     innerWidth / 2}, {-Math.cos((startAngle + endAngle) / 2) * (outerRadius + 30) + innerHeight / 2})"
                 >
-                  <text text-anchor="middle">{name}</text>
+                  <text text-anchor="middle" pointer-events="none">{scaffoldName}</text>
                 </g>
-                <path
-                  d={d3.arc()({ innerRadius, outerRadius, startAngle, endAngle })}
-                  fill="#ff594f"
-                  transform="translate({innerWidth / 2},{innerHeight / 2})"
-                />
+                <g>
+                  <path
+                    d={d3.arc()({ innerRadius, outerRadius, startAngle, endAngle })}
+                    fill="#ff594f"
+                    transform="translate({innerWidth / 2},{innerHeight / 2})"
+                    pointer-events="none"
+                  />
+                </g>
               {/each}
             </g>
-            <g>
-              {#each lines as [d, colour]}
-                <path
-                  {d}
-                  fill={colour}
-                  stroke={colour}
-                  stroke-width={0.000001}
-                  transform="translate({innerWidth / 2},{innerHeight / 2})"
-                />
-              {/each}
+            <g bind:this={canvas} transform="translate({innerWidth / 2},{innerHeight / 2})">
+              <!-- {#each lines as [d, colour, scaffoldId]}
+                {#if selectedChromosome != null && scaffoldId != selectedChromosome}
+                  <path
+                    {d}
+                    fill={"#ff594f"}
+                    stroke={"#ff594f"}
+                    stroke-width={0.000001}
+                    transform="translate({innerWidth / 2},{innerHeight / 2})"
+                    pointer-events="none"
+                  />
+                {:else}
+                  <path
+                    {d}
+                    fill={colour}
+                    stroke={colour}
+                    stroke-width={0.000001}
+                    transform="translate({innerWidth / 2},{innerHeight / 2})"
+                    pointer-events="none"
+                  />
+                {/if}
+              {/each} -->
+
+              <!-- <text>wtf</text> -->
             </g>
           </g>
         </svg>

@@ -88,8 +88,6 @@ export const GET = (async ({ url }) => {
         });
       }
     }
-
-    break;
   }
 
   const genes = scaffolds.flatMap((s) => s.genes.map((g) => ({ id: g.id, geneId: g.geneId })));
