@@ -1,5 +1,6 @@
 <script lang="ts">
   import { browser } from "$app/environment";
+  import { getAllGenes } from "$lib/api";
   import { selection, type SelectedEntry } from "$lib/selection";
   import { intoQuery } from "$lib/util";
   import {
@@ -13,7 +14,7 @@
     Select,
     SelectItem,
   } from "carbon-components-svelte";
-  import { Area, AreaCustom, Copy } from "carbon-icons-svelte";
+  import { Area, AreaCustom, Column as ColumnIcon, Copy, Row as RowIcon } from "carbon-icons-svelte";
   import * as d3 from "d3";
   import { get } from "svelte/store";
   import GeneTable from "../../lib/components/GeneTable.svelte";
@@ -22,8 +23,6 @@
   import type { PageData } from "./$types";
   import Selection from "./Selection.svelte";
   import type { SelectionEvent } from "./selection";
-  import { getAllGenes } from "$lib/api";
-  import { geneSchema } from "$lib/types";
 
   // data
   const dims = {
@@ -635,8 +634,8 @@
 <ContextMenu bind:open={ctxOpen} on:close={handleContextClose}>
   <ContextMenuOption labelText="Copy" icon={Copy} shortcutText="⌘C" indented on:click={handleCopy} />
   <ContextMenuDivider />
-  <ContextMenuOption labelText="Select Column" icon={Column} indented on:click={handleColumnSelect} />
-  <ContextMenuOption labelText="Select Row" icon={Row} indented on:click={handleRowSelect} />
+  <ContextMenuOption labelText="Select Column" icon={ColumnIcon} indented on:click={handleColumnSelect} />
+  <ContextMenuOption labelText="Select Row" icon={RowIcon} indented on:click={handleRowSelect} />
   <ContextMenuOption labelText="Select Region" icon={Area} indented on:click={handleRegionSelect} />
   <ContextMenuOption labelText="Free Select" icon={AreaCustom} indented on:click={handleFreeSelect} />
   <ContextMenuDivider />

@@ -1,5 +1,13 @@
-<script>
+<script lang="ts">
   import { Grid, Column, Row, ClickableTile, Link, UnorderedList, ListItem } from "carbon-components-svelte";
+
+  const pages = ["species", "gene", "select", "blast", "circos", "dotplot", "phylogeny", "synteny"];
+
+  const randomArrayElem = <T>(a: T[]): T => {
+    const idx = Math.floor(Math.random() * pages.length);
+
+    return a[idx];
+  };
 </script>
 
 <Grid padding>
@@ -132,8 +140,8 @@
 
       <p>
         We have a thing for that too! You can read our comprehensive <Link href="/ohnologs/docs">documentation</Link> to
-        learn all about our features. If you don't feel like reading, visit a <Link href="/ohnologs/docs"
-          >random page</Link
+        learn all about our features. If you don't feel like reading, visit a <Link
+          href="/ohnologs/{randomArrayElem(pages)}">random page</Link
         > and go exploring. That'll work too... probably.
       </p>
     </Column>
