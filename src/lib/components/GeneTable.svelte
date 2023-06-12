@@ -4,6 +4,7 @@
     Button,
     DataTable,
     DataTableSkeleton,
+    InlineLoading,
     Link,
     PaginationNav,
     Toolbar,
@@ -24,6 +25,8 @@
   export let total: number;
   export let shown: number;
   export let loading: boolean;
+
+  let downloading = false;
 
   function* nextGeneId(i: number) {
     for (let j = i; j < entries.length; j++) {
@@ -72,6 +75,8 @@
   };
 
   const handleDownloadAll = async () => {
+    downloading = true;
+
     const res = await fetch(`/ohnologs/api/download`);
     const data = await res.json();
 
@@ -85,9 +90,13 @@
         .join("\n");
 
     downloadFile("ohnologs.tsv", tsv);
+
+    downloading = false;
   };
 
   const handleDownloadSelected = async () => {
+    downloading = true;
+
     const query = intoQuery({ geneIds: selectedRowIds });
 
     const res = await fetch(`/ohnologs/api/download${query}`);
@@ -103,6 +112,8 @@
         .join("\n");
 
     downloadFile("ohnologs.tsv", tsv);
+
+    downloading = false;
   };
 </script>
 
@@ -131,10 +142,18 @@
 
         <Toolbar>
           <ToolbarContent>
-            <Button disabled={entries.length === 0} icon={Download} on:click={handleDownloadAll}>Download</Button>
+            <Button
+              disabled={entries.length === 0 || downloading}
+              icon={downloading ? InlineLoading : Download}
+              on:click={handleDownloadAll}>Download</Button
+            >
           </ToolbarContent>
           <ToolbarBatchActions on:cancel={handleCancel}>
-            <Button icon={Download} on:click={handleDownloadSelected}>Download</Button>
+            <Button
+              disabled={downloading}
+              icon={downloading ? InlineLoading : Download}
+              on:click={handleDownloadSelected}>Download</Button
+            >
           </ToolbarBatchActions>
         </Toolbar>
       </DataTable>

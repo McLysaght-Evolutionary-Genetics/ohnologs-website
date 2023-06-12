@@ -25,3 +25,9 @@ Ohnolog database and data vis
 - some filthy tables with filtering
 
 - ensembl/genbank/refseq/whatever links
+
+TODO:
+
+- make full blast database
+- re-import data?
+- beta ready!
