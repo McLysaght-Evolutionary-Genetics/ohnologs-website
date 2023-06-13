@@ -157,14 +157,6 @@ const execDiamond = async (
   return entries;
 };
 
-export const load = (async () => {
-  const genes = await prisma.gene.findMany();
-
-  return {
-    genes,
-  };
-}) satisfies PageServerLoad;
-
 export const actions = {
   search: async (event): Promise<z.infer<typeof geneSchema>[]> => {
     const form = await event.request.formData();

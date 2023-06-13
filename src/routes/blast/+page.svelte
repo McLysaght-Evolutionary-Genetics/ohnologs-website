@@ -3,7 +3,7 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import { geneSchema } from "$lib/types";
   import { error } from "@sveltejs/kit";
-  import { Button, ButtonSet, Column, Grid, InlineLoading, Row, TextArea } from "carbon-components-svelte";
+  import { Button, ButtonSet, Column, Grid, Row, TextArea } from "carbon-components-svelte";
   import * as z from "zod";
 
   //

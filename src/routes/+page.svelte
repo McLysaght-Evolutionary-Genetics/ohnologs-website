@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Grid, Column, Row, ClickableTile, Link, UnorderedList, ListItem } from "carbon-components-svelte";
 
-  const pages = ["species", "gene", "select", "blast", "circos", "dotplot", "phylogeny", "synteny"];
+  const pages = ["species", "gene", "select", "blast", "circos", "dotplot", "tree", "synteny"];
 
   const randomArrayElem = <T>(a: T[]): T => {
     const idx = Math.floor(Math.random() * pages.length);
@@ -20,8 +20,8 @@
   <Row>
     <Column>
       <p>
-        Welcome to the ohnologs database. You can download our ohnolog dataset or make use of the many filtering,
-        search, and visualisation features that our site has to offer.
+        Welcome to the ohnologs database. You can download our high-confidence ohnolog dataset or make use of the many
+        filtering, search, and visualisation features that our site has to offer.
       </p>
     </Column>
   </Row>
