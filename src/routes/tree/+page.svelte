@@ -138,11 +138,6 @@
         search button will display the tree.
       </li>
       <br />
-      <li>
-        This page is a work in progress. Any feedback, such as ways to make it more user-friendly or feature requests
-        would be highly appreciated!
-      </li>
-      <br />
       <li style="font-style: italic">
         <span style="background-color: orange">This page is in development.</span> Not all planned features are present.
         Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
