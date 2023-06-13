@@ -70,7 +70,7 @@
         <div class="textarea-padding">
           <TextArea
             labelText="Protein sequence"
-            placeholder="Paste a protein sequence to search the database with BLAST."
+            placeholder={"Paste a protein sequence to search the database with BLAST.\n\n>ENSGALP00010007403\nMEKVSATLAESTQRNLSMQDQRIDTRLHPGVAVGGKHSSWKEEAGMLRASTRYL..."}
             name="sequence"
           />
         </div>
