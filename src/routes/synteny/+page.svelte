@@ -1,226 +1,40 @@
 <script lang="ts">
-  import * as d3 from "d3";
+  import { browser } from "$app/environment";
+  import { intoQuery } from "$lib/util";
+  import { Column, Grid, Row } from "carbon-components-svelte";
   import type { D3ZoomEvent } from "d3";
-  import Gene from "./gene.svelte";
-  import { getContext } from "svelte";
-  import { Column, Grid, Row, Select } from "carbon-components-svelte";
-  import GeneTable from "$lib/components/GeneTable.svelte";
-  import type { GeneEntry } from "$lib/components/geneTable";
+  import * as d3 from "d3";
+  import * as z from "zod";
 
-  type GeneDirection = 1 | -1;
+  //
+  const preferredColours = ["#ff594f"];
 
-  const rnumber = (max: number) => Math.floor(Math.random() * max);
+  const randomShort = () => {
+    return Math.floor(Math.random() * 256);
+  };
 
-  const rcolour = () => `#${rnumber(256).toString(16)}${rnumber(256).toString(16)}${rnumber(256).toString(16)}`;
+  const randomColour = () => {
+    const r = randomShort().toString(16).padStart(2, "0");
+    const g = randomShort().toString(16).padStart(2, "0");
+    const b = randomShort().toString(16).padStart(2, "0");
 
-  const pairs = <T>(arr: T[]): [T, T][] => {
-    const res: [T, T][] = [];
+    const hex = `#${r}${g}${b}`;
 
-    for (let i = 0; i < arr.length; i++) {
-      for (let j = 0; j < arr.length; j++) {
-        if (i === j) {
-          continue;
-        }
+    return hex;
+  };
 
-        res.push([arr[i], arr[j]]);
-      }
+  function* colourGenerator() {
+    for (const colour of preferredColours) {
+      yield colour;
     }
 
-    return res;
-  };
-
-  const calcLinkCoords = (id_x: string, id_y: string): [[number, number], [number, number]] => {
-    const gene_x = data.genes.find((e) => e.id === id_x);
-    const gene_y = data.genes.find((e) => e.id === id_y);
-
-    // TODO: fix
-    if (gene_x == null || gene_y == null) {
-      return [
-        [0, 0],
-        [0, 0],
-      ];
+    while (true) {
+      yield randomColour();
     }
-
-    const track_x_idx = data.tracks.findIndex((e) => e.id === gene_x.track);
-    const track_y_idx = data.tracks.findIndex((e) => e.id === gene_y.track);
-
-    const xx = gene_x.start + gene_x.length / 2;
-    const xy = track_x_idx * data.options.trackPadding - data.options.geneHeight / 2;
-
-    const yx = gene_y.start + gene_y.length / 2;
-    const yy = track_y_idx * data.options.trackPadding - data.options.geneHeight / 2;
-
-    return [
-      [xx, xy],
-      [yx, yy],
-    ];
-  };
-
-  // data
-  const data = {
-    options: {
-      size: { width: 1000, height: 1000 },
-      margin: { top: 250, right: 20, bottom: 20, left: 200 },
-      trackPadding: 100,
-      geneHeight: 20,
-      dmarkerHeight: 30,
-    },
-    tracks: [
-      {
-        id: "chr_1",
-        label: "Chromosome 1",
-        length: 300,
-      },
-      {
-        id: "chr_2",
-        label: "Chromosome 2",
-        length: 500,
-      },
-      {
-        id: "chr_3",
-        label: "Chromosome 3",
-        length: 400,
-      },
-      {
-        id: "chr_4",
-        label: "Chromosome 4",
-        length: 150,
-      },
-    ],
-    genes: [
-      {
-        id: "yfg",
-        label: "Your favourite gene",
-        track: "chr_1",
-        start: 10,
-        length: 50,
-        direction: 1 as GeneDirection,
-      },
-      {
-        id: "i_make_things_glow",
-        label: "I make things glow",
-        track: "chr_1",
-        start: 80,
-        length: 20,
-        direction: -1 as GeneDirection,
-      },
-      {
-        id: "bbb",
-        label: "Bbb",
-        track: "chr_1",
-        start: 180,
-        length: 10,
-        direction: -1 as GeneDirection,
-      },
-      {
-        id: "ccc",
-        label: "Ccc",
-        track: "chr_1",
-        start: 250,
-        length: 30,
-        direction: -1 as GeneDirection,
-      },
-      //
-      {
-        id: "idk",
-        label: "Idk",
-        track: "chr_2",
-        start: 20,
-        length: 80,
-        direction: 1 as GeneDirection,
-      },
-      {
-        id: "aaa",
-        label: "Aaa",
-        track: "chr_2",
-        start: 150,
-        length: 20,
-        direction: 1 as GeneDirection,
-      },
-      {
-        id: "lol",
-        label: "Lol",
-        track: "chr_2",
-        start: 200,
-        length: 30,
-        direction: -1 as GeneDirection,
-      },
-      {
-        id: "ddd",
-        label: "Ddd",
-        track: "chr_2",
-        start: 240,
-        length: 30,
-        direction: -1 as GeneDirection,
-      },
-    ],
-    anchors: [
-      {
-        ids: ["yfg", "idk"],
-      },
-      {
-        ids: ["i_make_things_glow", "lol"],
-      },
-      {
-        ids: ["ccc", "ddd"],
-      },
-    ],
-  };
-
-  // scale
-  let bindAxis: Element;
-
-  $: scale = d3.scaleLinear().domain([0, 100]).range([0, data.options.size.width]);
-
-  $: if (bindAxis) {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    d3.select(bindAxis).call(d3.axisBottom(scale).ticks(data.options.size.width / 100));
   }
 
-  // brush
-  // const brush = d3.brush().on("brush end", () => {
-  //   console.log("waaaa");
-  // });
-
-  // TODO: tmp
-  let trans: any = null;
-
-  // zoom
-  let bindInitZoom: Element;
-  let bindHandleZoom: Element;
-
-  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-    d3.select(bindHandleZoom).attr("transform", e.transform.toString());
-
-    // console.log(e.transform);
-    // TODO: tmp
-    trans = e.transform;
-
-    const newScale = e.transform.rescaleX(scale);
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    d3.select(bindAxis).call(d3.axisBottom(newScale).ticks(data.options.size.width / 100));
-  };
-
-  const zoom = d3.zoom().on("zoom", handleZoom);
-
-  $: if (bindInitZoom) {
-    d3.select(bindInitZoom).call(zoom);
-    // d3.select(bindInitZoom).call(brush).call(brush.move);ss
-  }
-
-  let shift = false;
-
-  // $: if (bindInitZoom) {
-  //   if (shift) {
-  //     d3.select(bindInitZoom).call(d3.zoom());
-  //     // d3.select(bindInitZoom).call(brush).call(brush.move);
-  //   } else {
-  //     // d3.select(bindInitZoom).call(d3.brush());
-  //     d3.select(bindInitZoom).call(zoom);
-  //   }
-  // }
+  //
+  let loading = true;
 
   //
   const dims = {
@@ -232,46 +46,143 @@
       top: 20,
       right: 20,
       bottom: 20,
-      left: 180,
+      left: 20,
     },
   };
 
   const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
+  const scale = {
+    x: d3.scaleLinear().domain([0, 1_000_000]).range([0, innerWidth]),
+  };
+
+  let canvas: Element;
+  let panned: Element;
+
+  const handleTransform = (e: D3ZoomEvent<Element, unknown>) => {
+    d3.select(panned).attr("transform", e.transform.toString());
+
+    console.log(e.transform);
+  };
+
+  const transform = d3.zoom().on("zoom", handleTransform);
+
+  $: if (canvas != null) {
+    d3.select(canvas).call(transform);
+  }
+
   //
-  const sections = [];
+  const schema = z.object({
+    tracks: z.array(
+      z.object({
+        id: z.string().uuid(),
+        start: z.number().gte(0),
+        end: z.number().gte(0),
+        scaffold: z.object({
+          name: z.string(),
+          species: z.string(),
+          start: z.number().gte(0),
+          end: z.number().gte(0),
+        }),
+        genes: z.array(
+          z.object({
+            id: z.string().uuid(),
+            trackId: z.string().uuid(),
+            groupId: z.string().uuid(),
+            geneId: z.string(),
+            proteinId: z.string(),
+            start: z.number().gte(0),
+            end: z.number().gte(0),
+          }),
+        ),
+      }),
+    ),
+    groups: z.array(
+      z.object({
+        id: z.string().uuid(),
+        blockId: z.string().uuid(),
+      }),
+    ),
+  });
 
-  const links = [];
+  let block: z.infer<typeof schema> | null = null;
+  let links: { groupId: string; sx: number; ex: number; si: number; ei: number }[] | null = null;
+  let colours: Record<string, string> | null = null;
 
-  //
-  let entries: GeneEntry[] = [];
+  $: links =
+    block == null
+      ? null
+      : block.groups.flatMap((e) => {
+          const lpos = [];
 
-  //
-  let count = 0;
+          for (const [i, track] of block!.tracks.entries()) {
+            for (const gene of track.genes) {
+              if (gene.groupId === e.id) {
+                const m = (gene.start + gene.end) / 2;
+                const pos = m - track.start;
 
-  let page = 1;
-  let perPage = 10;
-  let shownPages = 7;
+                lpos.push([i, pos]);
+              }
+            }
+          }
 
-  let totalPages: number;
-  $: totalPages = Math.ceil(count / perPage);
+          const links = [];
 
-  let loading = false;
+          for (let i = 1; i < lpos.length; i++) {
+            const [si, sx] = lpos[i - 1];
+            const [ei, ex] = lpos[i];
+
+            links.push({
+              groupId: e.id,
+              sx,
+              ex,
+              si,
+              ei,
+            });
+          }
+
+          return links;
+        });
+
+  $: colours =
+    block == null
+      ? null
+      : (() => {
+          const colour = colourGenerator();
+
+          return Object.fromEntries(
+            block.groups.map((e) => {
+              const c = colour.next().value!;
+
+              return [e.id, c];
+            }),
+          );
+        })();
+
+  const updateSyntenyBlocks = async (geneId: string) => {
+    const query = intoQuery({
+      geneId,
+    });
+
+    const res = await fetch(`/ohnologs/api/synteny${query}`);
+    const data = await res.json();
+
+    const parsed = schema.safeParse(data);
+
+    if (!parsed.success) {
+      throw new Error("updateSyntenyBlocks - invalid synteny response from api");
+    }
+
+    block = parsed.data;
+  };
+
+  $: if (browser && loading) {
+    const geneId = "ENSGACG00000010771";
+
+    updateSyntenyBlocks(geneId);
+  }
 </script>
-
-<svelte:window
-  on:keydown={(e) => {
-    if (e.key === "Shift") {
-      shift = true;
-    }
-  }}
-  on:keyup={(e) => {
-    if (e.key === "Shift") {
-      shift = false;
-    }
-  }}
-/>
 
 <!--
   TODO:
@@ -321,82 +232,44 @@
 
   <Row>
     <Column>
-      <svg bind:this={bindInitZoom} width={data.options.size.width} height={data.options.size.height}>
-        <g bind:this={bindHandleZoom}>
-          <g>
-            {#each data.tracks as track, i}
-              <path
-                d={d3.line()([
-                  [0, data.options.trackPadding * i],
-                  [track.length, data.options.trackPadding * i],
-                ])}
-              />
+      {#if block != null && links != null && colours != null}
+        <svg bind:this={canvas} width={dims.size.width} height={dims.size.height}>
+          <g transform="translate({dims.margin.left},{dims.margin.top})">
+            <g bind:this={panned}>
               <g>
-                <text transform="translate({track.length},{data.options.trackPadding * i - 20})">{track.label}</text>
-                <text transform="translate(-50,{data.options.trackPadding * i + 20})"
-                  >{Math.min(trans && Math.abs(Math.min(trans.x, 0)) / track.length / trans.k, 1) * 100}% -
-                  {Math.min(
-                    trans &&
-                      Math.abs(Math.min(data.options.size.width - trans.x - track.length * trans.k, 0)) /
-                        track.length /
-                        trans.k,
-                    1,
-                  ) * 100}%
-                </text>
+                {#each links as { groupId, sx, ex, si, ei }}
+                  <line
+                    x1={scale.x(sx)}
+                    y1={si * 100 - 10}
+                    x2={scale.x(ex)}
+                    y2={ei * 100 - 10}
+                    stroke={colours[groupId]}
+                  />
+                {/each}
               </g>
-            {/each}
+              <g>
+                {#each block.tracks as track, i}
+                  <g>
+                    {#each track.genes as gene}
+                      <rect
+                        x={scale.x(gene.start - track.start)}
+                        y={i * 100 - 20}
+                        width={scale.x(gene.end - gene.start)}
+                        height={20}
+                        fill={colours[gene.groupId]}
+                      />
+                    {/each}
+                  </g>
+                  <g>
+                    <line x1={0} y1={i * 100} x2={scale.x(track.end - track.start)} y2={i * 100} stroke="black" />
+                    <text x={0} y={i * 100 + 20}>{track.scaffold.species}::{track.scaffold.name}</text>
+                  </g>
+                {/each}
+              </g>
+            </g>
           </g>
-          <g>
-            {#each data.anchors as anchor}
-              {#each pairs(anchor.ids) as [x, y]}
-                <path d={d3.line()(calcLinkCoords(x, y))} />
-              {/each}
-            {/each}
-          </g>
-          <g>
-            {#each data.genes as gene}
-              <Gene
-                id={gene.id}
-                label={gene.label}
-                geneX={gene.start}
-                geneY={data.tracks.findIndex((e) => e.id === gene.track) * data.options.trackPadding -
-                  data.options.geneHeight}
-                geneWidth={gene.length}
-                geneHeight={data.options.geneHeight}
-                geneColour={rcolour()}
-                pointerSize={50}
-                pointerOffset={-20}
-                pointerDirection={gene.direction}
-              />
-            {/each}
-          </g>
-        </g>
-        <g bind:this={bindAxis} transform="translate(0,{data.options.size.height - 200})" />
-      </svg>
-    </Column>
-  </Row>
-
-  <Row>
-    <Column>
-      <GeneTable
-        bind:page
-        bind:loading
-        title={"Ohnologs"}
-        description={"The ohnologs matching your currently selected filters are displayed below"}
-        {perPage}
-        {entries}
-        total={totalPages}
-        shown={shownPages}
-      />
+        </svg>
+      {/if}
     </Column>
   </Row>
 </Grid>
-
-<style lang="scss">
-  path {
-    stroke: black;
-  }
-  .paragraph {
-    color: navy;
-  }
-</style>

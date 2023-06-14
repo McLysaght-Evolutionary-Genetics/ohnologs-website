@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "MsynTrack" ALTER COLUMN "end" DROP DEFAULT,
+ALTER COLUMN "start" DROP DEFAULT;

@@ -69,6 +69,7 @@ model Scaffold {
 
   genes    Gene[]
   segments Segment[]
+  tracks   MsynTrack[]
 
   //
   @@unique([name, speciesId])
@@ -105,6 +106,10 @@ model Gene {
 
   labels GeneLabel[]
   trees  TreeGene[]
+  groups MsynGene[]
+
+  //
+  @@unique([geneId, scaffoldId])
 }
 
 // orthology/paralogy relationships
@@ -175,4 +180,63 @@ model TreeSpecies {
 
   //
   @@id([treeId, speciesId])
+}
+
+//
+model MsynBlock {
+  id String @default(uuid())
+
+  //
+  groups MsynGroup[]
+  tracks MsynTrack[]
+
+  //
+  @@id([id])
+}
+
+model MsynTrack {
+  //
+  start Int
+  end   Int
+
+  //
+  block   MsynBlock @relation(fields: [blockId], references: [id])
+  blockId String
+
+  scaffold   Scaffold @relation(fields: [scaffoldId], references: [id])
+  scaffoldId String
+
+  genes MsynGene[]
+
+  //
+  @@id([blockId, scaffoldId])
+}
+
+model MsynGroup {
+  id String @default(uuid())
+
+  //
+  block   MsynBlock @relation(fields: [blockId], references: [id])
+  blockId String
+
+  genes MsynGene[]
+
+  //
+  @@id([id])
+}
+
+model MsynGene {
+  //
+  track      MsynTrack @relation(fields: [blockId, scaffoldId], references: [blockId, scaffoldId])
+  blockId    String
+  scaffoldId String
+
+  group   MsynGroup @relation(fields: [groupId], references: [id])
+  groupId String
+
+  gene   Gene   @relation(fields: [geneId, scaffoldId], references: [geneId, scaffoldId])
+  geneId String
+
+  //
+  @@id([blockId, scaffoldId, groupId, geneId])
 }
