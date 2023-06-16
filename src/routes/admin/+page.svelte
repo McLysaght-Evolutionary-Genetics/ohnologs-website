@@ -26,3 +26,13 @@
     </Row>
   </Grid>
 </form>
+
+<br />
+
+<form method="post" action="?/loadSynteny">
+  <Grid padding>
+    <Row>
+      <Button type="submit">load synteny</Button>
+    </Row>
+  </Grid>
+</form>

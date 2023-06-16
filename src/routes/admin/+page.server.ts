@@ -277,7 +277,7 @@ export const actions = {
       ]);
     }
   },
-  loadTrees: async (event) => {
+  loadTrees: async () => {
     const TREE_PATH = "/home/niezabil/Desktop/ohnologs/scripts/trees.tsv";
 
     const lines = (await readFile(TREE_PATH))
@@ -344,6 +344,125 @@ export const actions = {
         );
 
       await prisma.$transaction([...addSpecies, ...addGenes]);
+    }
+  },
+  loadSynteny: async () => {
+    const SYNTENY_PATH = "/home/niezabil/Desktop/ohnologs/scripts/msyn.tsv";
+
+    const lines = (await readFile(SYNTENY_PATH))
+      .toString()
+      .trimEnd()
+      .split("\n")
+      .map((e) => e.split("\t"));
+
+    const blocks: string[][][] = [];
+
+    for (const line of lines) {
+      const [b_idx, list] = line;
+
+      const block_idx = parseInt(b_idx);
+      const genes = list.split(",");
+
+      if (blocks.length < block_idx) {
+        blocks.push([]);
+      }
+
+      blocks[blocks.length - 1].push(genes);
+    }
+
+    for (const b of blocks) {
+      const genes = b.flat();
+
+      const block = await prisma.msynBlock.create({
+        data: {},
+      });
+
+      const scafs = await prisma.scaffold.findMany({
+        where: {
+          genes: {
+            some: {
+              proteinId: {
+                in: genes,
+              },
+            },
+          },
+        },
+        include: {
+          genes: true,
+        },
+      });
+
+      for (const scaf of scafs) {
+        const gs = [...scaf.genes].sort((a, b) => a.start - b.start);
+        const ge = [...scaf.genes].sort((a, b) => b.end - a.end);
+
+        let start = -1;
+        let end = -1;
+
+        for (const q of gs) {
+          if (start !== -1) {
+            break;
+          }
+
+          for (const s of genes) {
+            if (s === q.proteinId) {
+              start = q.start;
+
+              break;
+            }
+          }
+        }
+
+        for (const q of ge) {
+          if (end !== -1) {
+            break;
+          }
+
+          for (const s of genes) {
+            if (s === q.proteinId) {
+              end = q.end;
+
+              break;
+            }
+          }
+        }
+
+        await prisma.msynTrack.create({
+          data: {
+            blockId: block.id,
+            scaffoldId: scaf.id,
+            start,
+            end,
+          },
+        });
+      }
+
+      for (const g of b) {
+        const group = await prisma.msynGroup.create({
+          data: {
+            blockId: block.id,
+          },
+        });
+
+        const genes = await prisma.gene.findMany({
+          where: {
+            proteinId: {
+              in: g,
+            },
+          },
+        });
+
+        await prisma.msynGene.createMany({
+          data: genes
+            .filter((e) => e.scaffoldId != null)
+            .map((e) => ({
+              blockId: block.id,
+              scaffoldId: e.scaffoldId!,
+              groupId: group.id,
+              geneId: e.geneId,
+            })),
+        });
+      }
     }
   },
 } satisfies Actions;

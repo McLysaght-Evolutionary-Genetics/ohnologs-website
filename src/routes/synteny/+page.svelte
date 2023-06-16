@@ -5,6 +5,7 @@
   import type { D3ZoomEvent } from "d3";
   import * as d3 from "d3";
   import * as z from "zod";
+  import { tippy } from "$lib/tippy";
 
   //
   const preferredColours = ["#ff594f"];
@@ -39,8 +40,8 @@
   //
   const dims = {
     size: {
-      width: 900,
-      height: 720,
+      width: 1440 * 1.2,
+      height: 720 * 1.2,
     },
     margin: {
       top: 20,
@@ -50,26 +51,61 @@
     },
   };
 
+  const geneHeight = 20;
+  const trackSpacing = 100;
+
   const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
-  const scale = {
-    x: d3.scaleLinear().domain([0, 1_000_000]).range([0, innerWidth]),
+  let domain_max = 50_000_000;
+
+  $: scale = {
+    x: d3.scaleLinear().domain([0, domain_max]).range([0, innerWidth]),
   };
 
   let canvas: Element;
   let panned: Element;
 
-  const handleTransform = (e: D3ZoomEvent<Element, unknown>) => {
-    d3.select(panned).attr("transform", e.transform.toString());
+  let tx = 0;
+  let ty = 0;
+  let tk = 1;
 
-    console.log(e.transform);
+  const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
+    tx = e.transform.x;
+    ty = e.transform.y;
+    tk = e.transform.k;
+
+    d3.select(panned).attr("transform", `translate(${tx},${ty}) scale(${tk})`);
   };
 
-  const transform = d3.zoom().on("zoom", handleTransform);
+  // const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
+  //   const sx = -tx * (1 / e.transform.k);
+  //   const dx = domain_max * (1 / e.transform.k);
+
+  //   console.log(sx, e.transform.k);
+
+  //   console.log(dx / 2);
+  //   console.log([-dx / 2 + sx, dx / 2 + sx]);
+
+  //   scale.x = d3
+  //     .scaleLinear()
+  //     .domain([-dx / 2 - sx, dx / 2 + sx])
+  //     .range([0, innerWidth]);
+  // };
+
+  // const drag = d3.drag().on("drag", handleDrag);
+  const zoom = d3.zoom().on("zoom", handleZoom);
+
+  const enableDrag = () => {
+    d3.select(canvas).call(zoom);
+  };
+
+  const disableDrag = () => {
+    d3.select(canvas).on("mousedown.zoom", null);
+  };
 
   $: if (canvas != null) {
-    d3.select(canvas).call(transform);
+    enableDrag();
   }
 
   //
@@ -178,10 +214,141 @@
   };
 
   $: if (browser && loading) {
-    const geneId = "ENSGACG00000010771";
+    const geneId = "ENSGALG00010012850";
 
     updateSyntenyBlocks(geneId);
   }
+
+  $: selected = [] as string[];
+
+  const handleSelect = (groupId: string) => {
+    const idx = selected.indexOf(groupId);
+
+    if (idx === -1) {
+      selected.push(groupId);
+    } else {
+      selected.splice(idx, 1);
+    }
+
+    selected = selected;
+  };
+
+  //
+  type ActionState = "none" | "select";
+
+  let action: { state: ActionState } & (
+    | { state: "none" }
+    | { state: "select"; x?: number; y?: number; mx?: number; my?: number }
+  ) = {
+    state: "none",
+  };
+
+  let svgCursor: Record<ActionState, string> = {
+    none: "default",
+    select: "crosshair",
+  };
+
+  let geneCursor: Record<ActionState, string> = {
+    none: "pointer",
+    select: "crosshair",
+  };
+
+  const handleMouseMove = (
+    e: MouseEvent & {
+      currentTarget: EventTarget & Window;
+    },
+  ) => {
+    if (action.state !== "select") {
+      return;
+    }
+
+    // update mouse coords
+    action.mx = e.offsetX - dims.margin.left;
+    action.my = e.offsetY - dims.margin.top;
+  };
+
+  const handleKeyDown = (
+    e: KeyboardEvent & {
+      currentTarget: EventTarget & Window;
+    },
+  ) => {
+    // revert to browsing state
+    if (e.key === "Escape") {
+      enableDrag();
+
+      action = {
+        state: "none",
+      };
+    }
+
+    // enable selection state
+    if (e.key === "s") {
+      disableDrag();
+
+      action = {
+        state: "select",
+      };
+    }
+  };
+
+  const handleMouseDown = (
+    e: MouseEvent & {
+      currentTarget: EventTarget & SVGSVGElement;
+    },
+  ) => {
+    if (action.state !== "select") {
+      return;
+    }
+
+    // update selection starting coords
+    action.x = e.offsetX - dims.margin.left;
+    action.y = e.offsetY - dims.margin.top;
+
+    console.log(action);
+  };
+
+  const handleMouseUp = (
+    e: MouseEvent & {
+      currentTarget: EventTarget & SVGSVGElement;
+    },
+  ) => {
+    if (action.state !== "select") {
+      return;
+    }
+
+    // do something with bounding box
+    const sx = action.x!;
+    const sy = action.y!;
+    const ex = e.offsetX - dims.margin.left;
+    const ey = e.offsetY - dims.margin.top;
+
+    const x1 = (Math.min(sx, ex) - tx) * (1 / tk);
+    const y1 = (Math.min(sy, ey) - ty) * (1 / tk);
+    const x2 = (Math.max(sx, ex) - tx) * (1 / tk);
+    const y2 = (Math.max(sy, ey) - ty) * (1 / tk);
+
+    const groups = new Set<string>();
+
+    for (const [i, track] of block!.tracks.entries()) {
+      for (const gene of track.genes) {
+        const left = scale.x(gene.start - track.start);
+        const right = scale.x(gene.end - track.start);
+        const top = i * trackSpacing - geneHeight;
+        const bottom = i * trackSpacing;
+
+        if (left >= x1 && right <= x2 && top >= y1 && bottom <= y2) {
+          groups.add(gene.groupId);
+        }
+      }
+    }
+
+    selected = [...groups];
+
+    // revert to browsing state
+    enableDrag();
+
+    action = { state: "none" };
+  };
 </script>
 
 <!--
@@ -209,6 +376,8 @@
 
  -->
 
+<svelte:window on:mousemove={handleMouseMove} on:keydown={handleKeyDown} />
+
 <Grid padding>
   <Row>
     <Column>
@@ -233,17 +402,26 @@
   <Row>
     <Column>
       {#if block != null && links != null && colours != null}
-        <svg bind:this={canvas} width={dims.size.width} height={dims.size.height}>
+        <svg
+          bind:this={canvas}
+          width={dims.size.width}
+          height={dims.size.height}
+          cursor={svgCursor[action.state]}
+          on:mousedown={handleMouseDown}
+          on:mouseup={handleMouseUp}
+        >
+          <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
+
           <g transform="translate({dims.margin.left},{dims.margin.top})">
             <g bind:this={panned}>
               <g>
                 {#each links as { groupId, sx, ex, si, ei }}
                   <line
                     x1={scale.x(sx)}
-                    y1={si * 100 - 10}
+                    y1={si * trackSpacing - geneHeight / 2}
                     x2={scale.x(ex)}
-                    y2={ei * 100 - 10}
-                    stroke={colours[groupId]}
+                    y2={ei * trackSpacing - geneHeight / 2}
+                    stroke={selected.includes(groupId) ? colours[groupId] : "#fafafa"}
                   />
                 {/each}
               </g>
@@ -253,20 +431,45 @@
                     {#each track.genes as gene}
                       <rect
                         x={scale.x(gene.start - track.start)}
-                        y={i * 100 - 20}
+                        y={i * trackSpacing - geneHeight}
                         width={scale.x(gene.end - gene.start)}
-                        height={20}
-                        fill={colours[gene.groupId]}
+                        height={geneHeight}
+                        fill={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
+                        cursor={geneCursor[action.state]}
+                        on:click={() => handleSelect(gene.groupId)}
+                        use:tippy={{
+                          content: gene.geneId,
+                          followCursor: true,
+                        }}
                       />
                     {/each}
                   </g>
                   <g>
-                    <line x1={0} y1={i * 100} x2={scale.x(track.end - track.start)} y2={i * 100} stroke="black" />
-                    <text x={0} y={i * 100 + 20}>{track.scaffold.species}::{track.scaffold.name}</text>
+                    <line
+                      x1={0}
+                      y1={i * trackSpacing}
+                      x2={scale.x(track.end - track.start)}
+                      y2={i * trackSpacing}
+                      stroke="black"
+                    />
+                    <text x={0} y={i * trackSpacing + 20} pointer-events="none"
+                      >{track.scaffold.species}::{track.scaffold.name}</text
+                    >
                   </g>
                 {/each}
               </g>
             </g>
+            {#if action.state === "select" && action.x != null && action.y != null && action.mx != null && action.my != null}
+              <g>
+                <rect
+                  x={Math.min(action.x, action.mx)}
+                  y={Math.min(action.y, action.my)}
+                  width={Math.max(action.mx, action.x) - Math.min(action.mx, action.x)}
+                  height={Math.max(action.my, action.y) - Math.min(action.my, action.y)}
+                  fill="#00000022"
+                />
+              </g>
+            {/if}
           </g>
         </svg>
       {/if}
