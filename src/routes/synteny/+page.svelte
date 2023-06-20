@@ -1,11 +1,16 @@
 <script lang="ts">
   import { browser } from "$app/environment";
+  import { getAllGenes } from "$lib/api";
+  import GeneTable from "$lib/components/GeneTable.svelte";
+  import type { GeneEntry } from "$lib/components/geneTable";
+  import type { SelectedEntry, SelectionType } from "$lib/selection";
+  import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
   import { Column, Grid, Row } from "carbon-components-svelte";
   import type { D3ZoomEvent } from "d3";
   import * as d3 from "d3";
   import * as z from "zod";
-  import { tippy } from "$lib/tippy";
+  import Gene from "./gene.svelte";
 
   //
   const preferredColours = ["#ff594f"];
@@ -36,6 +41,20 @@
 
   //
   let loading = true;
+  // let loadingGenes = false;
+
+  let page = 1;
+  let perPage = 10;
+  let shownPages = 7;
+
+  let entries: GeneEntry[];
+  // $: entries = block == null ?
+
+  let count: number;
+  $: count = block == null ? 0 : block.tracks.reduce((a, c) => a + c.genes.length, 0);
+
+  let totalPages: number;
+  $: totalPages = Math.ceil(count / perPage);
 
   //
   const dims = {
@@ -66,46 +85,35 @@
   let canvas: Element;
   let panned: Element;
 
-  let tx = 0;
-  let ty = 0;
+  const ix = 0;
+  const iy = 20;
+
+  let tx = ix;
+  let ty = iy;
   let tk = 1;
 
   const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-    tx = e.transform.x;
-    ty = e.transform.y;
+    tx = e.transform.x + ix;
+    ty = e.transform.y + iy;
     tk = e.transform.k;
 
     d3.select(panned).attr("transform", `translate(${tx},${ty}) scale(${tk})`);
   };
 
-  // const handleZoom = (e: D3ZoomEvent<Element, unknown>) => {
-  //   const sx = -tx * (1 / e.transform.k);
-  //   const dx = domain_max * (1 / e.transform.k);
-
-  //   console.log(sx, e.transform.k);
-
-  //   console.log(dx / 2);
-  //   console.log([-dx / 2 + sx, dx / 2 + sx]);
-
-  //   scale.x = d3
-  //     .scaleLinear()
-  //     .domain([-dx / 2 - sx, dx / 2 + sx])
-  //     .range([0, innerWidth]);
-  // };
-
-  // const drag = d3.drag().on("drag", handleDrag);
   const zoom = d3.zoom().on("zoom", handleZoom);
 
-  const enableDrag = () => {
+  const enableZoom = () => {
     d3.select(canvas).call(zoom);
   };
 
-  const disableDrag = () => {
+  const disableZoom = () => {
     d3.select(canvas).on("mousedown.zoom", null);
   };
 
   $: if (canvas != null) {
-    enableDrag();
+    d3.select(panned).attr("transform", `translate(${tx},${ty}) scale(${tk})`);
+
+    enableZoom();
   }
 
   //
@@ -146,40 +154,61 @@
   let links: { groupId: string; sx: number; ex: number; si: number; ei: number }[] | null = null;
   let colours: Record<string, string> | null = null;
 
+  $: genes =
+    block == null
+      ? null
+      : block.tracks.flatMap((e, i) => e.genes.map((f) => ({ ...f, track: { index: i, start: e.start, end: e.end } })));
+
   $: links =
     block == null
       ? null
-      : block.groups.flatMap((e) => {
-          const lpos = [];
+      : (() => {
+          const links = block.groups.flatMap((e) => {
+            const lpos = [];
 
-          for (const [i, track] of block!.tracks.entries()) {
-            for (const gene of track.genes) {
-              if (gene.groupId === e.id) {
-                const m = (gene.start + gene.end) / 2;
-                const pos = m - track.start;
+            for (const [i, track] of block!.tracks.entries()) {
+              for (const gene of track.genes) {
+                if (gene.groupId === e.id) {
+                  const m = (gene.start + gene.end) / 2;
+                  const pos = m - track.start;
 
-                lpos.push([i, pos]);
+                  lpos.push([i, pos]);
+                }
               }
+            }
+
+            const links = [];
+
+            for (let i = 1; i < lpos.length; i++) {
+              const [si, sx] = lpos[i - 1];
+              const [ei, ex] = lpos[i];
+
+              links.push({
+                groupId: e.id,
+                sx,
+                ex,
+                si,
+                ei,
+              });
+            }
+
+            return links;
+          });
+
+          const first = [];
+          const last = [];
+
+          for (const link of links) {
+            if (selected.includes(link.groupId)) {
+              first.push(link);
+            } else {
+              last.push(link);
             }
           }
 
-          const links = [];
-
-          for (let i = 1; i < lpos.length; i++) {
-            const [si, sx] = lpos[i - 1];
-            const [ei, ex] = lpos[i];
-
-            links.push({
-              groupId: e.id,
-              sx,
-              ex,
-              si,
-              ei,
-            });
-          }
-
-          return links;
-        });
+          // svg draw order
+          return [...last, ...first];
+        })();
 
   $: colours =
     block == null
@@ -213,23 +242,79 @@
     block = parsed.data;
   };
 
+  const updateTableEntries = async (geneIds: string[]) => {
+    const { data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+
+    entries = data;
+
+    loading = false;
+  };
+
   $: if (browser && loading) {
     const geneId = "ENSGALG00010012850";
 
     updateSyntenyBlocks(geneId);
   }
 
+  //
+  // const resetPage = () => {
+  //   if (page === 1) {
+  //     loading = true;
+  //   }
+
+  //   page = 1;
+  // };
+
+  // $: (() => {
+  //   [block];
+
+  //   resetPage();
+  // })();
+
+  // $: (() => {
+  //   [page];
+
+  //   loading = true;
+  // })();
+
+  $: if (browser && genes != null) {
+    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
+
+    updateTableEntries(geneIds);
+  }
+
+  //
   $: selected = [] as string[];
 
-  const handleSelect = (groupId: string) => {
-    const idx = selected.indexOf(groupId);
+  // $: if (genes != null) {
+  //   const selectedIds = $selection.map((e) => e.id);
+  //   const groupIds = new Set(genes.filter((e) => selectedIds.includes(e.id)).map((e) => e.groupId));
 
-    if (idx === -1) {
-      selected.push(groupId);
-    } else {
-      selected.splice(idx, 1);
+  //   selected = [...groupIds];
+  // }
+
+  const handleSelect = (groupId: string) => {
+    if (genes == null) {
+      return;
     }
 
+    //
+    const idx = selected.indexOf(groupId);
+    const ids = genes.filter((e) => e.groupId === groupId).map((e) => e.id);
+
+    if (idx === -1) {
+      const updated = [...$selection, ...ids.map((e) => ({ id: e, type: "transient" as SelectionType }))];
+
+      selected.push(groupId);
+      selection.set(updated);
+    } else {
+      const updated = $selection.filter((e) => !ids.includes(e.id));
+
+      selected.splice(idx, 1);
+      selection.set(updated);
+    }
+
+    // keep svelte happy
     selected = selected;
   };
 
@@ -274,7 +359,7 @@
   ) => {
     // revert to browsing state
     if (e.key === "Escape") {
-      enableDrag();
+      enableZoom();
 
       action = {
         state: "none",
@@ -283,7 +368,7 @@
 
     // enable selection state
     if (e.key === "s") {
-      disableDrag();
+      disableZoom();
 
       action = {
         state: "select",
@@ -345,10 +430,21 @@
     selected = [...groups];
 
     // revert to browsing state
-    enableDrag();
+    enableZoom();
 
     action = { state: "none" };
   };
+
+  //
+  // let selectedGene: string | null = null;
+
+  // let thing: Element;
+
+  // let flag = false;
+
+  // $: if (thing != null) {
+  //   flag = true;
+  // }
 </script>
 
 <!--
@@ -399,9 +495,21 @@
     </Column>
   </Row>
 
+  <!-- <div bind:this={thing}>
+    <p>owo</p>
+  </div>
+
+  <svg width={500} height={500}>
+    {#if flag}
+      <rect x={20} y={20} width={50} height={50} use:tippy={{ content: thing, followCursor: true }} />
+
+      <rect x={120} y={120} width={50} height={50} use:tippy={{ content: thing, followCursor: true }} />
+    {/if}
+  </svg> -->
+
   <Row>
     <Column>
-      {#if block != null && links != null && colours != null}
+      {#if block != null && genes != null && links != null && colours != null}
         <svg
           bind:this={canvas}
           width={dims.size.width}
@@ -426,24 +534,35 @@
                 {/each}
               </g>
               <g>
+                <g>
+                  {#each genes as gene}
+                    <!-- svelte-ignore a11y-click-events-have-key-events -->
+                    <!-- <rect
+                      x={scale.x(gene.start - gene.track.start)}
+                      y={gene.track.index * trackSpacing - geneHeight}
+                      width={scale.x(gene.end - gene.start)}
+                      height={geneHeight}
+                      fill={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
+                      cursor={geneCursor[action.state]}
+                      on:click={() => handleSelect(gene.groupId)}
+                    /> -->
+
+                    <Gene
+                      id={gene.id}
+                      geneId={gene.geneId}
+                      proteinId={gene.proteinId}
+                      x={scale.x(gene.start - gene.track.start)}
+                      y={gene.track.index * trackSpacing - geneHeight}
+                      width={scale.x(gene.end - gene.start)}
+                      height={geneHeight}
+                      colour={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
+                      cursor={geneCursor[action.state]}
+                      on:click={() => handleSelect(gene.groupId)}
+                    />
+                  {/each}
+                </g>
+
                 {#each block.tracks as track, i}
-                  <g>
-                    {#each track.genes as gene}
-                      <rect
-                        x={scale.x(gene.start - track.start)}
-                        y={i * trackSpacing - geneHeight}
-                        width={scale.x(gene.end - gene.start)}
-                        height={geneHeight}
-                        fill={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
-                        cursor={geneCursor[action.state]}
-                        on:click={() => handleSelect(gene.groupId)}
-                        use:tippy={{
-                          content: gene.geneId,
-                          followCursor: true,
-                        }}
-                      />
-                    {/each}
-                  </g>
                   <g>
                     <line
                       x1={0}
@@ -475,4 +594,22 @@
       {/if}
     </Column>
   </Row>
+
+  <!-- table -->
+  {#if block != null && links != null && colours != null}
+    <Row>
+      <Column>
+        <GeneTable
+          bind:page
+          bind:loading
+          title={"Ohnologs"}
+          description={"The ohnologs matching your currently selected filters are displayed below"}
+          {perPage}
+          {entries}
+          total={totalPages}
+          shown={shownPages}
+        />
+      </Column>
+    </Row>
+  {/if}
 </Grid>

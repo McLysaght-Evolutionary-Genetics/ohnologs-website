@@ -53,8 +53,6 @@
   });
 
   const handleSelect = ({ detail: { selected, row } }: CustomEvent<{ selected: boolean; row: DataTableRow }>) => {
-    console.log("a");
-
     const current = get(selection);
 
     if (selected) {

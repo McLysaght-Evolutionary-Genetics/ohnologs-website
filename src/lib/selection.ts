@@ -1,6 +1,6 @@
 import { writable } from "svelte/store";
 
-type SelectionType = "static" | "transient";
+export type SelectionType = "static" | "transient";
 
 export type SelectedEntry = {
   id: string;

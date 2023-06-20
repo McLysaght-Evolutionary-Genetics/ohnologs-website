@@ -1,6 +1,7 @@
 <script lang="ts">
   // import "../app.css";
   import "carbon-components-svelte/css/white.css";
+  import "tippy.js/themes/light.css";
 
   import {
     Content,
