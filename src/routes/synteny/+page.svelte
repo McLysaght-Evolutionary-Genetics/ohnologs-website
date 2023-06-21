@@ -11,6 +11,9 @@
   import * as d3 from "d3";
   import * as z from "zod";
   import Gene from "./gene.svelte";
+  import Popup from "$lib/components/popup.svelte";
+  import TooltipGroup from "$lib/components/tooltip_group.svelte";
+  import { followCursor } from "tippy.js";
 
   //
   const preferredColours = ["#ff594f"];
@@ -154,76 +157,79 @@
   let links: { groupId: string; sx: number; ex: number; si: number; ei: number }[] | null = null;
   let colours: Record<string, string> | null = null;
 
-  $: genes =
-    block == null
-      ? null
-      : block.tracks.flatMap((e, i) => e.genes.map((f) => ({ ...f, track: { index: i, start: e.start, end: e.end } })));
+  const regenerateGenes = (block: z.infer<typeof schema>) => {
+    return block.tracks.flatMap((e, i) =>
+      e.genes.map((f) => ({
+        ...f,
+        species: { name: e.scaffold.species },
+        track: { index: i, name: e.scaffold.name, start: e.start, end: e.end },
+      })),
+    );
+  };
 
-  $: links =
-    block == null
-      ? null
-      : (() => {
-          const links = block.groups.flatMap((e) => {
-            const lpos = [];
+  const regenerateLinks = (block: z.infer<typeof schema>) => {
+    const links = block.groups.flatMap((e) => {
+      const lpos = [];
 
-            for (const [i, track] of block!.tracks.entries()) {
-              for (const gene of track.genes) {
-                if (gene.groupId === e.id) {
-                  const m = (gene.start + gene.end) / 2;
-                  const pos = m - track.start;
+      for (const [i, track] of block!.tracks.entries()) {
+        for (const gene of track.genes) {
+          if (gene.groupId === e.id) {
+            const m = (gene.start + gene.end) / 2;
+            const pos = m - track.start;
 
-                  lpos.push([i, pos]);
-                }
-              }
-            }
-
-            const links = [];
-
-            for (let i = 1; i < lpos.length; i++) {
-              const [si, sx] = lpos[i - 1];
-              const [ei, ex] = lpos[i];
-
-              links.push({
-                groupId: e.id,
-                sx,
-                ex,
-                si,
-                ei,
-              });
-            }
-
-            return links;
-          });
-
-          const first = [];
-          const last = [];
-
-          for (const link of links) {
-            if (selected.includes(link.groupId)) {
-              first.push(link);
-            } else {
-              last.push(link);
-            }
+            lpos.push([i, pos]);
           }
+        }
+      }
 
-          // svg draw order
-          return [...last, ...first];
-        })();
+      const links = [];
 
-  $: colours =
-    block == null
-      ? null
-      : (() => {
-          const colour = colourGenerator();
+      for (let i = 1; i < lpos.length; i++) {
+        const [si, sx] = lpos[i - 1];
+        const [ei, ex] = lpos[i];
 
-          return Object.fromEntries(
-            block.groups.map((e) => {
-              const c = colour.next().value!;
+        links.push({
+          groupId: e.id,
+          sx,
+          ex,
+          si,
+          ei,
+        });
+      }
 
-              return [e.id, c];
-            }),
-          );
-        })();
+      return links;
+    });
+
+    const first = [];
+    const last = [];
+
+    for (const link of links) {
+      if (selected.includes(link.groupId)) {
+        first.push(link);
+      } else {
+        last.push(link);
+      }
+    }
+
+    // svg draw order
+    return [...last, ...first];
+  };
+
+  const regenerateColours = (block: z.infer<typeof schema>) => {
+    const colour = colourGenerator();
+
+    return Object.fromEntries(
+      block.groups.map((e) => {
+        const c = colour.next().value!;
+
+        return [e.id, c];
+      }),
+    );
+  };
+
+  $: genes = block == null ? null : regenerateGenes(block);
+  $: links = block == null ? null : regenerateLinks(block);
+  $: colours = block == null ? null : regenerateColours(block);
 
   const updateSyntenyBlocks = async (geneId: string) => {
     const query = intoQuery({
@@ -284,14 +290,28 @@
   }
 
   //
+  $: prevGlobal = [] as string[];
   $: selected = [] as string[];
 
-  // $: if (genes != null) {
-  //   const selectedIds = $selection.map((e) => e.id);
-  //   const groupIds = new Set(genes.filter((e) => selectedIds.includes(e.id)).map((e) => e.groupId));
+  $: if (genes != null) {
+    const selectedIds = $selection.map((e) => e.id);
+    const globIds = [...new Set(genes.filter((e) => selectedIds.includes(e.id)).map((e) => e.groupId))];
 
-  //   selected = [...groupIds];
-  // }
+    const added = globIds.filter((e) => !prevGlobal.includes(e));
+    const removed = prevGlobal.filter((e) => !globIds.includes(e));
+
+    prevGlobal = globIds;
+
+    // idk why the actual fuck the colours get re-calculated without this, but hey it works
+    // note to future maintainer: dont touch
+    handleGlob(added, removed);
+  }
+
+  const handleGlob = (added: string[], removed: string[]) => {
+    selected = [...selected.filter((e) => !removed.includes(e)), ...added];
+
+    links = regenerateLinks(block!);
+  };
 
   const handleSelect = (groupId: string) => {
     if (genes == null) {
@@ -315,7 +335,8 @@
     }
 
     // keep svelte happy
-    selected = selected;
+    // selected = selected;
+    links = regenerateLinks(block!);
   };
 
   //
@@ -427,7 +448,17 @@
       }
     }
 
-    selected = [...groups];
+    const added = [...groups].filter((e) => !selected.includes(e));
+    const ids = genes!.filter((e) => added.includes(e.groupId)).map((e) => e.id);
+
+    const updated = [...$selection, ...ids.map((e) => ({ id: e, type: "transient" as SelectionType }))];
+
+    console.log(added);
+
+    selected = [...selected, ...added];
+    selection.set(updated);
+
+    links = regenerateLinks(block!);
 
     // revert to browsing state
     enableZoom();
@@ -535,31 +566,35 @@
               </g>
               <g>
                 <g>
-                  {#each genes as gene}
-                    <!-- svelte-ignore a11y-click-events-have-key-events -->
-                    <!-- <rect
-                      x={scale.x(gene.start - gene.track.start)}
-                      y={gene.track.index * trackSpacing - geneHeight}
-                      width={scale.x(gene.end - gene.start)}
-                      height={geneHeight}
-                      fill={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
-                      cursor={geneCursor[action.state]}
-                      on:click={() => handleSelect(gene.groupId)}
-                    /> -->
-
-                    <Gene
-                      id={gene.id}
-                      geneId={gene.geneId}
-                      proteinId={gene.proteinId}
-                      x={scale.x(gene.start - gene.track.start)}
-                      y={gene.track.index * trackSpacing - geneHeight}
-                      width={scale.x(gene.end - gene.start)}
-                      height={geneHeight}
-                      colour={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
-                      cursor={geneCursor[action.state]}
-                      on:click={() => handleSelect(gene.groupId)}
-                    />
-                  {/each}
+                  <TooltipGroup
+                    options={{
+                      allowHTML: true,
+                      moveTransition: "transform 0.2s ease-out",
+                      delay: [0, 100],
+                      theme: "light",
+                      interactive: true,
+                      placement: "top",
+                      appendTo: document.body,
+                    }}
+                  >
+                    {#each genes as gene}
+                      <Gene
+                        species={gene.species.name}
+                        scaffold={gene.track.name}
+                        geneId={gene.geneId}
+                        proteinId={gene.proteinId}
+                        start={gene.start}
+                        end={gene.end}
+                        x={scale.x(gene.start - gene.track.start)}
+                        y={gene.track.index * trackSpacing - geneHeight}
+                        width={scale.x(gene.end - gene.start)}
+                        height={geneHeight}
+                        colour={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
+                        cursor={geneCursor[action.state]}
+                        on:click={() => handleSelect(gene.groupId)}
+                      />
+                    {/each}
+                  </TooltipGroup>
                 </g>
 
                 {#each block.tracks as track, i}

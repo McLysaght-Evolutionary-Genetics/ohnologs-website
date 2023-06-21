@@ -16,7 +16,6 @@
       tip = tippy(trigger, {
         content: popper,
         offset: [0, 4],
-        trigger: "mouseenter",
         interactive: true,
         onCreate: () => (initialised = true),
         onShow: () => {
