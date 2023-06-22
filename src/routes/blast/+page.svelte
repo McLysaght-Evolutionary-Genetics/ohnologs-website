@@ -72,13 +72,14 @@
             labelText="Protein sequence"
             placeholder={"Paste a protein sequence to search the database with BLAST.\n\n>ENSGALP00010007403\nMEKVSATLAESTQRNLSMQDQRIDTRLHPGVAVGGKHSSWKEEAGMLRASTRYL..."}
             name="sequence"
+            rows={5}
           />
         </div>
-        <ButtonSet>
-          <Button class="button-padding" type="submit">Search</Button>
-
-          <Button type="reset" kind="secondary">Clear</Button>
-        </ButtonSet>
+        <div class="button-set">
+          <Button class="button-padding" type="submit">Search</Button><Button type="reset" kind="secondary"
+            >Clear</Button
+          >
+        </div>
       </form>
     </Column>
   </Row>

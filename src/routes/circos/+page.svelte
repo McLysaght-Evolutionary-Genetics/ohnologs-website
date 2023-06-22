@@ -22,6 +22,9 @@
   };
 
   //
+  let windowWidth: number;
+  let windowHeight: number;
+
   const dims = {
     size: {
       width: 900 * 1.3,
@@ -38,8 +41,36 @@
   const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
+  const innerRadius = 240 * 1.7;
+
+  const radiusPadding = 5;
+  const outerRadius = innerRadius + radiusPadding;
+
   const padding = 0.1;
 
+  $: if (windowWidth != null) {
+    if (windowWidth < 672) {
+      dims.size.width = windowWidth - 16 * 9;
+      dims.size.height = windowHeight / 2;
+    }
+
+    if (windowWidth >= 672 && windowWidth < 1584) {
+      dims.size.width = windowWidth - 16 * 11;
+      dims.size.height = windowHeight / 2;
+    }
+
+    if (windowWidth >= 1584 && windowWidth < 1697) {
+      dims.size.width = windowWidth - 16 * 12;
+      dims.size.height = windowHeight / 2;
+    }
+
+    if (windowWidth >= 1697) {
+      dims.size.width = 1696 - 16 * 12;
+      dims.size.height = windowHeight / 2;
+    }
+  }
+
+  //
   let links: Link[] = [];
   let segments: Segment[] = [];
 
@@ -77,11 +108,6 @@
   if (padding * segments.length >= Math.PI * 2) {
     throw error(500, `padding cannot add up to >= 2PI: ${padding * segments.length}`);
   }
-
-  //
-  const innerRadius = 240 * 1.7;
-  const radiusPadding = 5;
-  const outerRadius = innerRadius + radiusPadding;
 
   //
   $: totalScaffoldLength = segments.reduce((a, c) => a + c.length, 0);
@@ -327,6 +353,8 @@
     }
   }
 </script>
+
+<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 <Grid padding>
   <!-- tutorial -->

@@ -1,5 +1,5 @@
 <script lang="ts">
-  // import "../app.css";
+  import "../app.css";
   import "carbon-components-svelte/css/white.css";
   import "tippy.js/themes/light.css";
 
@@ -92,7 +92,7 @@
   footer {
     position: relative;
     width: 100%;
-    height: 4rem;
+    /* height: 4rem; */
     left: 0;
     bottom: 0;
     background-color: #cccccc;
@@ -101,6 +101,9 @@
   }
 
   footer > div {
+    padding-bottom: 1.2rem;
     padding-top: 1rem;
+    padding-left: 4rem;
+    padding-right: 1rem;
   }
 </style>

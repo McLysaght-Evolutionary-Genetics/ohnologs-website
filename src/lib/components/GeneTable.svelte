@@ -17,6 +17,7 @@
   import type { GeneEntry } from "./geneTable";
   import { downloadFile, intoQuery } from "$lib/util";
 
+  //
   export let title: string;
   export let description: string;
   export let entries: GeneEntry[] = [];
@@ -26,6 +27,13 @@
   export let shown: number;
   export let loading: boolean;
 
+  //
+  let windowWidth: number;
+  let windowHeight: number;
+
+  $: shownResponsive = Math.min(shown, Math.floor(windowWidth / 100));
+
+  //
   let downloading = false;
 
   function* nextGeneId(i: number) {
@@ -115,6 +123,8 @@
   };
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
+
 <div>
   <!-- table -->
   <div class="table">
@@ -158,9 +168,10 @@
     {/if}
   </div>
 
-  <!-- pagination -->
+  <!-- <PaginationNav bind:page {total} {shown} /> -->
+
   <div class="pagination">
-    <PaginationNav bind:page {total} {shown} />
+    <PaginationNav bind:page {total} shown={shownResponsive} />
   </div>
 </div>
 

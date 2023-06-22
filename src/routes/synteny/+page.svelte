@@ -60,10 +60,13 @@
   $: totalPages = Math.ceil(count / perPage);
 
   //
+  let windowWidth: number;
+  let windowHeight: number;
+
   const dims = {
     size: {
-      width: 1440 * 1.2,
-      height: 720 * 1.2,
+      width: 1440,
+      height: 720,
     },
     margin: {
       top: 20,
@@ -84,6 +87,28 @@
   $: scale = {
     x: d3.scaleLinear().domain([0, domain_max]).range([0, innerWidth]),
   };
+
+  $: if (windowWidth != null) {
+    if (windowWidth < 672) {
+      dims.size.width = windowWidth - 16 * 9;
+      dims.size.height = windowHeight / 2;
+    }
+
+    if (windowWidth >= 672 && windowWidth < 1584) {
+      dims.size.width = windowWidth - 16 * 11;
+      dims.size.height = windowHeight / 1.4;
+    }
+
+    if (windowWidth >= 1584 && windowWidth < 1697) {
+      dims.size.width = windowWidth - 16 * 12;
+      dims.size.height = windowHeight / 1.65;
+    }
+
+    if (windowWidth >= 1697) {
+      dims.size.width = 1696 - 16 * 12;
+      dims.size.height = windowHeight / 1.65;
+    }
+  }
 
   let canvas: Element;
   let panned: Element;
@@ -503,7 +528,12 @@
 
  -->
 
-<svelte:window on:mousemove={handleMouseMove} on:keydown={handleKeyDown} />
+<svelte:window
+  bind:innerWidth={windowWidth}
+  bind:innerHeight={windowHeight}
+  on:mousemove={handleMouseMove}
+  on:keydown={handleKeyDown}
+/>
 
 <Grid padding>
   <Row>
@@ -549,8 +579,6 @@
           on:mousedown={handleMouseDown}
           on:mouseup={handleMouseUp}
         >
-          <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
-
           <g transform="translate({dims.margin.left},{dims.margin.top})">
             <g bind:this={panned}>
               <g>
@@ -570,7 +598,7 @@
                     options={{
                       allowHTML: true,
                       moveTransition: "transform 0.2s ease-out",
-                      delay: [0, 100],
+                      delay: [200, 100],
                       theme: "light",
                       interactive: true,
                       placement: "top",
@@ -625,6 +653,8 @@
               </g>
             {/if}
           </g>
+
+          <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
         </svg>
       {/if}
     </Column>
