@@ -260,7 +260,7 @@
   $: colours = block == null ? null : regenerateColours(block);
 
   //
-  let queryId: string = "";
+  let queryId = "";
 
   $: if ($svpage.url.searchParams.get("queryId") != null) {
     console.log("aaa");
