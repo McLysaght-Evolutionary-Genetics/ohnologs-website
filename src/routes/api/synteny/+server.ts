@@ -1,24 +1,28 @@
 import { PrismaClient } from "$lib/prisma";
 import { findQueryOrError } from "$lib/util";
-import type { Scaffold } from "@prisma/client";
 import type { RequestHandler } from "../$types";
-import util from "util";
 
 const prisma = new PrismaClient();
 
 export const GET = (async ({ url }) => {
-  const geneId = findQueryOrError(url, "geneId");
+  const queryId = findQueryOrError(url, "queryId");
+  const blockIdx = parseInt(findQueryOrError(url, "blockIdx"));
 
-  console.log(geneId);
-
-  const block = await prisma.msynBlock.findFirst({
+  const blocks = await prisma.msynBlock.findMany({
     where: {
       groups: {
         some: {
           genes: {
             some: {
               gene: {
-                geneId,
+                OR: [
+                  {
+                    geneId: queryId,
+                  },
+                  {
+                    proteinId: queryId,
+                  },
+                ],
               },
             },
           },
@@ -49,8 +53,13 @@ export const GET = (async ({ url }) => {
     },
   });
 
+  // show blocks with more locs first
+  blocks.sort((a, b) => b.groups.length - a.groups.length);
+
+  const block = blocks[blockIdx];
+
   if (block == null) {
-    throw new Error(`microsynteny block not found with geneId: ${geneId}`);
+    return new Response(JSON.stringify({ blocks: 0, tracks: [], groups: [] }));
   }
 
   const genes = block.groups.flatMap((e) =>
@@ -91,7 +100,7 @@ export const GET = (async ({ url }) => {
     };
   });
 
-  console.log(util.inspect(tracks, false, null, true));
+  // console.log(util.inspect(tracks, false, null, true));
 
-  return new Response(JSON.stringify({ tracks, groups }));
+  return new Response(JSON.stringify({ blocks: blocks.length, tracks, groups }));
 }) satisfies RequestHandler;

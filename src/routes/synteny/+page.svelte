@@ -1,19 +1,18 @@
 <script lang="ts">
   import { browser } from "$app/environment";
+  import { page as svpage } from "$app/stores";
   import { getAllGenes } from "$lib/api";
   import GeneTable from "$lib/components/GeneTable.svelte";
   import type { GeneEntry } from "$lib/components/geneTable";
-  import type { SelectedEntry, SelectionType } from "$lib/selection";
+  import TooltipGroup from "$lib/components/tooltip_group.svelte";
+  import type { SelectionType } from "$lib/selection";
   import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
-  import { Column, Grid, Row } from "carbon-components-svelte";
+  import { Button, Column, Grid, PaginationNav, Row, TextInput } from "carbon-components-svelte";
   import type { D3ZoomEvent } from "d3";
   import * as d3 from "d3";
   import * as z from "zod";
   import Gene from "./gene.svelte";
-  import Popup from "$lib/components/popup.svelte";
-  import TooltipGroup from "$lib/components/tooltip_group.svelte";
-  import { followCursor } from "tippy.js";
 
   //
   const preferredColours = ["#ff594f"];
@@ -43,12 +42,15 @@
   }
 
   //
-  let loading = true;
+  let loading = false;
   // let loadingGenes = false;
 
   let page = 1;
   let perPage = 10;
   let shownPages = 7;
+
+  let blockIdx = 1;
+  let blockCount = 0;
 
   let entries: GeneEntry[];
   // $: entries = block == null ?
@@ -146,6 +148,7 @@
 
   //
   const schema = z.object({
+    blocks: z.number().gte(0),
     tracks: z.array(
       z.object({
         id: z.string().uuid(),
@@ -256,9 +259,34 @@
   $: links = block == null ? null : regenerateLinks(block);
   $: colours = block == null ? null : regenerateColours(block);
 
-  const updateSyntenyBlocks = async (geneId: string) => {
+  //
+  let queryId: string = "";
+
+  $: if ($svpage.url.searchParams.get("queryId") != null) {
+    console.log("aaa");
+
+    queryId = $svpage.url.searchParams.get("queryId")!;
+
+    loading = true;
+    resetBlockIdx();
+  }
+
+  const resetBlockIdx = () => {
+    blockIdx = 1;
+  };
+
+  const resetTablePage = () => {
+    page = 1;
+  };
+
+  const updateSyntenyBlocks = async () => {
+    if (queryId.length === 0) {
+      return;
+    }
+
     const query = intoQuery({
-      geneId,
+      queryId,
+      blockIdx: blockIdx - 1,
     });
 
     const res = await fetch(`/ohnologs/api/synteny${query}`);
@@ -271,42 +299,33 @@
     }
 
     block = parsed.data;
+    blockCount = parsed.data.blocks;
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
-    const { data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+    if (geneIds.length > 0) {
+      const { data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
 
-    entries = data;
+      entries = data;
+    } else {
+      entries = [];
+    }
 
     loading = false;
   };
 
-  $: if (browser && loading) {
-    const geneId = "ENSGALG00010012850";
+  $: {
+    [blockIdx];
 
-    updateSyntenyBlocks(geneId);
+    loading = true;
   }
 
-  //
-  // const resetPage = () => {
-  //   if (page === 1) {
-  //     loading = true;
-  //   }
+  $: if (browser && loading) {
+    // const geneId = "ENSGALG00010012850";
 
-  //   page = 1;
-  // };
-
-  // $: (() => {
-  //   [block];
-
-  //   resetPage();
-  // })();
-
-  // $: (() => {
-  //   [page];
-
-  //   loading = true;
-  // })();
+    resetTablePage();
+    updateSyntenyBlocks();
+  }
 
   $: if (browser && genes != null) {
     const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
@@ -490,17 +509,6 @@
 
     action = { state: "none" };
   };
-
-  //
-  // let selectedGene: string | null = null;
-
-  // let thing: Element;
-
-  // let flag = false;
-
-  // $: if (thing != null) {
-  //   flag = true;
-  // }
 </script>
 
 <!--
@@ -571,92 +579,117 @@
   <Row>
     <Column>
       {#if block != null && genes != null && links != null && colours != null}
-        <svg
-          bind:this={canvas}
-          width={dims.size.width}
-          height={dims.size.height}
-          cursor={svgCursor[action.state]}
-          on:mousedown={handleMouseDown}
-          on:mouseup={handleMouseUp}
-        >
-          <g transform="translate({dims.margin.left},{dims.margin.top})">
-            <g bind:this={panned}>
-              <g>
-                {#each links as { groupId, sx, ex, si, ei }}
-                  <line
-                    x1={scale.x(sx)}
-                    y1={si * trackSpacing - geneHeight / 2}
-                    x2={scale.x(ex)}
-                    y2={ei * trackSpacing - geneHeight / 2}
-                    stroke={selected.includes(groupId) ? colours[groupId] : "#fafafa"}
-                  />
-                {/each}
-              </g>
-              <g>
+        {#if block.tracks.length === 0}
+          <p>synteny not found :(</p>
+        {:else}
+          <svg
+            bind:this={canvas}
+            width={dims.size.width}
+            height={dims.size.height}
+            cursor={svgCursor[action.state]}
+            on:mousedown={handleMouseDown}
+            on:mouseup={handleMouseUp}
+          >
+            <g transform="translate({dims.margin.left},{dims.margin.top})">
+              <g bind:this={panned}>
                 <g>
-                  <TooltipGroup
-                    options={{
-                      allowHTML: true,
-                      moveTransition: "transform 0.2s ease-out",
-                      delay: [200, 100],
-                      theme: "light",
-                      interactive: true,
-                      placement: "top",
-                      appendTo: document.body,
-                    }}
-                  >
-                    {#each genes as gene}
-                      <Gene
-                        species={gene.species.name}
-                        scaffold={gene.track.name}
-                        geneId={gene.geneId}
-                        proteinId={gene.proteinId}
-                        start={gene.start}
-                        end={gene.end}
-                        x={scale.x(gene.start - gene.track.start)}
-                        y={gene.track.index * trackSpacing - geneHeight}
-                        width={scale.x(gene.end - gene.start)}
-                        height={geneHeight}
-                        colour={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
-                        cursor={geneCursor[action.state]}
-                        on:click={() => handleSelect(gene.groupId)}
-                      />
-                    {/each}
-                  </TooltipGroup>
-                </g>
-
-                {#each block.tracks as track, i}
-                  <g>
+                  {#each links as { groupId, sx, ex, si, ei }}
                     <line
-                      x1={0}
-                      y1={i * trackSpacing}
-                      x2={scale.x(track.end - track.start)}
-                      y2={i * trackSpacing}
-                      stroke="black"
+                      x1={scale.x(sx)}
+                      y1={si * trackSpacing - geneHeight / 2}
+                      x2={scale.x(ex)}
+                      y2={ei * trackSpacing - geneHeight / 2}
+                      stroke={selected.includes(groupId) ? colours[groupId] : "#fafafa"}
                     />
-                    <text x={0} y={i * trackSpacing + 20} pointer-events="none"
-                      >{track.scaffold.species}::{track.scaffold.name}</text
+                  {/each}
+                </g>
+                <g>
+                  <g>
+                    <TooltipGroup
+                      options={{
+                        allowHTML: true,
+                        moveTransition: "transform 0.2s ease-out",
+                        delay: [200, 100],
+                        theme: "light",
+                        interactive: true,
+                        placement: "top",
+                        appendTo: document.body,
+                      }}
                     >
+                      {#each genes as gene}
+                        <Gene
+                          species={gene.species.name}
+                          scaffold={gene.track.name}
+                          geneId={gene.geneId}
+                          proteinId={gene.proteinId}
+                          start={gene.start}
+                          end={gene.end}
+                          x={scale.x(gene.start - gene.track.start)}
+                          y={gene.track.index * trackSpacing - geneHeight}
+                          width={scale.x(gene.end - gene.start)}
+                          height={geneHeight}
+                          colour={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
+                          cursor={geneCursor[action.state]}
+                          on:click={() => handleSelect(gene.groupId)}
+                        />
+                      {/each}
+                    </TooltipGroup>
                   </g>
-                {/each}
-              </g>
-            </g>
-            {#if action.state === "select" && action.x != null && action.y != null && action.mx != null && action.my != null}
-              <g>
-                <rect
-                  x={Math.min(action.x, action.mx)}
-                  y={Math.min(action.y, action.my)}
-                  width={Math.max(action.mx, action.x) - Math.min(action.mx, action.x)}
-                  height={Math.max(action.my, action.y) - Math.min(action.my, action.y)}
-                  fill="#00000022"
-                />
-              </g>
-            {/if}
-          </g>
 
-          <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
-        </svg>
+                  {#each block.tracks as track, i}
+                    <g>
+                      <line
+                        x1={0}
+                        y1={i * trackSpacing}
+                        x2={scale.x(track.end - track.start)}
+                        y2={i * trackSpacing}
+                        stroke="black"
+                      />
+                      <text x={0} y={i * trackSpacing + 20} pointer-events="none"
+                        >{track.scaffold.species}::{track.scaffold.name}</text
+                      >
+                    </g>
+                  {/each}
+                </g>
+              </g>
+              {#if action.state === "select" && action.x != null && action.y != null && action.mx != null && action.my != null}
+                <g>
+                  <rect
+                    x={Math.min(action.x, action.mx)}
+                    y={Math.min(action.y, action.my)}
+                    width={Math.max(action.mx, action.x) - Math.min(action.mx, action.x)}
+                    height={Math.max(action.my, action.y) - Math.min(action.my, action.y)}
+                    fill="#00000022"
+                  />
+                </g>
+              {/if}
+            </g>
+
+            <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
+          </svg>
+        {/if}
       {/if}
+    </Column>
+    <Column>
+      {#if blockCount !== 0}
+        <div class="pagination">
+          <PaginationNav bind:page={blockIdx} total={blockCount} />
+        </div>
+      {/if}
+    </Column>
+  </Row>
+
+  <Row>
+    <Column>
+      <TextInput bind:value={queryId} labelText="Gene or protein ID" />
+
+      <br />
+
+      <Button
+        on:click={() => {
+          loading = true;
+        }}>Search</Button
+      >
     </Column>
   </Row>
 
@@ -678,3 +711,10 @@
     </Row>
   {/if}
 </Grid>
+
+<style lang="postcss">
+  .pagination {
+    display: flex;
+    justify-content: center;
+  }
+</style>

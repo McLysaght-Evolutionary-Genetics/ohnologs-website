@@ -142,7 +142,7 @@
             <span
               >{cell.value}
               <Link href="/ohnologs/tree?protein={cell.value}" icon={TreeView} />
-              <Link href="/ohnologs/synteny?protein={cell.value}" icon={Scale} /></span
+              <Link href="/ohnologs/synteny?queryId={cell.value}" icon={Scale} /></span
             >
           {:else}{cell.value}
           {/if}
