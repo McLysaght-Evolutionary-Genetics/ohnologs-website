@@ -24,7 +24,10 @@
   import Selection from "./Selection.svelte";
   import type { SelectionEvent } from "./selection";
 
-  // data
+  //
+  let windowWidth: number;
+  let windowHeight: number;
+
   const dims = {
     size: {
       width: 900 * 1.3,
@@ -33,13 +36,40 @@
     margin: {
       top: 20,
       right: 20,
-      bottom: 60,
-      left: 180,
+      bottom: 70,
+      left: 70,
     },
   };
 
-  const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
-  const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
+  $: innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
+  $: innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
+
+  $: if (windowWidth != null) {
+    if (windowWidth < 672) {
+      dims.size.width = windowWidth - 16 * 9;
+      dims.size.height = windowHeight / 2;
+    }
+
+    if (windowWidth >= 672 && windowWidth < 1584) {
+      dims.size.width = windowWidth - 16 * 11;
+      dims.size.height = windowHeight / 1.4;
+    }
+
+    if (windowWidth >= 1584 && windowWidth < 1697) {
+      dims.size.width = windowWidth - 16 * 12;
+      dims.size.height = windowHeight / 1.3;
+    }
+
+    if (windowWidth >= 1697 && windowWidth < 1921) {
+      dims.size.width = 1696 - 16 * 12;
+      dims.size.height = windowHeight / 1.3;
+    }
+
+    if (windowWidth >= 1921) {
+      dims.size.width = 1696 - 16 * 12;
+      dims.size.height = windowHeight / 1.3;
+    }
+  }
 
   // old af!
   interface Region {
@@ -449,6 +479,8 @@
   $: if (browser) updateGenes(query, subject);
 </script>
 
+<svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
+
 <Grid padding>
   <Row>
     <Column>
@@ -514,6 +546,13 @@
                 {/each}
               </g>
               <g>
+                {#each ppos as [x, y, c]}
+                  {console.log(scale.x(x), scale.y(y))}
+
+                  <circle cx={scale.x(x)} cy={scale.y(y)} r={3} style="fill: {c}" />
+                {/each}
+              </g>
+              <g>
                 {#each vlines as x}
                   <line x1={scale.x(x)} x2={scale.x(x)} y2={innerHeight} stroke="black" />
                 {/each}
@@ -534,8 +573,11 @@
                   {/each}
                 </g>
                 <g>
-                  <text x={(dims.size.width - dims.margin.left) / 2} y={dims.size.height - 25} font-size="large"
-                    >{query}</text
+                  <text
+                    x={(dims.size.width - dims.margin.left) / 2}
+                    y={dims.size.height - 35}
+                    font-size="large"
+                    text-anchor="middle">{query}</text
                   >
                 </g>
               </g>
@@ -563,16 +605,10 @@
                     x={-50}
                     y={(dims.size.height - dims.margin.top) / 2}
                     transform="rotate(-90, {-50}, {(dims.size.height - dims.margin.top) / 2})"
-                    font-size="large">{subject}</text
+                    font-size="large"
+                    text-anchor="middle">{subject}</text
                   >
                 </g>
-              </g>
-              <g>
-                {#each ppos as [x, y, c]}
-                  {console.log(scale.x(x), scale.y(y))}
-
-                  <circle cx={scale.x(x)} cy={scale.y(y)} r={3} style="fill: {c}" />
-                {/each}
               </g>
             </g>
 
@@ -585,6 +621,8 @@
               on:selection={handleSelection}
             />
           </g>
+
+          <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
         </svg>
       </Column>
     </Row>

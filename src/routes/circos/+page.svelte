@@ -27,8 +27,8 @@
 
   const dims = {
     size: {
-      width: 900 * 1.3,
-      height: 720 * 1.4,
+      width: 900,
+      height: 720,
     },
     margin: {
       top: 20,
@@ -38,35 +38,56 @@
     },
   };
 
-  const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
-  const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
+  $: innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
+  $: innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
-  const innerRadius = 240 * 1.7;
+  let innerRadius = 240;
 
-  const radiusPadding = 5;
-  const outerRadius = innerRadius + radiusPadding;
+  let radiusPadding = 5;
+  $: outerRadius = innerRadius + radiusPadding;
 
   const padding = 0.1;
+  let selectorSize = 100;
 
   $: if (windowWidth != null) {
     if (windowWidth < 672) {
       dims.size.width = windowWidth - 16 * 9;
       dims.size.height = windowHeight / 2;
+
+      selectorSize = 35;
+      innerRadius = Math.min(dims.size.width, dims.size.height) / 2 - selectorSize - 10;
     }
 
     if (windowWidth >= 672 && windowWidth < 1584) {
       dims.size.width = windowWidth - 16 * 11;
-      dims.size.height = windowHeight / 2;
+      dims.size.height = windowHeight / 1.4;
+
+      selectorSize = 50;
+      innerRadius = Math.min(dims.size.width, dims.size.height) / 2 - selectorSize - 15;
     }
 
     if (windowWidth >= 1584 && windowWidth < 1697) {
       dims.size.width = windowWidth - 16 * 12;
-      dims.size.height = windowHeight / 2;
+      dims.size.height = windowHeight / 1.3;
+
+      selectorSize = 55;
+      innerRadius = Math.min(dims.size.width, dims.size.height) / 2 - selectorSize - 15;
     }
 
-    if (windowWidth >= 1697) {
+    if (windowWidth >= 1697 && windowWidth < 1921) {
       dims.size.width = 1696 - 16 * 12;
-      dims.size.height = windowHeight / 2;
+      dims.size.height = windowHeight / 1.3;
+
+      selectorSize = 55;
+      innerRadius = Math.min(dims.size.width, dims.size.height) / 2 - selectorSize - 20;
+    }
+
+    if (windowWidth >= 1921) {
+      dims.size.width = 1696 - 16 * 12;
+      dims.size.height = windowHeight / 1.3;
+
+      selectorSize = 70;
+      innerRadius = Math.min(dims.size.width, dims.size.height) / 2 - selectorSize - 20;
     }
   }
 
@@ -123,22 +144,23 @@
 
   let start = 0;
 
-  $: for (let s of segments) {
-    const end = (s.length / totalScaffoldLength) * (Math.PI * 2 - padding * segments.length);
+  $: {
+    arcs = [];
 
-    arcs.push({
-      scaffoldId: s.id,
-      scaffoldName: s.name,
-      innerRadius,
-      outerRadius,
-      startAngle: start,
-      endAngle: start + end,
-    });
+    for (let s of segments) {
+      const end = (s.length / totalScaffoldLength) * (Math.PI * 2 - padding * segments.length);
 
-    start = start + end + padding;
+      arcs.push({
+        scaffoldId: s.id,
+        scaffoldName: s.name,
+        innerRadius,
+        outerRadius,
+        startAngle: start,
+        endAngle: start + end,
+      });
 
-    // keep svelte happy
-    arcs = arcs;
+      start = start + end + padding;
+    }
   }
 
   // TODO: benchmark this fn (it may be quite slow rn)
@@ -329,7 +351,7 @@
     if (canvas != null) {
       const fragment = document.createDocumentFragment();
 
-      if (g != null) {
+      if ([...canvas.children].includes(g)) {
         canvas.removeChild(g);
       }
 
@@ -405,15 +427,18 @@
                   }}
                   points="{Math.sin(startAngle - padding / 2) * innerRadius},{-Math.cos(startAngle - padding / 2) *
                     innerRadius} {Math.sin(endAngle + padding / 2) * innerRadius},{-Math.cos(endAngle + padding / 2) *
-                    innerRadius} {Math.sin(endAngle) * (innerRadius + 100)},{-Math.cos(endAngle) *
-                    (innerRadius + 100)} {Math.sin(startAngle) * (innerRadius + 100)},{-Math.cos(startAngle) *
-                    (innerRadius + 100)}"
+                    innerRadius} {Math.sin(endAngle) * (innerRadius + selectorSize)},{-Math.cos(endAngle) *
+                    (innerRadius + selectorSize)} {Math.sin(startAngle) * (innerRadius + selectorSize)},{-Math.cos(
+                    startAngle,
+                  ) *
+                    (innerRadius + selectorSize)}"
                   fill="#fff0f0"
                 />
               </g>
               <g
-                transform="translate({Math.sin((startAngle + endAngle) / 2) * (outerRadius + 30) +
-                  innerWidth / 2}, {-Math.cos((startAngle + endAngle) / 2) * (outerRadius + 30) + innerHeight / 2})"
+                transform="translate({Math.sin((startAngle + endAngle) / 2) * (outerRadius + selectorSize * 0.4) +
+                  innerWidth / 2}, {-Math.cos((startAngle + endAngle) / 2) * (outerRadius + selectorSize * 0.4) +
+                  innerHeight / 2})"
               >
                 <text text-anchor="middle" pointer-events="none">{scaffoldName}</text>
               </g>
@@ -427,32 +452,10 @@
               </g>
             {/each}
           </g>
-          <g bind:this={canvas} transform="translate({innerWidth / 2},{innerHeight / 2})">
-            <!-- {#each lines as [d, colour, scaffoldId]}
-                {#if selectedChromosome != null && scaffoldId != selectedChromosome}
-                  <path
-                    {d}
-                    fill={"#ff594f"}
-                    stroke={"#ff594f"}
-                    stroke-width={0.000001}
-                    transform="translate({innerWidth / 2},{innerHeight / 2})"
-                    pointer-events="none"
-                  />
-                {:else}
-                  <path
-                    {d}
-                    fill={colour}
-                    stroke={colour}
-                    stroke-width={0.000001}
-                    transform="translate({innerWidth / 2},{innerHeight / 2})"
-                    pointer-events="none"
-                  />
-                {/if}
-              {/each} -->
-
-            <!-- <text>wtf</text> -->
-          </g>
+          <g bind:this={canvas} transform="translate({innerWidth / 2},{innerHeight / 2})" />
         </g>
+
+        <rect width="100%" height="100%" style="fill:none;stroke:black;stroke-width:1" />
       </svg>
       <!-- </Column>
     </Row> -->
