@@ -33,12 +33,22 @@
   onMount(() => {
     const tree = new PhyloTree(newick);
 
+    // leaf.annotation = "asd";
+
+    tree.assignAttributes({ amphioxus_XP_035682474: "value" });
+
+    const leaf = tree.getNodes().data.children.find((e: any) => e.name.includes("amphioxus"));
+    // leaf.name = "amphioxus";
+
+    console.log(leaf);
+
     tree.render({
       height: dims.size.height,
       width: dims.size.width,
       "left-right-spacing": "fit-to-size",
       "top-bottom-spacing": "fit-to-size",
       "align-tips": true,
+      brush: false,
     });
 
     if (tree.display) {

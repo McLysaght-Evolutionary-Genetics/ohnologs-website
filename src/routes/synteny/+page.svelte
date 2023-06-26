@@ -43,7 +43,7 @@
 
   //
   let loading = false;
-  // let loadingGenes = false;
+  let loadingGenes = false;
 
   let page = 1;
   let perPage = 10;
@@ -185,6 +185,9 @@
   let links: { groupId: string; sx: number; ex: number; si: number; ei: number }[] | null = null;
   let colours: Record<string, string> | null = null;
 
+  let currentBlockIdx = 1;
+  let currentQueryId = "";
+
   const regenerateGenes = (block: z.infer<typeof schema>) => {
     return block.tracks.flatMap((e, i) =>
       e.genes.map((f) => ({
@@ -263,8 +266,6 @@
   let queryId = "";
 
   $: if ($svpage.url.searchParams.get("queryId") != null) {
-    console.log("aaa");
-
     queryId = $svpage.url.searchParams.get("queryId")!;
 
     loading = true;
@@ -279,13 +280,28 @@
     page = 1;
   };
 
+  const resetQueryId = () => {
+    queryId = "";
+  };
+
   const updateSyntenyBlocks = async () => {
-    if (queryId.length === 0) {
+    if (currentQueryId.length === 0) {
+      block = {
+        blocks: 0,
+        tracks: [],
+        groups: [],
+      };
+
+      blockCount = 0;
+
+      loading = false;
+      loadingGenes = true;
+
       return;
     }
 
     const query = intoQuery({
-      queryId,
+      queryId: currentQueryId,
       blockIdx: blockIdx - 1,
     });
 
@@ -300,6 +316,10 @@
 
     block = parsed.data;
     blockCount = parsed.data.blocks;
+    currentBlockIdx = blockIdx;
+
+    loading = false;
+    loadingGenes = true;
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
@@ -311,25 +331,47 @@
       entries = [];
     }
 
-    loading = false;
+    loadingGenes = false;
   };
 
-  $: {
-    [blockIdx];
+  // ENSTGUG00000005774
+
+  // let skipNextUpdateCosDaddySvelteDoesntLikeMeVeryMuch = false;
+
+  // $: if (blockCount > 0 && blockIdx) {
+  //   blockIdx;
+
+  //   console.log(loading);
+
+  //   doTheThing();
+  // }
+
+  const doTheThing = () => {
+    loading = true;
+  };
+
+  $: if (blockIdx !== currentBlockIdx) {
+    console.log("plshelp");
 
     loading = true;
   }
 
-  $: if (browser && loading) {
-    // const geneId = "ENSGALG00010012850";
-
+  $: if (loading) {
     resetTablePage();
     updateSyntenyBlocks();
+    resetQueryId();
+
+    block = block;
   }
 
-  $: if (browser && genes != null) {
-    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
+  $: if (!loading) {
+    page;
 
+    loadingGenes = true;
+  }
+
+  $: if (browser && loadingGenes && genes != null) {
+    const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
     updateTableEntries(geneIds);
   }
 
@@ -687,6 +729,9 @@
 
       <Button
         on:click={() => {
+          resetBlockIdx();
+
+          currentQueryId = queryId;
           loading = true;
         }}>Search</Button
       >
@@ -694,12 +739,12 @@
   </Row>
 
   <!-- table -->
-  {#if block != null && links != null && colours != null}
+  {#if block != null && blockCount > 0 && links != null && colours != null}
     <Row>
       <Column>
         <GeneTable
           bind:page
-          bind:loading
+          bind:loading={loadingGenes}
           title={"Ohnologs"}
           description={"The ohnologs matching your currently selected filters are displayed below"}
           {perPage}

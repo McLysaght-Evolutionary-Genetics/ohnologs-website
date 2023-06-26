@@ -53,9 +53,23 @@ export const GET = (async ({ url }) => {
         ...(geneIds.length === 0
           ? {}
           : {
-              id: {
-                in: geneIds,
-              },
+              OR: [
+                {
+                  id: {
+                    in: geneIds,
+                  },
+                },
+                {
+                  geneId: {
+                    in: geneIds,
+                  },
+                },
+                {
+                  proteinId: {
+                    in: geneIds,
+                  },
+                },
+              ],
             }),
 
         scaffold: {
@@ -106,9 +120,23 @@ export const GET = (async ({ url }) => {
         ...(geneIds.length === 0
           ? {}
           : {
-              id: {
-                in: geneIds,
-              },
+              OR: [
+                {
+                  id: {
+                    in: geneIds,
+                  },
+                },
+                {
+                  geneId: {
+                    in: geneIds,
+                  },
+                },
+                {
+                  proteinId: {
+                    in: geneIds,
+                  },
+                },
+              ],
             }),
 
         scaffold: {

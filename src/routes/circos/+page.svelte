@@ -2,18 +2,17 @@
   import * as d3 from "d3";
 
   import { browser } from "$app/environment";
+  import { page as svpage } from "$app/stores";
+  import { getAllGenes } from "$lib/api";
   import GeneTable from "$lib/components/GeneTable.svelte";
   import type { GeneEntry } from "$lib/components/geneTable";
   import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
   import { error } from "@sveltejs/kit";
-  import { Column, Grid, Row, Select, SelectItem } from "carbon-components-svelte";
+  import { Button, Column, Grid, Row, Select, SelectItem, TextInput } from "carbon-components-svelte";
   import { get } from "svelte/store";
   import type { Link, Segment } from "../api/circos/+server";
   import type { PageData } from "./$types";
-  import { getAllGenes } from "$lib/api";
-  import c from "tinycolor2";
-  import { onMount } from "svelte";
 
   //
   type Scaffold = {
@@ -279,7 +278,28 @@
   let entries: GeneEntry[] = [];
 
   //
+  let altQueryId = "";
   let query: string;
+
+  const getSpeciesFromAltQuery = async () => {
+    console.log(altQueryId);
+
+    const { data } = await getAllGenes([altQueryId], [], [], [], [], [], false, 1, 1);
+
+    const gene = data[0];
+
+    if (gene != null) {
+      query = gene.species;
+
+      if (!$selection.map((e) => e.id).includes(gene.id)) {
+        $selection = [...$selection, { id: gene.id, type: "static" }];
+      }
+    } else {
+      query = "none";
+    }
+
+    altQueryId = "";
+  };
 
   const updateGenes = async (query: string) => {
     const lookup = Object.fromEntries(data.species.map(([k, v]) => [v, k])) as Record<string, string>;
@@ -472,6 +492,20 @@
           <SelectItem value={sp} />
         {/each}
       </Select>
+    </Column>
+  </Row>
+
+  <Row>
+    <Column>
+      <TextInput bind:value={altQueryId} labelText="Gene or protein ID" />
+
+      <br />
+
+      <Button
+        on:click={() => {
+          getSpeciesFromAltQuery();
+        }}>Search</Button
+      >
     </Column>
   </Row>
 

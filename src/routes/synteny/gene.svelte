@@ -57,7 +57,7 @@
               </tr>
               <tr>
                 <td>Source</td>
-                <td><a href="https://www.ensembl.org/Homo_sapiens/Gene/Summary?g=${geneId}" target="_blank">Ensembl</a></td>
+                <td><a href="https://www.ensembl.org/Gene/Summary?g=${geneId}" target="_blank">Ensembl</a></td>
               </tr>
             </tbody>
           </table>
