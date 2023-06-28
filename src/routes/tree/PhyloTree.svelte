@@ -10,6 +10,7 @@
   import * as p from "phylotree";
 
   import "./phylotree.css";
+  import { getAllSpecies } from "$lib/api";
 
   // const
   const dims = {
@@ -27,6 +28,7 @@
 
   // params
   export let newick: string;
+  export let species: string[];
   export let loading = false;
 
   //
@@ -34,8 +36,6 @@
 
   const getTreeNodes = (root: any): any[] => {
     let nodes = [];
-
-    // console.log(root);
 
     nodes.push(root);
 
@@ -47,8 +47,48 @@
   };
 
   //
-  onMount(() => {
+  onMount(async () => {
     const tree = new PhyloTree(newick);
+
+    const nodes = getTreeNodes(tree.getNodes());
+
+    // TODO: fix amphioxus hack
+    const maxSpLen = Math.max(...["amphioxus", ...species].map((e) => e.length));
+
+    for (const node of nodes) {
+      // internal node
+      if (node.children != null) {
+        continue;
+      }
+
+      const meta: { species?: string; protein?: string; pvc?: number; pgc?: number } = {};
+
+      // TODO: fix amphioxus hack
+      for (const sp of ["amphioxus", ...species]) {
+        if (node.data.name.startsWith(sp)) {
+          meta.species = sp;
+
+          break;
+        }
+      }
+
+      // this will surely come back to bite me in the ass but oh well
+      if (meta.species == null) {
+        throw new Error("undefined leaf species");
+      }
+
+      // species + _
+      const rest = node.data.name.slice(meta.species.length + 1).split("---");
+
+      meta.protein = rest[0];
+
+      const recon = rest[1] == null ? [null, null] : rest[1].split("|").map((e: string) => parseInt(e));
+
+      meta.pvc = recon[0];
+      meta.pgc = recon[1];
+
+      node.data.name = `${meta.protein} (${meta.species})`;
+    }
 
     const rendered = tree.render({
       height: dims.size.height,
@@ -59,16 +99,12 @@
       brush: false,
     });
 
-    let i = 0;
-
     rendered.style_edges((element: any, data: any) => {
       if (data.target.data.name !== "wgd") {
         return;
       }
 
       const locator = rendered.placeAlongAnEdge(data, 0);
-
-      console.log(data);
 
       const class_name = `phylotree-wgd-${data.target.id}`;
       const colour = "red";
@@ -104,14 +140,6 @@
       container.appendChild(svg);
     }
   });
-
-  // $: if (loading) {
-  //   updateTree();
-
-  //   console.log(newick);
-
-  //   loading = false;
-  // }
 </script>
 
 <div bind:this={container} />
