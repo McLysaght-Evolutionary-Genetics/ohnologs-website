@@ -5,30 +5,28 @@ import type { RequestHandler } from "./$types";
 const prisma = new PrismaClient();
 
 export const GET = (async ({ url }) => {
-  const species = findQuery(url, "species");
-  const protein = findQuery(url, "protein");
+  const queryId = findQuery(url, "queryId");
+
+  if (queryId == null) {
+    return new Response(JSON.stringify({ trees: [], genes: [] }));
+  }
 
   const trees = await prisma.tree.findMany({
     where: {
-      ...(species == null
-        ? {}
-        : {
-            species: {
-              some: {
-                species: {
-                  name: species,
-                },
-              },
-            },
-          }),
-
-      ...(protein == null
+      ...(queryId == null
         ? {}
         : {
             genes: {
               some: {
                 gene: {
-                  proteinId: protein,
+                  OR: [
+                    {
+                      geneId: queryId,
+                    },
+                    {
+                      proteinId: queryId,
+                    },
+                  ],
                 },
               },
             },

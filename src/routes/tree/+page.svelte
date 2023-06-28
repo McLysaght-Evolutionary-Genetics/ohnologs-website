@@ -30,7 +30,7 @@
   let loadingTree = false;
 
   let species: string | null = null;
-  let protein: string | null = null;
+  let queryId: string | null = null;
 
   //
   let count = 0;
@@ -50,7 +50,7 @@
   }
 
   if ($svpage.url.searchParams.get("protein")) {
-    protein = $svpage.url.searchParams.get("protein");
+    queryId = $svpage.url.searchParams.get("protein");
 
     loadingTree = true;
   }
@@ -66,8 +66,8 @@
       params["species"] = species;
     }
 
-    if (protein != null && protein !== "") {
-      params["protein"] = protein;
+    if (queryId != null && queryId !== "") {
+      params["queryId"] = queryId;
     }
 
     const query = intoQuery(params);
@@ -85,9 +85,13 @@
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
-    const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+    if (geneIds.length > 0) {
+      const { data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
 
-    entries = data;
+      entries = data;
+    } else {
+      entries = [];
+    }
 
     loadingTable = false;
   };
@@ -97,23 +101,23 @@
     page = 1;
   };
 
-  $: (() => {
-    [genes];
+  $: {
+    genes;
 
     resetPage();
-  })();
+  }
 
-  $: (() => {
-    [page];
+  $: {
+    page;
 
     loadingTable = true;
-  })();
+  }
 
   $: if (browser && loadingTree) {
     updateTree();
   }
 
-  $: if (browser && loadingTable && genes.length > 0) {
+  $: if (browser && loadingTable) {
     const geneIds = genes.slice((page - 1) * perPage, page * perPage).map((e) => e.id);
 
     updateTableEntries(geneIds);
@@ -156,8 +160,7 @@
 
   <Row>
     <Column>
-      <!-- <TextInput bind:value={species} labelText="Species" /> -->
-      <TextInput bind:value={protein} labelText="Protein" />
+      <TextInput bind:value={queryId} labelText="Gene or protein ID" />
 
       <br />
 
@@ -170,7 +173,7 @@
   </Row>
 
   <!-- table -->
-  {#if (species != null && species !== "") || (protein != null && protein !== "")}
+  {#if entries.length > 0}
     <Row>
       <Column>
         <GeneTable
