@@ -9,12 +9,13 @@
     ContextMenuDivider,
     ContextMenuGroup,
     ContextMenuOption,
+    ExpandableTile,
     Grid,
     Row,
     Select,
     SelectItem,
   } from "carbon-components-svelte";
-  import { Area, AreaCustom, Column as ColumnIcon, Copy, Row as RowIcon } from "carbon-icons-svelte";
+  import { Area, AreaCustom, Column as ColumnIcon, Copy, Information, Row as RowIcon } from "carbon-icons-svelte";
   import * as d3 from "d3";
   import { get } from "svelte/store";
   import GeneTable from "../../lib/components/GeneTable.svelte";
@@ -482,36 +483,69 @@
 <svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 <Grid padding>
-  <Row>
-    <Column>
-      <p class="paragraph"><u><h3>Info:</h3></u></p>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
       <br />
-      <li>
-        You can select the query and subject species to display in the plot using the dropdown menus below. Selecting
-        both species will display a dot plot.
-      </li>
+      <p>The dotplot is a tool for visualising synteny between the chromosomes of different species.</p>
       <br />
-      <li>
-        <span style="color: blue">Blue</span> dots represent orthologs. <span style="color: red">Red</span> dots represent
-        orthologs that are currently in your selection.
-      </li>
+      <p><u>Plot settings:</u></p>
+      <p>
+        You can pick the 'query' and 'subject' species to by selecting them using the relevant dropdown menus below.
+      </p>
       <br />
-      <li>
-        Ohnologs can be selected either graphically by right clicking anywhere on the plot, or using the table below.
-      </li>
+      <p><u>Plot navigation:</u></p>
+      <p>
+        The plot displays the chromosomes of the query species (x-axis) and the subject species (y-axis). Each box
+        represents a chromosome-chromosome comparison. Blue dots show ohnologous relationships between chromosomes.
+        These will be displayed as orange if the query/subject gene is in the current selection (see data download
+        below). Unbroken diagonal lines are indicative of microsynteny while clouds of dots represent macrosynteny.
+      </p>
       <br />
-      <li>
-        All plot data can be downloaded by clicking the download button above the table. Alternatively, individual
-        ohnologs can be downloaded by selecting the relevant rows.
-      </li>
+      <p>
+        Right-clicking on any of the boxes will open a context menu. From here, all the genes in the current box, row,
+        or column can be added to the current selection. Alternatively, 'free selection' can be enabled producing a
+        selection box than can be moved and resized. Genes selected this way will also appear as selected in the table
+        and vice versa. The selection can be cleared by pressing the 'cancel' button above the gene table.
+      </p>
       <br />
-      <li style="font-style: italic">
-        <span style="background-color: yellow">This page is in development.</span> Most planned features should be present.
-        Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-      </li>
+      <p><u>Data download:</u></p>
+      <p>
+        Genes that appear in the plot will be displayed in a table below. All gene data can be downloaded by pressing
+        the 'download' button above the table. Alternatively, inidividual gene data can be downloaded by selecting the
+        desired rows. This can be done by clicking the checkbox next to each gene name. The selection can be cleared by
+        pressing the 'cancel' button above the table.
+      </p>
       <br />
-    </Column>
-  </Row>
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   {#if query != null && query !== "none" && subject != null && subject !== "none"}
     <Row>

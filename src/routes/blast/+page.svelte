@@ -3,7 +3,8 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import { geneSchema } from "$lib/types";
   import { error } from "@sveltejs/kit";
-  import { Button, ButtonSet, Column, Grid, Row, TextArea } from "carbon-components-svelte";
+  import { Button, ButtonSet, Column, ExpandableTile, Grid, Row, TextArea } from "carbon-components-svelte";
+  import { Information } from "carbon-icons-svelte";
   import * as z from "zod";
 
   //
@@ -17,27 +18,55 @@
 </script>
 
 <Grid padding>
-  <!-- tutorial -->
-  <Row>
-    <Column>
-      <div>
-        <p class="paragraph"><u><h3>Info:</h3></u></p>
-        <br />
-        <li>
-          You can search the database using BLAST - any ohnologs matching your search query will be displayed in the
-          table below.
-        </li>
-        <br />
-        <li>The query should be entered into the text box below in FASTA format - header followed by sequence.</li>
-        <br />
-        <li style="font-style: italic">
-          <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find.
-          Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-        </li>
-        <br />
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
       </div>
-    </Column>
-  </Row>
+    </div>
+    <div slot="below">
+      <br />
+      <p>All BLAST results are displayed in the table below.</p>
+      <br />
+      <p><u>Database BLAST:</u></p>
+      <p>
+        You can search our database using BLASTP by pasting a protein FASTA entry into the text area below. Clicking
+        'search' will begin the BLAST process.
+      </p>
+      <br />
+      <p><u>Data download:</u></p>
+      <p>
+        Any results will be displayed in a table below. All gene data can be downloaded by pressing the 'download'
+        button above the table. Alternatively, inidividual gene data can be downloaded by selecting the desired rows.
+        This can be done by clicking the checkbox next to each gene name. The selection can be cleared by pressing the
+        'cancel' button above the table.
+      </p>
+      <br />
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   <!-- search -->
   <Row>

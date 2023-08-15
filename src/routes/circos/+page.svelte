@@ -9,10 +9,11 @@
   import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
   import { error } from "@sveltejs/kit";
-  import { Button, Column, Grid, Row, Select, SelectItem, TextInput } from "carbon-components-svelte";
+  import { Button, Column, ExpandableTile, Grid, Row, Select, SelectItem, TextInput } from "carbon-components-svelte";
   import { get } from "svelte/store";
   import type { Link, Segment } from "../api/circos/+server";
   import type { PageData } from "./$types";
+  import { Information } from "carbon-icons-svelte";
 
   //
   type Scaffold = {
@@ -399,34 +400,65 @@
 <svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 <Grid padding>
-  <!-- tutorial -->
-  <Row>
-    <Column>
-      <p class="paragraph"><u><h3>Info:</h3></u></p>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
       <br />
-      <li>
-        You can select the species to display in the plot using the dropdown menu below. Selecting a species will
-        display a circos plot.
-      </li>
+      <p>The circos plot is a tool for visualising synteny between chromosomes within a species.</p>
       <br />
-      <li>
-        <span style="color: red">Red</span> arcs represent chromosomes. <span style="color: blue">Blue</span>
-        connections highlight paralogy relationships. <span style="color: green">Green</span> lines show paralogs that are
-        currently in your selection - ohnologs can be selected using the table below.
-      </li>
+      <p><u>Plot settings:</u></p>
+      <p>
+        You can pick the species to use for the plot either a) by directly selecting a 'query species' in the dropdown
+        menu or b) by pasting any gene/protein identifier into the textbox below and hitting 'search'. The identifier
+        will be matched against our database to find its species.
+      </p>
       <br />
-      <li>
-        All plot data can be downloaded by clicking the download button above the table. Alternatively, individual
-        ohnologs can be downloaded by selecting the relevant rows.
-      </li>
+      <p><u>Plot navigation:</u></p>
+      <p>
+        The plot displays all chromosomes belonging to the query species as labelled orange arcs. Ohnology relationships
+        between chromosomes are represented by blue arcs. These arcs will be highlighted in green for any genes present
+        in the current selection (see data download below). Ohnology relationships originating from a specific
+        chromosome can be highlighted by hovering the mouse cursor above any of the orange boxes associated with each
+        chromosome.
+      </p>
       <br />
-      <li style="font-style: italic">
-        <span style="background-color: yellow">This page is in development.</span> Most planned features should be present.
-        Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-      </li>
+      <p><u>Data download:</u></p>
+      <p>
+        Genes that appear in the plot will be displayed in a table below. All ene data can be downloaded by pressing the
+        'download' button above the table. Alternatively, inidividual gene data can be downloaded by selecting the
+        desired rows. This can be done by clicking the checkbox next to each gene name. The selection can be cleared by
+        pressing the 'cancel' button above the table.
+      </p>
       <br />
-    </Column>
-  </Row>
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   <!-- figure -->
   {#if query != null && query != "none"}

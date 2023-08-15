@@ -4,9 +4,10 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import type { GeneEntry } from "$lib/components/geneTable";
   import { selection } from "$lib/selection";
-  import { Checkbox, Column, Grid, MultiSelect, Row } from "carbon-components-svelte";
+  import { Checkbox, Column, ExpandableTile, Grid, MultiSelect, Row } from "carbon-components-svelte";
   import type { MultiSelectItem } from "carbon-components-svelte/types/MultiSelect/MultiSelect.svelte";
   import type { PageData } from "./$types";
+  import { Information } from "carbon-icons-svelte";
 
   //
   export let data: PageData;
@@ -148,25 +149,64 @@
 
 <!-- svelte-ignore missing-declaration -->
 <Grid padding>
-  <div>
-    <p class="paragraph"><u><h3>Info:</h3></u></p>
-    <br />
-    <li>
-      You can use the dropdown menus below to filter ohnologs according to your needs - any ohnologs matching your
-      filters will be displayed in the table below.
-    </li>
-    <br />
-    <li>
-      All ohnolog data can be downloaded by clicking the download button above the table. Alternatively, individual
-      ohnolog data can be downloaded by selecting the relevant rows.
-    </li>
-    <br />
-    <li style="font-style: italic">
-      <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find. Any
-      feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-    </li>
-    <br />
-  </div>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
+      <br />
+      <p>All genes in our database are displayed in the table below.</p>
+      <br />
+      <p><u>Data filtering:</u></p>
+      <p>
+        Genes can be filtered by species/chromosome/segment using the 'species', 'chromosome', and 'segment' dropdown
+        menus. Segments refer to breaks in macro-synteny that were used to reconstruct ancestral vertebrate/ganthostome
+        genomes. Genes can also be filtered by source database - such as Ensembl or Refseq - using the 'source' dropdown
+        menu.
+      </p>
+      <br />
+      <p>
+        The genes in our database have been classified as ohnologs based on multiple sources of evience. Ohnologs with
+        support based on specific types of evidence can be filtered using the 'labels' dropdown menu. By default, any
+        genes with at least one selected label will be displayed. Alternatively, 'strict' matching an be enabled by
+        clicking the checkbox under the label dropdown menu. This will only display genes that have all of the selected
+        labels (or a superset thereof).
+      </p>
+      <br />
+      <p><u>Data download:</u></p>
+      <p>
+        All gene data can be downloaded by pressing the 'download' button above the table. Alternatively, inidividual
+        gene data can be downloaded by selecting the desired rows. This can be done by clicking the checkbox next to
+        each gene name. The selection can be cleared by pressing the 'cancel' button above the table.
+      </p>
+      <br />
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   <!-- filters -->
   <Row>

@@ -6,6 +6,7 @@
   import {
     Column,
     DataTable,
+    ExpandableTile,
     FileUploaderDropContainer,
     FileUploaderItem,
     Grid,
@@ -13,6 +14,7 @@
     Row,
     TextArea,
   } from "carbon-components-svelte";
+  import { Information } from "carbon-icons-svelte";
 
   //
   type FileType = "fasta" | "tsv" | "csv" | "list" | "unknown";
@@ -347,23 +349,56 @@
 </script>
 
 <Grid padding>
-  <!-- tutorial -->
-  <Row>
-    <Column>
-      <p class="paragraph"><u><h3>Info:</h3></u></p>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
       <br />
-      <li>
-        You can search the database by providing FASTA files, gene tables, or gene lists - any ohnologs matching your
-        search query will be displayed in the table below.
-      </li>
+      <p>All search results are displayed in the table below.</p>
       <br />
-      <li style="font-style: italic">
-        <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find. Any
-        feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-      </li>
+      <p><u>Database search:</u></p>
+      <p>
+        You can search our database for gene or protein identifiers either a) by uploading a FASTA file or gene
+        table/list or b) by pasting the content of the FASTA file or gene table/list directly into the text area. Files
+        can be uploaded by clicking on or dragging files onto the upload area below.
+      </p>
       <br />
-    </Column>
-  </Row>
+      <p><u>Data download:</u></p>
+      <p>
+        Any results will be displayed in a table below. All gene data can be downloaded by pressing the 'download'
+        button above the table. Alternatively, inidividual gene data can be downloaded by selecting the desired rows.
+        This can be done by clicking the checkbox next to each gene name. The selection can be cleared by pressing the
+        'cancel' button above the table.
+      </p>
+      <br />
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   <!-- upload -->
   <Row>

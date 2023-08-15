@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { Button, Column, Grid, Row, TextArea, TextInput } from "carbon-components-svelte";
+  import { Button, Column, ExpandableTile, Grid, Row, TextArea, TextInput } from "carbon-components-svelte";
   import PhyloTree from "./PhyloTree.svelte";
   import { browser } from "$app/environment";
   import { intoQuery } from "$lib/util";
@@ -8,6 +8,7 @@
   import type { GeneEntry } from "$lib/components/geneTable";
   import { getAllGenes } from "$lib/api";
   import type { PageData } from "./$types";
+  import { Information } from "carbon-icons-svelte";
 
   const dims = {
     size: {
@@ -136,22 +137,63 @@
 <!-- <g transform="translate({dims.margin.left},{dims.margin.top})"> -->
 
 <Grid padding>
-  <Row>
-    <Column>
-      <p class="paragraph"><u><h3>Info:</h3></u></p>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
       <br />
-      <li>
-        You can enter a protein name into the textbox below to display the gene tree that it is part of. Clicking the
-        search button will display the tree.
-      </li>
+      <p>Gene trees are useful for visualising the evolutionary history of homologous genes.</p>
       <br />
-      <li style="font-style: italic">
-        <span style="background-color: orange">This page is in development.</span> Not all planned features are present.
-        Any feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-      </li>
+      <p><u>Plot settings:</u></p>
+      <p>
+        You can choose the gene tree to plot by pasting any gene/protein identifier into the textbox below and hitting
+        'search'. The identifier will be matched against our database to find the tree that it appears in.
+        Alternatively, you can click the 'tree' link in any gene table on our website to jump straight to the relevant
+        tree (see table navigation below).
+      </p>
       <br />
-    </Column>
-  </Row>
+      <p><u>Plot navigation:</u></p>
+      <p>
+        All trees are rooted on an amphioxus gene. Whole genome duplication nodes are highlighted with red circles. Each
+        leaf is labelled with a species and protein identifier.
+      </p>
+      <br />
+      <p><u>Data download:</u></p>
+      <p>
+        Genes that appear in the plot will be displayed in a table below. All gene data can be downloaded by pressing
+        the 'download' button above the table. Alternatively, inidividual gene data can be downloaded by selecting the
+        desired rows. This can be done by clicking the checkbox next to each gene name. The selection can be cleared by
+        pressing the 'cancel' button above the table.
+      </p>
+      <br />
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   {#if !loadingTree && treeData.length > 0}
     <Row>

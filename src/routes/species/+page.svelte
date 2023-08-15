@@ -8,6 +8,7 @@
     Column,
     DataTable,
     DataTableSkeleton,
+    ExpandableTile,
     Grid,
     Link,
     MultiSelect,
@@ -21,7 +22,7 @@
     ToolbarMenuItem,
     ToolbarSearch,
   } from "carbon-components-svelte";
-  import { Download, Launch } from "carbon-icons-svelte";
+  import { Bookmark, Download, Information, InformationSquare, Launch } from "carbon-icons-svelte";
   import type * as z from "zod";
   import type { PageData } from "./$types";
   import SpeciesTable from "$lib/components/SpeciesTable.svelte";
@@ -116,25 +117,49 @@
 
 <!-- svelte-ignore missing-declaration -->
 <Grid padding>
-  <div>
-    <p class="paragraph"><u><h3>Info:</h3></u></p>
-    <br />
-    <li>
-      You can use the dropdown menus below to filter species according to your needs - any species matching your filters
-      will be displayed in the table below.
-    </li>
-    <br />
-    <li>
-      All species data can be downloaded by clicking the download button above the table. Alternatively, individual
-      species data can be downloaded by selecting the relevant rows.
-    </li>
-    <br />
-    <li style="font-style: italic">
-      <span style="background-color: lawngreen">This page is nearly complete.</span> Please report any bugs you find. Any
-      feedback, such as ways to make it more user-friendly or feature requests would be highly appreciated!
-    </li>
-    <br />
-  </div>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
+      <br />
+      <p>All species in our database are displayed in the table below.</p>
+      <br />
+      <p><u>Data filtering:</u></p>
+      <p>
+        Species can be filtered by source database - such as Ensembl or Refseq - using the 'source' dropdown menu.
+        Likewise, you can include/exclude present-day genomes or ancestral genome reconstructions using the 'state'
+        dropdown menu.
+      </p>
+      <br />
+      <p><u>Data download:</u></p>
+      <p>
+        All species data can be downloaded by pressing the 'download' button above the table. Alternatively, inidividual
+        species data can be downloaded by selecting the desired rows. This can be done by clicking the checkbox next to
+        each species name. The selection can be cleared by pressing the 'cancel' button above the table.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   <!-- filters -->
   <Row>

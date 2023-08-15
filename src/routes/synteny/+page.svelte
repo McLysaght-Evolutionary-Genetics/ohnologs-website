@@ -8,11 +8,12 @@
   import type { SelectionType } from "$lib/selection";
   import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
-  import { Button, Column, Grid, PaginationNav, Row, TextInput } from "carbon-components-svelte";
+  import { Button, Column, ExpandableTile, Grid, PaginationNav, Row, TextInput } from "carbon-components-svelte";
   import type { D3ZoomEvent } from "d3";
   import * as d3 from "d3";
   import * as z from "zod";
   import Gene from "./gene.svelte";
+  import { Information } from "carbon-icons-svelte";
 
   //
   const preferredColours = ["#ff594f"];
@@ -573,25 +574,77 @@
 />
 
 <Grid padding>
-  <Row>
-    <Column>
-      <p class="paragraph"><u><h3>Info:</h3></u></p>
+  <ExpandableTile
+    tileCollapsedIconText={"Click to view usage guide"}
+    tileExpandedIconText={"Click to hide usage guide"}
+  >
+    <div slot="above">
+      <div style="display: flex;">
+        <div style="padding-top: 0.156rem; padding-right: 0.7rem;">
+          <Information size={24} />
+        </div>
+        <h4>Instructions</h4>
+      </div>
+    </div>
+    <div slot="below">
       <br />
-      <li>
-        The plot shows a block of conserved micro-synteny: Chromosomes are represented by horizontal lines. Genes are
-        displayed as coloured boxes. The direction of each gene is shows above.
-      </li>
+      <p>
+        Synteny plots are useful for visualising the conservation of gene order and content across different chromosomal
+        regions.
+      </p>
       <br />
-      <li>The plot can be moved by dragging it with your mouse. It can also be resized by using your scroll wheel.</li>
+      <p><u>Plot settings:</u></p>
+      <p>
+        You can choose the synteny block to plot by pasting any gene/protein identifier into the textbox below and
+        hitting 'search'. The identifier will be matched against our database to find the block that it appears in.
+        Alternatively, you can click the 'synteny' link in any gene table on our website to jump straight to the
+        relevant block (see table navigation below). If the query gene is part of multiple synteny blocks, a pagination
+        nav will be displayed below the plot.
+      </p>
       <br />
-      <li style="font-style: italic">
-        <span style="background-color: tomato">This page is in early development.</span> Anything on this page is meant only
-        as a demonstration. Any feedback, such as ways to make it more user-friendly or feature requests would be highly
-        appreciated!
-      </li>
+      <p><u>Plot navigation:</u></p>
+      <p>
+        Synteny blocks can contain chromosomal regions from multiple species, represented by grey horizontal lines. Each
+        gene is displayed as a light grey rectangle. The width of the rectangle is proportional to the length of the
+        gene that it represents. Light grey lines connecting two or more rectangles represent homology relationships.
+      </p>
       <br />
-    </Column>
-  </Row>
+      <p>
+        Individual genes and all of their homology relationships can be highlighted by clicking on the desired gene
+        (clicking again will return it to normal). Alternatively, pressing the 's' key will enable selection mode - in
+        this mode, the cursor will appear as a crosshsair. While in selection mode, hold down the left mouse button and
+        draw a rectangle around all of the genes that you wish to select. Selection mode can be cancelled by pressing
+        the 'escape' key. Highlighted genes will appear as selected in the table and vice versa. The selection can be
+        cleared by pressing the 'cancel' button above the gene table.
+      </p>
+      <br />
+      <p><u>Data download:</u></p>
+      <p>
+        Genes that appear in the plot will be displayed in a table below. All gene data can be downloaded by pressing
+        the 'download' button above the table. Alternatively, inidividual gene data can be downloaded by selecting the
+        desired rows. This can be done by clicking the checkbox next to each gene name. The selection can be cleared by
+        pressing the 'cancel' button above the table.
+      </p>
+      <br />
+      <p><u>Table navigation:</u></p>
+      <p>
+        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        respectively. The 'source' column provides a link to the external database from which each gene was sourced.
+      </p>
+      <br />
+      <p>
+        View our <a
+          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
+          target="_blank"
+          rel="noreferrer"
+          on:click|stopPropagation={() => {}}>documentation</a
+        >
+        for additional info.
+      </p>
+    </div>
+  </ExpandableTile>
+
+  <br />
 
   <!-- <div bind:this={thing}>
     <p>owo</p>
