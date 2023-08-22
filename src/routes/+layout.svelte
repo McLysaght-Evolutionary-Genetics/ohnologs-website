@@ -83,7 +83,7 @@
   <div>
     <p>
       2023 Lukasz Niezabitowski @ McLysaght lab. I make code things on
-      <a href="https://github.com/Dragon1320">GitHub</a>.
+      <a href="https://github.com/Dragon1320" target="_blank" rel="noreferrer">GitHub</a>.
     </p>
   </div>
 </footer>

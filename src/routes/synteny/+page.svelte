@@ -575,6 +575,7 @@
 
 <Grid padding>
   <ExpandableTile
+    expanded
     tileCollapsedIconText={"Click to view usage guide"}
     tileExpandedIconText={"Click to hide usage guide"}
   >
@@ -610,12 +611,13 @@
       </p>
       <br />
       <p>
-        Individual genes and all of their homology relationships can be highlighted by clicking on the desired gene
-        (clicking again will return it to normal). Alternatively, pressing the 's' key will enable selection mode - in
-        this mode, the cursor will appear as a crosshsair. While in selection mode, hold down the left mouse button and
-        draw a rectangle around all of the genes that you wish to select. Selection mode can be cancelled by pressing
-        the 'escape' key. Highlighted genes will appear as selected in the table and vice versa. The selection can be
-        cleared by pressing the 'cancel' button above the gene table.
+        Hovering the mouse cursor over a gene will display additional information. Individual genes and all of their
+        homology relationships can be highlighted by clicking on the desired gene (clicking again will return it to
+        normal). Alternatively, pressing the 's' key will enable selection mode - in this mode, the cursor will appear
+        as a crosshsair. While in selection mode, hold down the left mouse button and draw a rectangle around all of the
+        genes that you wish to select. Selection mode can be cancelled by pressing the 'escape' key. Highlighted genes
+        will appear as selected in the table and vice versa. The selection can be cleared by pressing the 'cancel'
+        button above the gene table.
       </p>
       <br />
       <p><u>Data download:</u></p>
@@ -637,7 +639,7 @@
           href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
           target="_blank"
           rel="noreferrer"
-          on:click|stopPropagation={() => {}}>documentation</a
+          on:click|stopPropagation>documentation</a
         >
         for additional info.
       </p>
@@ -779,7 +781,7 @@
   </Row>
 
   <!-- table -->
-  {#if block != null && blockCount > 0 && links != null && colours != null}
+  {#if entries != null && entries.length > 0 && block != null}
     <Row>
       <Column>
         <GeneTable

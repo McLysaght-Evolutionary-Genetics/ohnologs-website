@@ -42,8 +42,13 @@
     }
   }
 
-  $: nextId = nextGeneId(0);
+  let nextId = nextGeneId(0);
 
+  $: if (entries.length > 0) {
+    nextId = nextGeneId(0);
+  }
+
+  //
   const headers = [
     { key: "geneId", value: "Gene" },
     { key: "proteinId", value: "Protein" },
@@ -137,7 +142,9 @@
 
         <svelte:fragment slot="cell" let:cell>
           {#if cell.key === "source"}
-            <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" icon={Launch}>{cell.value}</Link>
+            <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" target="_blank" icon={Launch}
+              >{cell.value}</Link
+            >
           {:else if cell.key === "proteinId"}
             <span
               >{cell.value}

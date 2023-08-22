@@ -4,12 +4,14 @@
     DataTable,
     DataTableSkeleton,
     InlineLoading,
+    Link,
     PaginationNav,
     Toolbar,
     ToolbarBatchActions,
     ToolbarContent,
+    TreeView,
   } from "carbon-components-svelte";
-  import { Download } from "carbon-icons-svelte";
+  import { Download, Launch, Scale } from "carbon-icons-svelte";
   import type { SpeciesEntry } from "./speciesTable";
   import { downloadFile, intoQuery } from "$lib/util";
 
@@ -22,8 +24,22 @@
   export let shown: number;
   export let loading: boolean;
 
+  //
   let downloading = false;
 
+  function* nextGeneId(i: number) {
+    for (let j = i; j < entries.length; j++) {
+      yield entries[j].name;
+    }
+  }
+
+  let nextId = nextGeneId(0);
+
+  $: if (entries.length > 0) {
+    nextId = nextGeneId(0);
+  }
+
+  //
   const headers = [
     { key: "name", value: "Species" },
     { key: "state", value: "State" },
@@ -89,6 +105,14 @@
       <DataTable bind:selectedRowIds selectable {headers} rows={entries}>
         <strong slot="title">{title}</strong>
         <span class="description" slot="description">{description}</span>
+
+        <svelte:fragment slot="cell" let:cell>
+          {#if cell.key === "source"}
+            <Link href="https://www.ensembl.org/{nextId.next().value}" target="_blank" icon={Launch}>{cell.value}</Link>
+          {:else}
+            {cell.value}
+          {/if}
+        </svelte:fragment>
 
         <Toolbar>
           <ToolbarContent>

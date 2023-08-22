@@ -19,6 +19,7 @@
 
 <Grid padding>
   <ExpandableTile
+    expanded
     tileCollapsedIconText={"Click to view usage guide"}
     tileExpandedIconText={"Click to hide usage guide"}
   >
@@ -59,7 +60,7 @@
           href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
           target="_blank"
           rel="noreferrer"
-          on:click|stopPropagation={() => {}}>documentation</a
+          on:click|stopPropagation>documentation</a
         >
         for additional info.
       </p>

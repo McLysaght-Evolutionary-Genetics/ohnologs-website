@@ -38,6 +38,9 @@
     },
   };
 
+  const homologyColour = "#0000ff";
+  const highlightColour = "#00ff00";
+
   $: innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   $: innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
@@ -229,12 +232,12 @@
 
     for (const link of links) {
       //
-      let colour = "#0000ff";
+      let colour = homologyColour;
 
       let selectedIds = current.map((e) => e.id);
 
       if (selectedIds.includes(link.start.id) || selectedIds.includes(link.end.id)) {
-        colour = "#00ff00";
+        colour = highlightColour;
       }
 
       //
@@ -270,6 +273,7 @@
   $: totalPages = Math.ceil(count / perPage);
 
   let loading = false;
+  let loadingPlot = false;
 
   //
   let selectedChromosome: string | null = null;
@@ -326,6 +330,8 @@
     segments = homologies.segments;
     genes = homologies.genes;
     count = homologies.genes.length;
+
+    loadingPlot = false;
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
@@ -380,7 +386,8 @@
       canvas.appendChild(g);
 
       for (const [d, colour, scaffoldId] of lines) {
-        const c = scaffoldId === selectedChromosome ? colour : "#bdccff22";
+        const c =
+          colour === highlightColour ? highlightColour : scaffoldId === selectedChromosome ? colour : "#bdccff22";
 
         const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
         path.setAttribute("d", d);
@@ -395,12 +402,25 @@
       g.appendChild(fragment);
     }
   }
+
+  $: if (query != null) {
+    loading = true;
+    loadingPlot = true;
+
+    genes = [];
+    entries = [];
+    arcs = [];
+    lines = [];
+    links = [];
+    segments = [];
+  }
 </script>
 
 <svelte:window bind:innerWidth={windowWidth} bind:innerHeight={windowHeight} />
 
 <Grid padding>
   <ExpandableTile
+    expanded
     tileCollapsedIconText={"Click to view usage guide"}
     tileExpandedIconText={"Click to hide usage guide"}
   >
@@ -451,7 +471,7 @@
           href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
           target="_blank"
           rel="noreferrer"
-          on:click|stopPropagation={() => {}}>documentation</a
+          on:click|stopPropagation>documentation</a
         >
         for additional info.
       </p>
@@ -461,7 +481,7 @@
   <br />
 
   <!-- figure -->
-  {#if query != null && query != "none"}
+  {#if query != null && query != "none" && !loadingPlot}
     <div class="plot">
       <!-- <Row>
       <Column> -->
