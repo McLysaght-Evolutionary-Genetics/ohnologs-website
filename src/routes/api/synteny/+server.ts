@@ -65,9 +65,9 @@ export const GET = (async ({ url }) => {
   const genes = block.groups.flatMap((e) =>
     e.genes.map((f) => {
       return {
-        id: f.gene.id,
+        id: f.gene.geneId,
         trackId: f.track.scaffoldId,
-        groupId: e.id,
+        groupId: e.groupId,
         geneId: f.geneId,
         proteinId: f.gene.proteinId,
         start: f.gene.start,
@@ -84,7 +84,7 @@ export const GET = (async ({ url }) => {
       start: e.start,
       end: e.end,
       scaffold: {
-        name: e.scaffold.name,
+        name: e.scaffold.scaffoldId,
         species: e.scaffold.species.name,
         start: e.scaffold.start,
         end: e.scaffold.end,
@@ -95,7 +95,7 @@ export const GET = (async ({ url }) => {
 
   const groups = block.groups.map((e) => {
     return {
-      id: e.id,
+      id: e.groupId,
       blockId: e.blockId,
     };
   });

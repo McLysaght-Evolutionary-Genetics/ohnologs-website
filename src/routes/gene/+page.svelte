@@ -29,9 +29,9 @@
   let entries: GeneEntry[] = [];
 
   //
-  const species: MultiSelectItem[] = data.species.map((e) => ({ id: e.id, text: e.name }));
-  const sources: MultiSelectItem[] = data.sources.map((e) => ({ id: e.id, text: e.name }));
-  const labels: MultiSelectItem[] = data.labels.map((e) => ({ id: e.id, text: e.name }));
+  const species: MultiSelectItem[] = data.species.map((e) => ({ id: e.speciesId, text: e.name }));
+  const sources: MultiSelectItem[] = data.sources.map((e) => ({ id: e.sourceId, text: e.name }));
+  const labels: MultiSelectItem[] = data.labels.map((e) => ({ id: e.labelId, text: e.name }));
   let scaffolds: MultiSelectItem[] = [];
   let segments: MultiSelectItem[] = [];
 

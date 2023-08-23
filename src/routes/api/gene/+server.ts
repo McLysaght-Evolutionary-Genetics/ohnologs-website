@@ -54,11 +54,11 @@ export const GET = (async ({ url }) => {
           ? {}
           : {
               OR: [
-                {
-                  id: {
-                    in: geneIds,
-                  },
-                },
+                // {
+                //   geneId: {
+                //     in: geneIds,
+                //   },
+                // },
                 {
                   geneId: {
                     in: geneIds,
@@ -75,8 +75,8 @@ export const GET = (async ({ url }) => {
         scaffold: {
           species: {
             AND: [
-              ...(species.length === 0 ? [] : [{ id: { in: species } }]),
-              ...(sources.length === 0 ? [] : [{ genomeSourceId: { in: sources } }]),
+              ...(species.length === 0 ? [] : [{ speciesId: { in: species } }]),
+              ...(sources.length === 0 ? [] : [{ sourceId: { in: sources } }]),
             ],
           },
 
@@ -121,11 +121,11 @@ export const GET = (async ({ url }) => {
           ? {}
           : {
               OR: [
-                {
-                  id: {
-                    in: geneIds,
-                  },
-                },
+                // {
+                //   geneId: {
+                //     in: geneIds,
+                //   },
+                // },
                 {
                   geneId: {
                     in: geneIds,
@@ -142,8 +142,8 @@ export const GET = (async ({ url }) => {
         scaffold: {
           species: {
             AND: [
-              ...(species.length === 0 ? [] : [{ id: { in: species } }]),
-              ...(sources.length === 0 ? [] : [{ genomeSourceId: { in: sources } }]),
+              ...(species.length === 0 ? [] : [{ speciesId: { in: species } }]),
+              ...(sources.length === 0 ? [] : [{ sourceId: { in: sources } }]),
             ],
           },
 
@@ -161,7 +161,7 @@ export const GET = (async ({ url }) => {
   ]);
 
   const data = genes.map((e) => ({
-    id: e.id,
+    id: e.geneId,
     geneId: e.geneId,
     proteinId: e.proteinId,
     // TODO: this is a problem... can we make scaffolds required?
@@ -169,8 +169,8 @@ export const GET = (async ({ url }) => {
     species: e.scaffold?.species.name ?? "",
     source: e.scaffold?.species.source.name ?? "",
     version: e.scaffold?.species.version ?? "",
-    completeness: e.scaffold?.species.completeness ?? "",
-    scaffold: e.scaffold?.name ?? "",
+    completeness: e.scaffold?.species.assembly ?? "",
+    scaffold: e.scaffold?.scaffoldId ?? "",
     // TODO: this is currently impossible to query for...
     // we need to link genes directly to scaffolds... somehow
     segment: "",
@@ -204,7 +204,7 @@ export const POST = (async ({ url, request }) => {
       },
     },
     where: {
-      id: {
+      geneId: {
         ...(all ? {} : { in: data.genes }),
       },
     },

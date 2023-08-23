@@ -19,8 +19,8 @@ export const GET = (async ({ url }) => {
   });
 
   const data = segments.map((e) => ({
-    id: e.id,
-    name: e.name,
+    id: e.scaffoldId,
+    name: e.scaffoldId,
   }));
 
   return new Response(JSON.stringify(data));

@@ -4,15 +4,20 @@ import type { PageServerLoad } from "./$types";
 const prisma = new PrismaClient();
 
 export const load = (async () => {
-  const [count, states, sources] = await prisma.$transaction([
-    prisma.species.count(),
-    prisma.genomeState.findMany(),
-    prisma.genomeSource.findMany(),
-  ]);
+  const [count, sources] = await prisma.$transaction([prisma.species.count(), prisma.genomeSource.findMany()]);
 
   return {
     count,
-    states,
     sources,
+    states: [
+      {
+        id: 0,
+        name: "current",
+      },
+      {
+        id: 1,
+        name: "reconstruction",
+      },
+    ],
   };
 }) satisfies PageServerLoad;

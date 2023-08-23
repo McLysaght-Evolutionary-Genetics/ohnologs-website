@@ -13,22 +13,24 @@ export const GET = (async ({ url }) => {
 
   console.log(sources);
 
+  prisma.species.count({
+    where: {},
+  });
+
   const [count, species] = await prisma.$transaction([
     prisma.species.count({
       where: {
         ...(sources.length === 0
           ? {}
           : {
-              genomeSourceId: {
+              sourceId: {
                 in: sources,
               },
             }),
         ...(states.length === 0
           ? {}
           : {
-              genomeStateId: {
-                in: states,
-              },
+              reconstruction: states.includes("reconstruction"),
             }),
       },
     }),
@@ -37,20 +39,17 @@ export const GET = (async ({ url }) => {
         ...(sources.length === 0
           ? {}
           : {
-              genomeSourceId: {
+              sourceId: {
                 in: sources,
               },
             }),
         ...(states.length === 0
           ? {}
           : {
-              genomeStateId: {
-                in: states,
-              },
+              reconstruction: states.includes("reconstruction"),
             }),
       },
       include: {
-        state: true,
         source: true,
         scaffolds: {
           include: {
@@ -77,12 +76,12 @@ export const GET = (async ({ url }) => {
     const [segments, genes] = e.scaffolds.reduce((a, c) => [a[0] + c._count.segments, a[1] + c._count.genes], [0, 0]);
 
     return {
-      id: e.id,
+      id: e.speciesId,
       name: e.name,
-      state: e.state.name,
+      state: e.reconstruction ? "reconstruction" : "current",
       source: e.source.name,
       version: e.version,
-      completeness: e.completeness,
+      assembly: e.assembly,
       scaffolds: e._count.scaffolds,
       segments,
       genes,

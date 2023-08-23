@@ -6,7 +6,7 @@ const prisma = new PrismaClient();
 export const load = (async () => {
   const [genomes] = await prisma.$transaction([prisma.species.findMany()]);
 
-  const species = genomes.map((e) => [e.id, e.name]);
+  const species = genomes.map((e) => [e.speciesId, e.name]);
 
   return {
     species,

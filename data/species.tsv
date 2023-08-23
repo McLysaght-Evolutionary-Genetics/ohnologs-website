@@ -1,0 +1,15 @@
+refseq	branchiostoma_floridae	Amphioxus	100	chromosome	true	false
+ensembl	gallus_gallus	Chicken	109	chromosome	false	false
+ensembl	canis_lupus_familiaris	Dog	109	chromosome	false	false
+ensembl	callorhinchus_milii	Elephant shark	109	scaffold	false	false
+ensembl	anolis_carolinensis	Green Anole	109	chromosome	false	false
+ensembl	homo_sapiens	Human	109	chromosome	false	false
+ensembl	oryzias_latipes	Medaka	109	chromosome	false	false
+ensembl	mus_musculus	Mouse	109	chromosome	false	false
+ensembl	monodelphis_domestica	Opossum	109	chromosome	false	false
+ensembl	takifugu_rubripes	Pufferfish	109	chromosome	false	false
+ensembl	lepisosteus_oculatus	Spotted gar	109	chromosome	false	false
+ensembl	gasterosteus_aculeatus	Stickleback	109	chromosome	false	false
+ensembl	meleagris_gallopavo	Turkey	109	chromosome	false	false
+ensembl	taeniopygia_guttata	Zebra finch	109	chromosome	false	false
+ensembl	danio_rerio	Zebrafish	109	chromosome	false	false

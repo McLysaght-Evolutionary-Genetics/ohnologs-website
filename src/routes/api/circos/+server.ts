@@ -53,7 +53,7 @@ export const GET = (async ({ url }) => {
     },
   });
 
-  const segments: Segment[] = scaffolds.map((e) => ({ id: e.id, name: e.name, length: e.end - e.start }));
+  const segments: Segment[] = scaffolds.map((e) => ({ id: e.scaffoldId, name: e.scaffoldId, length: e.end - e.start }));
 
   const links: Link[] = [];
 
@@ -64,8 +64,8 @@ export const GET = (async ({ url }) => {
       }
 
       const start = {
-        id: qGene.id,
-        scaffold: qScaf.id,
+        id: qGene.geneId,
+        scaffold: qScaf.scaffoldId,
         offset: (qGene.end + qGene.start) / 2,
       };
 
@@ -77,8 +77,8 @@ export const GET = (async ({ url }) => {
         }
 
         const end = {
-          id: sGene.id,
-          scaffold: sScaf.id,
+          id: sGene.geneId,
+          scaffold: sScaf.scaffoldId,
           offset: (sGene.end + sGene.start) / 2,
         };
 
@@ -90,7 +90,7 @@ export const GET = (async ({ url }) => {
     }
   }
 
-  const genes = scaffolds.flatMap((s) => s.genes.map((g) => ({ id: g.id, geneId: g.geneId })));
+  const genes = scaffolds.flatMap((s) => s.genes.map((g) => ({ id: g.geneId, geneId: g.geneId })));
 
   return new Response(JSON.stringify({ segments, links, genes }));
 }) satisfies RequestHandler;

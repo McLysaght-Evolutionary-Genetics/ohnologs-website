@@ -57,11 +57,15 @@ export const GET = (async ({ url }) => {
   ]);
 
   const qsegs: Segment[] = queries.map(
-    ((s) => (e) => ({ id: e.id, name: e.name, length: e.end - e.start, cumlen: (s += e.end - e.start) }))(0),
+    ((s) => (e) => ({ id: e.scaffoldId, name: e.scaffoldId, length: e.end - e.start, cumlen: (s += e.end - e.start) }))(
+      0,
+    ),
   );
 
   const ssegs: Segment[] = subjects.map(
-    ((s) => (e) => ({ id: e.id, name: e.name, length: e.end - e.start, cumlen: (s += e.end - e.start) }))(0),
+    ((s) => (e) => ({ id: e.scaffoldId, name: e.scaffoldId, length: e.end - e.start, cumlen: (s += e.end - e.start) }))(
+      0,
+    ),
   );
 
   // const homologies = Object.fromEntries(
@@ -79,7 +83,7 @@ export const GET = (async ({ url }) => {
     }
 
     const qScaf = qGene.scaffold;
-    const qCumlen = qsegs.find((e) => e.id === qScaf.id)!.cumlen;
+    const qCumlen = qsegs.find((e) => e.id === qScaf.scaffoldId)!.cumlen;
 
     const xScaff = qCumlen - qScaf.end - qScaf.start;
     const xGene = (qGene.start + qGene.end) / 2;
@@ -92,7 +96,7 @@ export const GET = (async ({ url }) => {
       }
 
       const sScaf = sGene.scaffold;
-      const sCumlen = ssegs.find((e) => e.id === sScaf.id)!.cumlen;
+      const sCumlen = ssegs.find((e) => e.id === sScaf.scaffoldId)!.cumlen;
 
       const yScaff = sCumlen - sScaf.end - sScaf.start;
       const yGene = (sGene.start + sGene.end) / 2;
@@ -100,14 +104,14 @@ export const GET = (async ({ url }) => {
       const y = yScaff + yGene;
 
       const point: Point = {
-        qid: qGene.id,
-        sid: sGene.id,
+        qid: qGene.geneId,
+        sid: sGene.geneId,
         x,
         y,
       };
 
       sGenes.push({
-        id: sGene.id,
+        id: sGene.geneId,
         geneId: sGene.geneId,
       });
 
@@ -115,7 +119,7 @@ export const GET = (async ({ url }) => {
     }
   }
 
-  const genes = [...qGenes, ...sGenes].map((e) => ({ id: e.id, geneId: e.geneId }));
+  const genes = [...qGenes, ...sGenes].map((e) => ({ id: e.geneId, geneId: e.geneId }));
 
   return new Response(JSON.stringify({ qsegs, ssegs, points, genes }));
 }) satisfies RequestHandler;

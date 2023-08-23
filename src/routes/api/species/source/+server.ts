@@ -7,7 +7,7 @@ export const GET = (async () => {
   const sources = await prisma.genomeSource.findMany();
 
   const data = sources.map((e) => ({
-    id: e.id,
+    id: e.sourceId,
     name: e.name,
   }));
 

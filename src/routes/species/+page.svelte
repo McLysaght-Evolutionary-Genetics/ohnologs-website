@@ -112,7 +112,7 @@
   }
 
   const states = data.states.map((e) => ({ id: e.id, text: e.name }));
-  const sources = data.sources.map((e) => ({ id: e.id, text: e.name }));
+  const sources = data.sources.map((e) => ({ id: e.sourceId, text: e.name }));
 </script>
 
 <!-- svelte-ignore missing-declaration -->

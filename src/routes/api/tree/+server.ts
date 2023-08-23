@@ -41,7 +41,7 @@ export const GET = (async ({ url }) => {
     },
   });
 
-  const genes = trees.flatMap((e) => e.genes).map((e) => ({ id: e.gene.id, geneId: e.gene.geneId }));
+  const genes = trees.flatMap((e) => e.genes).map((e) => ({ id: e.gene.geneId, geneId: e.gene.geneId }));
 
   return new Response(JSON.stringify({ trees, genes }));
 }) satisfies RequestHandler;

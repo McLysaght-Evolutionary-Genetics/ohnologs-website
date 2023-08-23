@@ -1,468 +1,246 @@
-import { readFile } from "fs/promises";
-
 import { PrismaClient } from "$lib/prisma";
-import type { Actions } from "@sveltejs/kit";
+import { error, type Actions } from "@sveltejs/kit";
+import { readFile } from "fs/promises";
+import path from "path";
+import z from "zod";
 
-// import type { Actions } from "./$types";
-
-// const TREEFILE_EXT = "treefile";
+// sources - source:sourceId, source:name
+// species - <source:sourceId>, species:speciesId, species:name, species:version, species:assembly, species:outgoup, species:reconstruction
+// scaffolds - <species:speciesId>, scaffold:scaffoldId scaffold:start scaffold:end
+// segments - <species:speciesId, scaffold:scaffolId>, segment:segmentId, segment:start, segment:end
+// families - family:familyId
+// genes - <species:speciesId, scaffold:scaffoldId?, segment:segmentId?, family:familyId?>, gene:geneId, gene:proteinId, gene:start, gene:end, gene:pvc?, gene:pgc?
+// labels - label:labelId, label:name
+// gene_labels - <gene:geneId, label:labelId>
+// gene_ohnology - <gene:queryId, gene:subjectId>, ohnology:relation
+// trees - tree:treeId tree:newick
+// tree_species - <tree:treeId, species:speciesId>
+// tree_genes - <tree:treeId, gene:geneId>
+// synteny_blocks - block:blockId
+// synteny_tracks - <block:blockId, species:speciesId, scaffold:scaffoldId>, track:start, track:end
+// synteny_groups - <block:blockId> group:groupId
+// synteny_genes - <block:blockId, scaffold:scaffoldId, group:groupId, gene:geneId>
 
 const prisma = new PrismaClient();
 
-// /mnt/aoifolution/github/trim/tmp/tree/
+const readTsv = async <T extends [z.ZodTypeAny, ...z.ZodTypeAny[]]>(
+  fp: string,
+  schema: z.ZodTuple<T>,
+): Promise<z.infer<typeof schema>[]> => {
+  // read all lines
+  const lines = (await readFile(fp))
+    .toString()
+    .trimEnd()
+    .split("\n")
+    .map((e) => e.split("\t"));
+
+  // validate each line
+  lines.forEach((e) => schema.parse(e));
+
+  return lines as z.infer<typeof schema>[];
+};
 
 export const actions = {
-  loadMeta: async () => {
-    const META_PATH = "/home/niezabil/Desktop/ohnologs/scripts/filtered.tsv";
-    const OHNOLOGS_PATH = "/home/niezabil/Desktop/ohnologs/scripts/ohnologs.tsv";
+  import: async (event) => {
+    // parse form data
+    const form = await event.request.formData();
+    const importPath = form.get("path")?.toString();
 
-    const lines = (await readFile(META_PATH))
-      .toString()
-      .trimEnd()
-      .split("\n")
-      .map((e) => e.split("\t"));
-
-    // species
-    // source
-    // version
-    // state
-    // gene
-    // name
-    // seqname
-    // start
-    // end
-    type Genome = {
-      species: string;
-      source: string;
-      state: string;
-    };
-
-    const genomes: Genome[] = [];
-
-    const genomeIncluded = (genomes: Genome[], species: string) => {
-      for (const { species: sp } of genomes) {
-        if (sp === species) {
-          return true;
-        }
-      }
-
-      return false;
-    };
-
-    for (const line of lines) {
-      // TODO: make this an object instead
-      const [species, source, version, state] = line;
-
-      if (genomeIncluded(genomes, species)) {
-        continue;
-      }
-
-      genomes.push({
-        species,
-        source,
-        state,
-      });
+    if (importPath == null) {
+      throw error(400, "import path not specified");
     }
 
-    for (const { species, source, state } of genomes) {
-      await prisma.species.upsert({
-        where: {
-          name: species,
-        },
-        update: {},
-        create: {
-          name: species,
-          completeness: "chromosome",
-          version: "0",
-          source: {
-            connectOrCreate: {
-              where: {
-                name: source,
-              },
-              create: {
-                name: source,
-              },
-            },
-          },
-          state: {
-            connectOrCreate: {
-              where: {
-                name: state,
-              },
-              create: {
-                name: state,
-              },
-            },
-          },
-        },
-      });
-    }
+    // load data files
+    const sources = await readTsv(path.join(importPath, "sources.tsv"), z.tuple([z.string(), z.string()]));
+    const species = await readTsv(
+      path.join(importPath, "species.tsv"),
+      z.tuple([
+        z.string(),
+        z.string(),
+        z.string(),
+        z.string(),
+        z.enum(["chromosome", "scaffold"]),
+        z.boolean(),
+        z.boolean(),
+      ]),
+    );
+    const scaffolds = await readTsv(
+      path.join(importPath, "scaffolds.tsv"),
+      z.tuple([z.string(), z.string(), z.number(), z.number()]),
+    );
+    const segments = await readTsv(
+      path.join(importPath, "segments.tsv"),
+      z.tuple([z.string(), z.string(), z.string(), z.number(), z.number()]),
+    );
+    const families = await readTsv(path.join(importPath, "families.tsv"), z.tuple([z.string()]));
+    const genes = await readTsv(
+      path.join(importPath, "genes.tsv"),
+      z.tuple([
+        z.string(),
+        z.string().nullable(),
+        z.string().nullable(),
+        z.string().nullable(),
+        z.string(),
+        z.string(),
+        z.number(),
+        z.number(),
+        z.number().nullable(),
+        z.number().nullable(),
+      ]),
+    );
+    const labels = await readTsv(path.join(importPath, "labels.tsv"), z.tuple([z.string(), z.string()]));
+    const geneLabels = await readTsv(path.join(importPath, "gene_labels.tsv"), z.tuple([z.string(), z.string()]));
+    const geneOhnology = await readTsv(
+      path.join(importPath, "gene_ohnology.tsv"),
+      z.tuple([z.string(), z.string(), z.enum(["r1", "r2"])]),
+    );
+    const trees = await readTsv(path.join(importPath, "trees.tsv"), z.tuple([z.string(), z.string()]));
+    const treeSpecies = await readTsv(path.join(importPath, "tree_species.tsv"), z.tuple([z.string(), z.string()]));
+    const treeGenes = await readTsv(path.join(importPath, "tree_genes.tsv"), z.tuple([z.string(), z.string()]));
+    const syntenyBlocks = await readTsv(path.join(importPath, "synteny_blocks.tsv"), z.tuple([z.string()]));
+    const syntenyTracks = await readTsv(
+      path.join(importPath, "synteny_tracks.tsv"),
+      z.tuple([z.string(), z.string(), z.string(), z.number(), z.number()]),
+    );
+    const syntenyGroups = await readTsv(path.join(importPath, "synteny_groups.tsv"), z.tuple([z.string(), z.string()]));
+    const syntenyGenes = await readTsv(
+      path.join(importPath, "synteny_genes.tsv"),
+      z.tuple([z.string(), z.string(), z.string(), z.string()]),
+    );
 
-    //
-    type Scaffold = {
-      species: string;
-      seqname: string;
-      seqstart: number;
-      seqend: number;
-    };
+    // throw everything into the db
+    await prisma.genomeSource.createMany({
+      data: sources.map(([sourceId, name]) => ({
+        sourceId,
+        name,
+      })),
+    });
 
-    const scaffolds: Scaffold[] = [];
+    await prisma.species.createMany({
+      data: species.map(([sourceId, speciesId, name, version, assembly, outgroup, reconstruction]) => ({
+        sourceId,
+        speciesId,
+        name,
+        version,
+        assembly,
+        outgroup,
+        reconstruction,
+      })),
+    });
 
-    const scaffoldIncluded = (scaffolds: Scaffold[], species: string, scaffold: string) => {
-      for (const { species: sp, seqname } of scaffolds) {
-        if (sp === species && seqname === scaffold) {
-          return true;
-        }
-      }
+    await prisma.scaffold.createMany({
+      data: scaffolds.map(([speciesId, scaffoldId, start, end]) => ({
+        speciesId,
+        scaffoldId,
+        start,
+        end,
+      })),
+    });
 
-      return false;
-    };
+    await prisma.segment.createMany({
+      data: segments.map(([speciesId, scaffoldId, segmentId, start, end]) => ({
+        speciesId,
+        scaffoldId,
+        segmentId,
+        start,
+        end,
+      })),
+    });
 
-    for (const line of lines) {
-      // TODO: make this an object instead
-      const [species, source, version, state, gene, name, start, end, seqname, seqstart, seqend] = line;
+    await prisma.family.createMany({
+      data: families.map(([familyId]) => ({
+        familyId,
+      })),
+    });
 
-      // no scaffold info
-      if (seqname.length === 0) {
-        continue;
-      }
+    await prisma.gene.createMany({
+      data: genes.map(([speciesId, scaffoldId, segmentId, familyId, geneId, proteinId, start, end, pvc, pgc]) => ({
+        speciesId,
+        scaffoldId,
+        segmentId,
+        familyId,
+        geneId,
+        proteinId,
+        start,
+        end,
+        pvc,
+        pgc,
+      })),
+    });
 
-      if (scaffoldIncluded(scaffolds, species, seqname)) {
-        continue;
-      }
+    await prisma.label.createMany({
+      data: labels.map(([labelId, name]) => ({
+        labelId,
+        name,
+      })),
+    });
 
-      scaffolds.push({
-        species,
-        seqname,
-        seqstart: parseInt(seqstart),
-        seqend: parseInt(seqend),
-      });
-    }
+    await prisma.geneLabel.createMany({
+      data: geneLabels.map(([geneId, labelId]) => ({
+        geneId,
+        labelId,
+      })),
+    });
 
-    for (const { species: sp, seqname, seqstart, seqend } of scaffolds) {
-      const species = await prisma.species.findUnique({
-        where: {
-          name: sp,
-        },
-      });
+    await prisma.ohnology.createMany({
+      data: geneOhnology.map(([queryId, subjectId, relation]) => ({
+        queryId,
+        subjectId,
+        relation,
+      })),
+    });
 
-      if (species == null) {
-        throw new Error(`unknown species: ${species}`);
-      }
+    await prisma.tree.createMany({
+      data: trees.map(([treeId, newick]) => ({
+        treeId,
+        newick,
+      })),
+    });
 
-      await prisma.scaffold.upsert({
-        where: {
-          name_speciesId: {
-            name: seqname,
-            speciesId: species.id,
-          },
-        },
-        update: {},
-        create: {
-          speciesId: species.id,
-          name: seqname,
-          start: seqstart,
-          end: seqend,
-        },
-      });
-    }
+    await prisma.treeSpecies.createMany({
+      data: treeSpecies.map(([treeId, speciesId]) => ({
+        treeId,
+        speciesId,
+      })),
+    });
 
-    //
-    type Gene = {
-      species: string;
-      scaffold: string;
-      geneId: string;
-      proteinId: string;
-      start: number;
-      end: number;
-    };
+    await prisma.treeGene.createMany({
+      data: treeGenes.map(([treeId, geneId]) => ({
+        treeId,
+        geneId,
+      })),
+    });
 
-    const genes: Gene[] = [];
+    await prisma.msynBlock.createMany({
+      data: syntenyBlocks.map(([blockId]) => ({
+        blockId,
+      })),
+    });
 
-    for (const line of lines) {
-      // TODO: make this an object instead
-      const [species, source, version, state, gene, name, start, end, seqname] = line;
+    await prisma.msynTrack.createMany({
+      data: syntenyTracks.map(([blockId, speciesId, scaffoldId, start, end]) => ({
+        blockId,
+        speciesId,
+        scaffoldId,
+        start,
+        end,
+      })),
+    });
 
-      genes.push({
-        species,
-        scaffold: seqname,
-        geneId: gene,
-        proteinId: name,
-        start: parseInt(start),
-        end: parseInt(end),
-      });
-    }
+    await prisma.msynGroup.createMany({
+      data: syntenyGroups.map(([blockId, groupId]) => ({
+        blockId,
+        groupId,
+      })),
+    });
 
-    for (const { species, scaffold: scaf, geneId, proteinId, start, end } of genes) {
-      // unknown scaffold
-      let scaffoldId: string | null;
-
-      if (scaf.length > 0) {
-        // should be unique
-        scaffoldId =
-          (
-            await prisma.scaffold.findFirst({
-              where: {
-                name: scaf,
-                species: {
-                  name: species,
-                },
-              },
-            })
-          )?.id ?? null;
-
-        // scaffold name specified but not in our database
-        if (scaffoldId == null) {
-          throw new Error(`unknown scaffold: ${scaf}, species: ${species}`);
-        }
-      } else {
-        // scaffold name unknown, should not link gene to scaffold
-        scaffoldId = null;
-      }
-
-      await prisma.gene.upsert({
-        where: {
-          geneId,
-        },
-        update: {},
-        create: {
-          geneId,
-          proteinId,
-          start: scaffoldId == null ? 0 : start,
-          end: scaffoldId == null ? 0 : end,
-
-          scaffoldId: scaffoldId == null ? undefined : scaffoldId,
-        },
-      });
-    }
-
-    const ohnologs = (await readFile(OHNOLOGS_PATH))
-      .toString()
-      .trimEnd()
-      .split("\n")
-      .map((e) => e.split("\t"));
-
-    for (const line of ohnologs) {
-      const [querySpecies, subjectSpecies, queryName, subjectName, degree, fam] = line;
-
-      const index = parseInt(fam);
-
-      const family = await prisma.family.upsert({
-        where: {
-          index,
-        },
-        update: {},
-        create: {
-          index,
-        },
-      });
-
-      await prisma.$transaction([
-        prisma.gene.update({
-          where: {
-            proteinId: queryName,
-          },
-          data: {
-            familyId: family.id,
-          },
-        }),
-        prisma.gene.update({
-          where: {
-            proteinId: subjectName,
-          },
-          data: {
-            familyId: family.id,
-          },
-        }),
-      ]);
-    }
-  },
-  loadTrees: async () => {
-    const TREE_PATH = "/home/niezabil/Desktop/ohnologs/scripts/trees.tsv";
-
-    const lines = (await readFile(TREE_PATH))
-      .toString()
-      .trimEnd()
-      .split("\n")
-      .map((e) => e.split("\t"));
-
-    const speciesLookup: Record<string, string> = {};
-
-    for (const line of lines) {
-      const [species, genes, pvcs, pgcs] = line.slice(0, 4).map((e) => e.split(","));
-      const newick = line[4];
-
-      const speciesToFetch = species.filter((e) => !Object.keys(speciesLookup).includes(e));
-
-      const [tree, fetchedSpecies, fetchedGenes] = await prisma.$transaction([
-        prisma.tree.create({
-          data: {
-            newick,
-          },
-        }),
-        prisma.species.findMany({
-          where: {
-            name: {
-              in: speciesToFetch,
-            },
-          },
-        }),
-        prisma.gene.findMany({
-          where: {
-            proteinId: {
-              in: genes,
-            },
-          },
-        }),
-      ]);
-
-      for (const sp of fetchedSpecies) {
-        speciesLookup[sp.name] = sp.id;
-      }
-
-      const geneLookup = Object.fromEntries(fetchedGenes.map((e) => [e.proteinId, e.id]));
-
-      const addSpecies = species.map((e) =>
-        prisma.treeSpecies.create({
-          data: {
-            treeId: tree.id,
-            speciesId: speciesLookup[e],
-          },
-        }),
-      );
-
-      // TODO: import tree genes properly so we dont need this filter
-      const addGenes = genes
-        .filter((e) => geneLookup[e] != null)
-        .map((e) =>
-          prisma.treeGene.create({
-            data: {
-              treeId: tree.id,
-              geneId: geneLookup[e],
-            },
-          }),
-        );
-
-      await prisma.$transaction([...addSpecies, ...addGenes]);
-    }
-  },
-  loadSynteny: async () => {
-    const SYNTENY_PATH = "/home/niezabil/Desktop/ohnologs/scripts/msyn.tsv";
-
-    const lines = (await readFile(SYNTENY_PATH))
-      .toString()
-      .trimEnd()
-      .split("\n")
-      .map((e) => e.split("\t"));
-
-    const blocks: string[][][] = [];
-
-    for (const line of lines) {
-      const [b_idx, list] = line;
-
-      const block_idx = parseInt(b_idx);
-      const genes = list.split(",");
-
-      if (blocks.length < block_idx) {
-        blocks.push([]);
-      }
-
-      blocks[blocks.length - 1].push(genes);
-    }
-
-    for (const b of blocks) {
-      const genes = b.flat();
-
-      const block = await prisma.msynBlock.create({
-        data: {},
-      });
-
-      const scafs = await prisma.scaffold.findMany({
-        where: {
-          genes: {
-            some: {
-              proteinId: {
-                in: genes,
-              },
-            },
-          },
-        },
-        include: {
-          genes: true,
-        },
-      });
-
-      for (const scaf of scafs) {
-        const gs = [...scaf.genes].sort((a, b) => a.start - b.start);
-        const ge = [...scaf.genes].sort((a, b) => b.end - a.end);
-
-        let start = -1;
-        let end = -1;
-
-        for (const q of gs) {
-          if (start !== -1) {
-            break;
-          }
-
-          for (const s of genes) {
-            if (s === q.proteinId) {
-              start = q.start;
-
-              break;
-            }
-          }
-        }
-
-        for (const q of ge) {
-          if (end !== -1) {
-            break;
-          }
-
-          for (const s of genes) {
-            if (s === q.proteinId) {
-              end = q.end;
-
-              break;
-            }
-          }
-        }
-
-        await prisma.msynTrack.create({
-          data: {
-            blockId: block.id,
-            scaffoldId: scaf.id,
-            start,
-            end,
-          },
-        });
-      }
-
-      for (const g of b) {
-        const group = await prisma.msynGroup.create({
-          data: {
-            blockId: block.id,
-          },
-        });
-
-        const genes = await prisma.gene.findMany({
-          where: {
-            proteinId: {
-              in: g,
-            },
-          },
-        });
-
-        await prisma.msynGene.createMany({
-          data: genes
-            .filter((e) => e.scaffoldId != null)
-            .map((e) => ({
-              blockId: block.id,
-              scaffoldId: e.scaffoldId!,
-              groupId: group.id,
-              geneId: e.geneId,
-            })),
-        });
-      }
-    }
+    await prisma.msynGene.createMany({
+      data: syntenyGenes.map(([blockId, scaffoldId, groupId, geneId]) => ({
+        blockId,
+        scaffoldId,
+        groupId,
+        geneId,
+      })),
+    });
   },
 } satisfies Actions;
