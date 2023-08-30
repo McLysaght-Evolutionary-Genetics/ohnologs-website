@@ -2,7 +2,7 @@
   import { Button, ButtonSet, Column, Grid, Row, TextArea } from "carbon-components-svelte";
 </script>
 
-<form method="post" action="?/loadTrees">
+<form method="post" action="?/import">
   <Grid padding>
     <Row>
       <Column>
@@ -11,28 +11,8 @@
     </Row>
     <Row>
       <ButtonSet>
-        <Button type="submit">load trees</Button>
+        <Button type="submit">import</Button>
       </ButtonSet>
-    </Row>
-  </Grid>
-</form>
-
-<br />
-
-<form method="post" action="?/loadMeta">
-  <Grid padding>
-    <Row>
-      <Button type="submit">load meta</Button>
-    </Row>
-  </Grid>
-</form>
-
-<br />
-
-<form method="post" action="?/loadSynteny">
-  <Grid padding>
-    <Row>
-      <Button type="submit">load synteny</Button>
     </Row>
   </Grid>
 </form>

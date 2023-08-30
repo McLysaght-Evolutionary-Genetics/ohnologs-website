@@ -76,18 +76,17 @@ model Segment {
 
   //
   @@id([speciesId, scaffoldId, segmentId])
-  @@unique([segmentId, scaffoldId])
 }
 
 model Gene {
   //
   geneId    String @id
   proteinId String @unique
-  start     Int
-  end       Int
+  start     Int?
+  end       Int?
 
-  pvc Int?
-  pgc Int?
+  pvc Int[]
+  pgc Int[]
 
   //
   species   Species @relation(fields: [speciesId], references: [speciesId])
@@ -96,7 +95,7 @@ model Gene {
   scaffold   Scaffold? @relation(fields: [scaffoldId, speciesId], references: [scaffoldId, speciesId])
   scaffoldId String?
 
-  segment   Segment? @relation(fields: [scaffoldId, segmentId], references: [scaffoldId, segmentId])
+  segment   Segment? @relation(fields: [speciesId, scaffoldId, segmentId], references: [speciesId, scaffoldId, segmentId])
   segmentId String?
 
   family   Family? @relation(fields: [familyId], references: [familyId])
@@ -110,7 +109,7 @@ model Gene {
   subjects Ohnology[] @relation("subject")
 
   //
-  @@unique([geneId, scaffoldId])
+  @@unique([proteinId, scaffoldId])
 }
 
 // homology
@@ -132,10 +131,10 @@ model Ohnology {
   relation OhnologyRelation
 
   //
-  query   Gene   @relation(name: "query", fields: [queryId], references: [geneId])
+  query   Gene   @relation(name: "query", fields: [queryId], references: [proteinId])
   queryId String
 
-  subject   Gene   @relation(name: "subject", fields: [subjectId], references: [geneId])
+  subject   Gene   @relation(name: "subject", fields: [subjectId], references: [proteinId])
   subjectId String
 
   //
@@ -154,14 +153,14 @@ model Label {
 
 model GeneLabel {
   //
-  gene   Gene   @relation(fields: [geneId], references: [geneId])
-  geneId String
+  gene      Gene   @relation(fields: [proteinId], references: [proteinId])
+  proteinId String
 
   label   Label  @relation(fields: [labelId], references: [labelId])
   labelId String
 
   //
-  @@id([geneId, labelId])
+  @@id([proteinId, labelId])
 }
 
 // tree page
@@ -180,11 +179,11 @@ model TreeGene {
   tree   Tree   @relation(fields: [treeId], references: [treeId])
   treeId String
 
-  gene   Gene   @relation(fields: [geneId], references: [geneId])
-  geneId String
+  gene      Gene   @relation(fields: [proteinId], references: [proteinId])
+  proteinId String
 
   //
-  @@id([treeId, geneId])
+  @@id([treeId, proteinId])
 }
 
 model TreeSpecies {
@@ -248,9 +247,9 @@ model MsynGene {
   group   MsynGroup @relation(fields: [groupId], references: [groupId])
   groupId String
 
-  gene   Gene   @relation(fields: [geneId, scaffoldId], references: [geneId, scaffoldId])
-  geneId String
+  gene      Gene   @relation(fields: [proteinId, scaffoldId], references: [proteinId, scaffoldId])
+  proteinId String
 
   //
-  @@id([blockId, scaffoldId, groupId, geneId])
+  @@id([blockId, scaffoldId, groupId, proteinId])
 }

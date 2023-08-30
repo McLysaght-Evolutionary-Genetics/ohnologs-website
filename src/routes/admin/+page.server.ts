@@ -11,15 +11,15 @@ import z from "zod";
 // families - family:familyId
 // genes - <species:speciesId, scaffold:scaffoldId?, segment:segmentId?, family:familyId?>, gene:geneId, gene:proteinId, gene:start, gene:end, gene:pvc?, gene:pgc?
 // labels - label:labelId, label:name
-// gene_labels - <gene:geneId, label:labelId>
+// gene_labels - <gene:proteinId, label:labelId>
 // gene_ohnology - <gene:queryId, gene:subjectId>, ohnology:relation
 // trees - tree:treeId tree:newick
 // tree_species - <tree:treeId, species:speciesId>
-// tree_genes - <tree:treeId, gene:geneId>
+// tree_genes - <tree:treeId, gene:proteinId>
 // synteny_blocks - block:blockId
 // synteny_tracks - <block:blockId, species:speciesId, scaffold:scaffoldId>, track:start, track:end
 // synteny_groups - <block:blockId> group:groupId
-// synteny_genes - <block:blockId, scaffold:scaffoldId, group:groupId, gene:geneId>
+// synteny_genes - <block:blockId, scaffold:scaffoldId, group:groupId, gene:proteinId>
 
 const prisma = new PrismaClient();
 
@@ -30,19 +30,20 @@ const readTsv = async <T extends [z.ZodTypeAny, ...z.ZodTypeAny[]]>(
   // read all lines
   const lines = (await readFile(fp))
     .toString()
-    .trimEnd()
     .split("\n")
+    .filter((e) => e.length > 0)
     .map((e) => e.split("\t"));
 
   // validate each line
-  lines.forEach((e) => schema.parse(e));
+  const parsed = lines.map((e) => schema.parse(e));
 
-  return lines as z.infer<typeof schema>[];
+  return parsed as z.infer<typeof schema>[];
 };
 
 export const actions = {
   import: async (event) => {
-    // parse form data
+    // ---
+
     const form = await event.request.formData();
     const importPath = form.get("path")?.toString();
 
@@ -50,8 +51,23 @@ export const actions = {
       throw error(400, "import path not specified");
     }
 
-    // load data files
+    // ---
+
+    console.log("importing genome sources...");
+
     const sources = await readTsv(path.join(importPath, "sources.tsv"), z.tuple([z.string(), z.string()]));
+
+    await prisma.genomeSource.createMany({
+      data: sources.map(([sourceId, name]) => ({
+        sourceId,
+        name,
+      })),
+    });
+
+    // ---
+
+    console.log("importing species...");
+
     const species = await readTsv(
       path.join(importPath, "species.tsv"),
       z.tuple([
@@ -60,61 +76,10 @@ export const actions = {
         z.string(),
         z.string(),
         z.enum(["chromosome", "scaffold"]),
-        z.boolean(),
-        z.boolean(),
+        z.preprocess((v) => Boolean(v), z.boolean()),
+        z.preprocess((v) => Boolean(v), z.boolean()),
       ]),
     );
-    const scaffolds = await readTsv(
-      path.join(importPath, "scaffolds.tsv"),
-      z.tuple([z.string(), z.string(), z.number(), z.number()]),
-    );
-    const segments = await readTsv(
-      path.join(importPath, "segments.tsv"),
-      z.tuple([z.string(), z.string(), z.string(), z.number(), z.number()]),
-    );
-    const families = await readTsv(path.join(importPath, "families.tsv"), z.tuple([z.string()]));
-    const genes = await readTsv(
-      path.join(importPath, "genes.tsv"),
-      z.tuple([
-        z.string(),
-        z.string().nullable(),
-        z.string().nullable(),
-        z.string().nullable(),
-        z.string(),
-        z.string(),
-        z.number(),
-        z.number(),
-        z.number().nullable(),
-        z.number().nullable(),
-      ]),
-    );
-    const labels = await readTsv(path.join(importPath, "labels.tsv"), z.tuple([z.string(), z.string()]));
-    const geneLabels = await readTsv(path.join(importPath, "gene_labels.tsv"), z.tuple([z.string(), z.string()]));
-    const geneOhnology = await readTsv(
-      path.join(importPath, "gene_ohnology.tsv"),
-      z.tuple([z.string(), z.string(), z.enum(["r1", "r2"])]),
-    );
-    const trees = await readTsv(path.join(importPath, "trees.tsv"), z.tuple([z.string(), z.string()]));
-    const treeSpecies = await readTsv(path.join(importPath, "tree_species.tsv"), z.tuple([z.string(), z.string()]));
-    const treeGenes = await readTsv(path.join(importPath, "tree_genes.tsv"), z.tuple([z.string(), z.string()]));
-    const syntenyBlocks = await readTsv(path.join(importPath, "synteny_blocks.tsv"), z.tuple([z.string()]));
-    const syntenyTracks = await readTsv(
-      path.join(importPath, "synteny_tracks.tsv"),
-      z.tuple([z.string(), z.string(), z.string(), z.number(), z.number()]),
-    );
-    const syntenyGroups = await readTsv(path.join(importPath, "synteny_groups.tsv"), z.tuple([z.string(), z.string()]));
-    const syntenyGenes = await readTsv(
-      path.join(importPath, "synteny_genes.tsv"),
-      z.tuple([z.string(), z.string(), z.string(), z.string()]),
-    );
-
-    // throw everything into the db
-    await prisma.genomeSource.createMany({
-      data: sources.map(([sourceId, name]) => ({
-        sourceId,
-        name,
-      })),
-    });
 
     await prisma.species.createMany({
       data: species.map(([sourceId, speciesId, name, version, assembly, outgroup, reconstruction]) => ({
@@ -128,6 +93,20 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing scaffolds...");
+
+    const scaffolds = await readTsv(
+      path.join(importPath, "scaffolds.tsv"),
+      z.tuple([
+        z.string(),
+        z.string(),
+        z.preprocess((v) => Number(v), z.number()),
+        z.preprocess((v) => Number(v), z.number()),
+      ]),
+    );
+
     await prisma.scaffold.createMany({
       data: scaffolds.map(([speciesId, scaffoldId, start, end]) => ({
         speciesId,
@@ -136,6 +115,21 @@ export const actions = {
         end,
       })),
     });
+
+    // ---
+
+    console.log("importing segments...");
+
+    const segments = await readTsv(
+      path.join(importPath, "segments.tsv"),
+      z.tuple([
+        z.string(),
+        z.string(),
+        z.string(),
+        z.preprocess((v) => Number(v), z.number()),
+        z.preprocess((v) => Number(v), z.number()),
+      ]),
+    );
 
     await prisma.segment.createMany({
       data: segments.map(([speciesId, scaffoldId, segmentId, start, end]) => ({
@@ -147,11 +141,74 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing families...");
+
+    const families = await readTsv(path.join(importPath, "families.tsv"), z.tuple([z.string()]));
+
     await prisma.family.createMany({
       data: families.map(([familyId]) => ({
         familyId,
       })),
     });
+
+    // ---
+
+    console.log("importing genes...");
+
+    const genes = await readTsv(
+      path.join(importPath, "genes.tsv"),
+      z.tuple([
+        z.string(),
+        z.preprocess((v) => (String(v).length === 0 ? null : v), z.string().nullable()),
+        z.preprocess((v) => (String(v).length === 0 ? null : v), z.string().nullable()),
+        z.preprocess((v) => (String(v).length === 0 ? null : v), z.string().nullable()),
+        z.string(),
+        z.string(),
+        z.preprocess((v) => (String(v).length === 0 ? null : Number(v)), z.number().nullable()),
+        z.preprocess((v) => (String(v).length === 0 ? null : Number(v)), z.number().nullable()),
+        z.preprocess((v) => {
+          const s = String(v);
+
+          if (s.length === 0) {
+            return [];
+          }
+
+          return s.split(",").map((e) => parseInt(e));
+        }, z.array(z.number())),
+        z.preprocess((v) => {
+          const s = String(v);
+
+          if (s.length === 0) {
+            return [];
+          }
+
+          return s.split(",").map((e) => parseInt(e));
+        }, z.array(z.number())),
+      ]),
+    );
+
+    // for (const [speciesId, scaffoldId, segmentId, familyId, geneId, proteinId, start, end, pvc, pgc] of genes) {
+    //   try {
+    //     await prisma.gene.create({
+    //       data: {
+    //         speciesId,
+    //         scaffoldId,
+    //         segmentId,
+    //         familyId,
+    //         geneId,
+    //         proteinId,
+    //         start,
+    //         end,
+    //         pvc,
+    //         pgc,
+    //       },
+    //     });
+    //   } catch (e) {
+    //     console.log(speciesId, scaffoldId, geneId, proteinId);
+    //   }
+    // }
 
     await prisma.gene.createMany({
       data: genes.map(([speciesId, scaffoldId, segmentId, familyId, geneId, proteinId, start, end, pvc, pgc]) => ({
@@ -168,6 +225,12 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing labels...");
+
+    const labels = await readTsv(path.join(importPath, "labels.tsv"), z.tuple([z.string(), z.string()]));
+
     await prisma.label.createMany({
       data: labels.map(([labelId, name]) => ({
         labelId,
@@ -175,12 +238,47 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing gene labels...");
+
+    const geneLabels = await readTsv(path.join(importPath, "gene_labels.tsv"), z.tuple([z.string(), z.string()]));
+
+    // let ok = 0;
+    // let oof = 0;
+
+    // for (const [proteinId, labelId] of geneLabels) {
+    //   try {
+    //     await prisma.geneLabel.create({
+    //       data: {
+    //         proteinId,
+    //         labelId,
+    //       },
+    //     });
+
+    //     ok += 1;
+    //   } catch (e) {
+    //     oof += 1;
+    //   }
+    // }
+
+    // console.log(ok, oof);
+
     await prisma.geneLabel.createMany({
-      data: geneLabels.map(([geneId, labelId]) => ({
-        geneId,
+      data: geneLabels.map(([proteinId, labelId]) => ({
+        proteinId,
         labelId,
       })),
     });
+
+    // ---
+
+    console.log("importing ohnology...");
+
+    const geneOhnology = await readTsv(
+      path.join(importPath, "gene_ohnology.tsv"),
+      z.tuple([z.string(), z.string(), z.preprocess((v) => `r${v}`, z.enum(["r1", "r2"]))]),
+    );
 
     await prisma.ohnology.createMany({
       data: geneOhnology.map(([queryId, subjectId, relation]) => ({
@@ -190,12 +288,24 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing trees...");
+
+    const trees = await readTsv(path.join(importPath, "trees.tsv"), z.tuple([z.string(), z.string()]));
+
     await prisma.tree.createMany({
       data: trees.map(([treeId, newick]) => ({
         treeId,
         newick,
       })),
     });
+
+    // ---
+
+    console.log("importing tree species...");
+
+    const treeSpecies = await readTsv(path.join(importPath, "tree_species.tsv"), z.tuple([z.string(), z.string()]));
 
     await prisma.treeSpecies.createMany({
       data: treeSpecies.map(([treeId, speciesId]) => ({
@@ -204,18 +314,74 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing tree genes...");
+
+    const treeGenes = await readTsv(path.join(importPath, "tree_genes.tsv"), z.tuple([z.string(), z.string()]));
+
+    // for (const [treeId, proteinId] of treeGenes) {
+    //   try {
+    //     await prisma.treeGene.create({
+    //       data: {
+    //         treeId,
+    //         proteinId,
+    //       },
+    //     });
+    //   } catch (e) {
+    //     console.log(treeId, proteinId);
+    //   }
+    // }
+
     await prisma.treeGene.createMany({
-      data: treeGenes.map(([treeId, geneId]) => ({
+      data: treeGenes.map(([treeId, proteinId]) => ({
         treeId,
-        geneId,
+        proteinId,
       })),
     });
+
+    // ---
+
+    console.log("importing synteny blocks...");
+
+    const syntenyBlocks = await readTsv(path.join(importPath, "synteny_blocks.tsv"), z.tuple([z.string()]));
 
     await prisma.msynBlock.createMany({
       data: syntenyBlocks.map(([blockId]) => ({
         blockId,
       })),
     });
+
+    // ---
+
+    console.log("importing synteny tracks...");
+
+    const syntenyTracks = await readTsv(
+      path.join(importPath, "synteny_tracks.tsv"),
+      z.tuple([
+        z.string(),
+        z.string(),
+        z.string(),
+        z.preprocess((v) => Number(v), z.number()),
+        z.preprocess((v) => Number(v), z.number()),
+      ]),
+    );
+
+    for (const [blockId, speciesId, scaffoldId, start, end] of syntenyTracks) {
+      try {
+        await prisma.msynTrack.create({
+          data: {
+            blockId,
+            speciesId,
+            scaffoldId,
+            start,
+            end,
+          },
+        });
+      } catch (e) {
+        console.log(blockId, speciesId, scaffoldId, start, end);
+      }
+    }
 
     await prisma.msynTrack.createMany({
       data: syntenyTracks.map(([blockId, speciesId, scaffoldId, start, end]) => ({
@@ -227,6 +393,12 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing synteny groups...");
+
+    const syntenyGroups = await readTsv(path.join(importPath, "synteny_groups.tsv"), z.tuple([z.string(), z.string()]));
+
     await prisma.msynGroup.createMany({
       data: syntenyGroups.map(([blockId, groupId]) => ({
         blockId,
@@ -234,12 +406,21 @@ export const actions = {
       })),
     });
 
+    // ---
+
+    console.log("importing synteny genes...");
+
+    const syntenyGenes = await readTsv(
+      path.join(importPath, "synteny_genes.tsv"),
+      z.tuple([z.string(), z.string(), z.string(), z.string()]),
+    );
+
     await prisma.msynGene.createMany({
-      data: syntenyGenes.map(([blockId, scaffoldId, groupId, geneId]) => ({
+      data: syntenyGenes.map(([blockId, scaffoldId, groupId, proteinId]) => ({
         blockId,
         scaffoldId,
         groupId,
-        geneId,
+        proteinId,
       })),
     });
   },

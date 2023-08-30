@@ -1,15 +1,15 @@
-refseq	branchiostoma_floridae	Amphioxus	100	chromosome	true	false
-ensembl	gallus_gallus	Chicken	109	chromosome	false	false
-ensembl	canis_lupus_familiaris	Dog	109	chromosome	false	false
-ensembl	callorhinchus_milii	Elephant shark	109	scaffold	false	false
-ensembl	anolis_carolinensis	Green Anole	109	chromosome	false	false
-ensembl	homo_sapiens	Human	109	chromosome	false	false
-ensembl	oryzias_latipes	Medaka	109	chromosome	false	false
-ensembl	mus_musculus	Mouse	109	chromosome	false	false
-ensembl	monodelphis_domestica	Opossum	109	chromosome	false	false
-ensembl	takifugu_rubripes	Pufferfish	109	chromosome	false	false
-ensembl	lepisosteus_oculatus	Spotted gar	109	chromosome	false	false
-ensembl	gasterosteus_aculeatus	Stickleback	109	chromosome	false	false
-ensembl	meleagris_gallopavo	Turkey	109	chromosome	false	false
-ensembl	taeniopygia_guttata	Zebra finch	109	chromosome	false	false
-ensembl	danio_rerio	Zebrafish	109	chromosome	false	false
+refseq	amphioxus	branchiostoma_floridae	100	chromosome	true	false
+ensembl	chicken	gallus_gallus	109	chromosome	false	false
+ensembl	dog	canis_lupus_familiaris	109	chromosome	false	false
+ensembl	elephant_shark	callorhinchus_milii	109	scaffold	false	false
+ensembl	green_anole	anolis_carolinensis	109	chromosome	false	false
+ensembl	human	homo_sapiens	109	chromosome	false	false
+ensembl	medaka	oryzias_latipes	109	chromosome	false	false
+ensembl	mouse	mus_musculus	109	chromosome	false	false
+ensembl	opossum	monodelphis_domestica	109	chromosome	false	false
+ensembl	pufferfish	takifugu_rubripes	109	chromosome	false	false
+ensembl	spotted_gar	lepisosteus_oculatus	109	chromosome	false	false
+ensembl	stickleback	gasterosteus_aculeatus	109	chromosome	false	false
+ensembl	turkey	meleagris_gallopavo	109	chromosome	false	false
+ensembl	zebra_finch	taeniopygia_guttata	109	chromosome	false	false
+ensembl	zebrafish	danio_rerio	109	chromosome	false	false
