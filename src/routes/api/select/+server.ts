@@ -10,6 +10,10 @@ export const GET = (async ({ url }) => {
   const [count, genes] = await prisma.$transaction([
     prisma.gene.count({
       where: {
+        queries: {
+          some: {},
+        },
+
         OR: [
           {
             geneId: {
@@ -25,24 +29,11 @@ export const GET = (async ({ url }) => {
       },
     }),
     prisma.gene.findMany({
-      include: {
-        scaffold: {
-          include: {
-            species: {
-              include: {
-                source: true,
-              },
-            },
-            segments: true,
-          },
-        },
-        labels: {
-          include: {
-            label: true,
-          },
-        },
-      },
       where: {
+        queries: {
+          some: {},
+        },
+
         OR: [
           {
             geneId: {
@@ -56,6 +47,25 @@ export const GET = (async ({ url }) => {
           },
         ],
       },
+
+      include: {
+        scaffold: {
+          include: {
+            species: {
+              include: {
+                source: true,
+              },
+            },
+            segments: true,
+          },
+        },
+        segment: true,
+        labels: {
+          include: {
+            label: true,
+          },
+        },
+      },
     }),
   ]);
 
@@ -68,11 +78,11 @@ export const GET = (async ({ url }) => {
     species: e.scaffold?.species.name ?? "",
     source: e.scaffold?.species.source.name ?? "",
     version: e.scaffold?.species.version ?? "",
-    completeness: e.scaffold?.species.assembly ?? "scaffold",
+    assembly: e.scaffold?.species.assembly,
     scaffold: e.scaffold?.scaffoldId ?? "",
     // TODO: this is currently impossible to query for...
     // we need to link genes directly to scaffolds... somehow
-    segment: "",
+    segment: e.segment?.segmentId ?? "",
     labels: e.labels.map((e) => e.label.name),
   }));
 

@@ -22,21 +22,19 @@ export const getAllSourcesResponseSchema = z.array(sourceSchema);
 
 export const getAllScaffoldsResponseSchema = z.array(
   z.object({
-    id: z.string().uuid(),
+    id: z.string(),
     name: z.string(),
   }),
 );
 export const getAllSegmentsResponseSchema = z.array(
   z.object({
-    id: z.string().uuid(),
+    id: z.string(),
     name: z.string(),
   }),
 );
 
 export const getAllGenes = async (
   geneIds: string[],
-  species: string[],
-  scaffolds: string[],
   segments: string[],
   sources: string[],
   labels: string[],
@@ -46,8 +44,6 @@ export const getAllGenes = async (
 ): Promise<z.infer<typeof getAllGenesResponseSchema>> => {
   const query = intoQuery({
     geneIds,
-    species,
-    scaffolds,
     segments,
     sources,
     labels,

@@ -55,11 +55,23 @@
 
   //
   const updateGenes = async () => {
+    let segments: string[] = [];
+
+    if (selectedSpeciesIds.length > 0) {
+      segments = selectedSpeciesIds;
+    }
+
+    if (selectedScaffoldIds.length > 0) {
+      segments = selectedScaffoldIds;
+    }
+
+    if (selectedSegmentIds.length > 0) {
+      segments = selectedSegmentIds;
+    }
+
     const { count, data } = await getAllGenes(
       [],
-      selectedSpeciesIds,
-      selectedScaffoldIds,
-      selectedSegmentIds,
+      segments,
       selectedSourceIds,
       selectedLabelIds,
       exactLabels,
@@ -141,10 +153,14 @@
     updateGenes();
   }
 
-  //
-  selection.subscribe((e) => {
-    console.log("selected:", e);
-  });
+  // //
+  // selection.subscribe((e) => {
+  //   console.log("selected:", e);
+  // });
+
+  // $: {
+  //   console.log(selectedSpeciesIds, selectedScaffoldIds, selectedSegmentIds);
+  // }
 </script>
 
 <!-- svelte-ignore missing-declaration -->
@@ -233,7 +249,7 @@
     <Column>
       <MultiSelect
         bind:selectedIds={selectedSegmentIds}
-        disabled
+        disabled={!segmentSelectEnabled}
         titleText="Segment"
         label="Select segment..."
         items={segments}

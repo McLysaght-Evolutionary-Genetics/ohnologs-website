@@ -152,7 +152,7 @@
     blocks: z.number().gte(0),
     tracks: z.array(
       z.object({
-        id: z.string().uuid(),
+        id: z.string(),
         start: z.number().gte(0),
         end: z.number().gte(0),
         scaffold: z.object({
@@ -163,9 +163,9 @@
         }),
         genes: z.array(
           z.object({
-            id: z.string().uuid(),
-            trackId: z.string().uuid(),
-            groupId: z.string().uuid(),
+            id: z.string(),
+            trackId: z.string(),
+            groupId: z.string(),
             geneId: z.string(),
             proteinId: z.string(),
             start: z.number().gte(0),
@@ -176,8 +176,8 @@
     ),
     groups: z.array(
       z.object({
-        id: z.string().uuid(),
-        blockId: z.string().uuid(),
+        id: z.string(),
+        blockId: z.string(),
       }),
     ),
   });
@@ -310,17 +310,19 @@
     const res = await fetch(`/ohnologs/api/synteny${query}`);
     const data = await res.json();
 
+    // console.log(data);
+
     const parsed = schema.safeParse(data);
 
     if (!parsed.success) {
-      throw new Error("updateSyntenyBlocks - invalid synteny response from api");
+      throw new Error("updateSyntenyBlocks - invalid synteny response from api", { cause: parsed.error });
     }
 
     block = parsed.data;
     blockCount = parsed.data.blocks;
     currentBlockIdx = blockIdx;
 
-    console.log(block, blockCount);
+    // console.log(block, blockCount);
 
     loading = false;
     loadingGenes = true;
@@ -328,7 +330,7 @@
 
   const updateTableEntries = async (geneIds: string[]) => {
     if (geneIds.length > 0) {
-      const { data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+      const { data } = await getAllGenes(geneIds, [], [], [], false, 1, perPage);
 
       entries = data;
     } else {
@@ -484,7 +486,7 @@
     action.x = e.offsetX - dims.margin.left;
     action.y = e.offsetY - dims.margin.top;
 
-    console.log(action);
+    // console.log(action);
   };
 
   const handleMouseUp = (
@@ -527,7 +529,7 @@
 
     const updated = [...$selection, ...ids.map((e) => ({ id: e, type: "transient" as SelectionType }))];
 
-    console.log(added);
+    // console.log(added);
 
     selected = [...selected, ...added];
     selection.set(updated);

@@ -42,10 +42,10 @@
   //
   const headers = [
     { key: "name", value: "Species" },
-    { key: "state", value: "State" },
+    { key: "reconstruction", value: "reconstruction" },
     { key: "source", value: "Source" },
     { key: "version", value: "Version" },
-    { key: "completeness", value: "Completeness" },
+    { key: "assembly", value: "Assembly" },
     { key: "scaffolds", value: "Chromosomes" },
     { key: "segments", value: "Segments" },
     { key: "genes", value: "Genes" },

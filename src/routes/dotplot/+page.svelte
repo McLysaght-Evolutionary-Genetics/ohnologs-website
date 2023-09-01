@@ -118,7 +118,7 @@
     return [e.x, e.y, c];
   }) satisfies [number, number, string][];
 
-  $: console.log(ppos);
+  // $: console.log(ppos);
 
   selection.subscribe((current) => {
     ppos = points.map((e) => {
@@ -443,7 +443,7 @@
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
-    const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+    const { count, data } = await getAllGenes(geneIds, [], [], [], false, 1, perPage);
 
     entries = data;
 
@@ -582,7 +582,7 @@
               </g>
               <g>
                 {#each ppos as [x, y, c]}
-                  {console.log(scale.x(x), scale.y(y))}
+                  <!-- {console.log(scale.x(x), scale.y(y))} -->
 
                   <circle cx={scale.x(x)} cy={scale.y(y)} r={3} style="fill: {c}" />
                 {/each}

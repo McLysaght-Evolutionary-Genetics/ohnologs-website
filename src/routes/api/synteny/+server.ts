@@ -33,6 +33,13 @@ export const GET = (async ({ url }) => {
       groups: {
         include: {
           genes: {
+            where: {
+              gene: {
+                queries: {
+                  some: {},
+                },
+              },
+            },
             include: {
               gene: true,
               track: true,
@@ -66,9 +73,11 @@ export const GET = (async ({ url }) => {
     e.genes.map((f) => {
       return {
         id: f.gene.geneId,
+        speciesId: f.speciesId,
+        blockId: f.blockId,
         trackId: f.track.scaffoldId,
         groupId: e.groupId,
-        geneId: f.geneId,
+        geneId: f.gene.geneId,
         proteinId: f.gene.proteinId,
         start: f.gene.start,
         end: f.gene.end,
@@ -77,7 +86,9 @@ export const GET = (async ({ url }) => {
   );
 
   const tracks = block.tracks.map((e) => {
-    const current = genes.filter((f) => f.trackId === e.scaffoldId);
+    const current = genes.filter(
+      (f) => f.blockId === e.blockId && f.speciesId === e.speciesId && f.trackId === e.scaffoldId,
+    );
 
     return {
       id: e.scaffoldId,

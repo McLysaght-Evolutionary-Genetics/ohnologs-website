@@ -287,9 +287,7 @@
   let query: string;
 
   const getSpeciesFromAltQuery = async () => {
-    console.log(altQueryId);
-
-    const { data } = await getAllGenes([altQueryId], [], [], [], [], [], false, 1, 1);
+    const { data } = await getAllGenes([altQueryId], [], [], [], false, 1, 1);
 
     const gene = data[0];
 
@@ -335,7 +333,7 @@
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
-    const { count, data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+    const { count, data } = await getAllGenes(geneIds, [], [], [], false, 1, perPage);
 
     entries = data;
 

@@ -76,7 +76,7 @@
         method="post"
         action="?/search"
         use:enhance={() => {
-          entries = undefined;
+          entries = [];
           loading = true;
 
           return async ({ result, form }) => {

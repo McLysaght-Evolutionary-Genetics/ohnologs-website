@@ -26,6 +26,11 @@ export const GET = (async ({ url }) => {
     prisma.scaffold.findMany({
       include: {
         genes: {
+          where: {
+            queries: {
+              some: {},
+            },
+          },
           include: {
             family: {
               include: {
@@ -86,7 +91,7 @@ export const GET = (async ({ url }) => {
     const qCumlen = qsegs.find((e) => e.id === qScaf.scaffoldId)!.cumlen;
 
     const xScaff = qCumlen - qScaf.end - qScaf.start;
-    const xGene = (qGene.start + qGene.end) / 2;
+    const xGene = (qGene.start! + qGene.end!) / 2;
 
     const x = xScaff + xGene;
 
@@ -99,7 +104,7 @@ export const GET = (async ({ url }) => {
       const sCumlen = ssegs.find((e) => e.id === sScaf.scaffoldId)!.cumlen;
 
       const yScaff = sCumlen - sScaf.end - sScaf.start;
-      const yGene = (sGene.start + sGene.end) / 2;
+      const yGene = (sGene.start! + sGene.end!) / 2;
 
       const y = yScaff + yGene;
 

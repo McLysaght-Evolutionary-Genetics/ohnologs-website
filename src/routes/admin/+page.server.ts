@@ -15,11 +15,11 @@ import z from "zod";
 // gene_ohnology - <gene:queryId, gene:subjectId>, ohnology:relation
 // trees - tree:treeId tree:newick
 // tree_species - <tree:treeId, species:speciesId>
-// tree_genes - <tree:treeId, gene:proteinId>
+// tree_genes - <tree:tree#Id, gene:proteinId>
 // synteny_blocks - block:blockId
 // synteny_tracks - <block:blockId, species:speciesId, scaffold:scaffoldId>, track:start, track:end
 // synteny_groups - <block:blockId> group:groupId
-// synteny_genes - <block:blockId, scaffold:scaffoldId, group:groupId, gene:proteinId>
+// synteny_genes - <block:blockId, species:speciesId, scaffold:scaffoldId, group:groupId, gene:proteinId>
 
 const prisma = new PrismaClient();
 
@@ -189,27 +189,6 @@ export const actions = {
       ]),
     );
 
-    // for (const [speciesId, scaffoldId, segmentId, familyId, geneId, proteinId, start, end, pvc, pgc] of genes) {
-    //   try {
-    //     await prisma.gene.create({
-    //       data: {
-    //         speciesId,
-    //         scaffoldId,
-    //         segmentId,
-    //         familyId,
-    //         geneId,
-    //         proteinId,
-    //         start,
-    //         end,
-    //         pvc,
-    //         pgc,
-    //       },
-    //     });
-    //   } catch (e) {
-    //     console.log(speciesId, scaffoldId, geneId, proteinId);
-    //   }
-    // }
-
     await prisma.gene.createMany({
       data: genes.map(([speciesId, scaffoldId, segmentId, familyId, geneId, proteinId, start, end, pvc, pgc]) => ({
         speciesId,
@@ -243,26 +222,6 @@ export const actions = {
     console.log("importing gene labels...");
 
     const geneLabels = await readTsv(path.join(importPath, "gene_labels.tsv"), z.tuple([z.string(), z.string()]));
-
-    // let ok = 0;
-    // let oof = 0;
-
-    // for (const [proteinId, labelId] of geneLabels) {
-    //   try {
-    //     await prisma.geneLabel.create({
-    //       data: {
-    //         proteinId,
-    //         labelId,
-    //       },
-    //     });
-
-    //     ok += 1;
-    //   } catch (e) {
-    //     oof += 1;
-    //   }
-    // }
-
-    // console.log(ok, oof);
 
     await prisma.geneLabel.createMany({
       data: geneLabels.map(([proteinId, labelId]) => ({
@@ -320,25 +279,25 @@ export const actions = {
 
     const treeGenes = await readTsv(path.join(importPath, "tree_genes.tsv"), z.tuple([z.string(), z.string()]));
 
-    // for (const [treeId, proteinId] of treeGenes) {
-    //   try {
-    //     await prisma.treeGene.create({
-    //       data: {
-    //         treeId,
-    //         proteinId,
-    //       },
-    //     });
-    //   } catch (e) {
-    //     console.log(treeId, proteinId);
-    //   }
-    // }
+    for (const [treeId, proteinId] of treeGenes) {
+      try {
+        await prisma.treeGene.create({
+          data: {
+            treeId,
+            proteinId,
+          },
+        });
+      } catch (e) {
+        console.log(treeId, proteinId);
+      }
+    }
 
-    await prisma.treeGene.createMany({
-      data: treeGenes.map(([treeId, proteinId]) => ({
-        treeId,
-        proteinId,
-      })),
-    });
+    // await prisma.treeGene.createMany({
+    //   data: treeGenes.map(([treeId, proteinId]) => ({
+    //     treeId,
+    //     proteinId,
+    //   })),
+    // });
 
     // ---
 
@@ -366,22 +325,6 @@ export const actions = {
         z.preprocess((v) => Number(v), z.number()),
       ]),
     );
-
-    for (const [blockId, speciesId, scaffoldId, start, end] of syntenyTracks) {
-      try {
-        await prisma.msynTrack.create({
-          data: {
-            blockId,
-            speciesId,
-            scaffoldId,
-            start,
-            end,
-          },
-        });
-      } catch (e) {
-        console.log(blockId, speciesId, scaffoldId, start, end);
-      }
-    }
 
     await prisma.msynTrack.createMany({
       data: syntenyTracks.map(([blockId, speciesId, scaffoldId, start, end]) => ({
@@ -412,16 +355,21 @@ export const actions = {
 
     const syntenyGenes = await readTsv(
       path.join(importPath, "synteny_genes.tsv"),
-      z.tuple([z.string(), z.string(), z.string(), z.string()]),
+      z.tuple([z.string(), z.string(), z.string(), z.string(), z.string()]),
     );
 
     await prisma.msynGene.createMany({
-      data: syntenyGenes.map(([blockId, scaffoldId, groupId, proteinId]) => ({
+      data: syntenyGenes.map(([blockId, speciesId, scaffoldId, groupId, proteinId]) => ({
         blockId,
+        speciesId,
         scaffoldId,
         groupId,
         proteinId,
       })),
     });
+
+    // ---
+
+    console.log("imported all data!");
   },
 } satisfies Actions;

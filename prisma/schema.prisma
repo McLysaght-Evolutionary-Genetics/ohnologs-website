@@ -224,32 +224,36 @@ model MsynTrack {
   genes MsynGene[]
 
   //
-  @@id([blockId, scaffoldId])
+  @@id([blockId, speciesId, scaffoldId])
 }
 
 model MsynGroup {
   //
-  groupId String @id
+  groupId String
 
   //
   block   MsynBlock @relation(fields: [blockId], references: [blockId])
   blockId String
 
   genes MsynGene[]
+
+  //
+  @@id([groupId, blockId])
 }
 
 model MsynGene {
   //
-  track      MsynTrack @relation(fields: [blockId, scaffoldId], references: [blockId, scaffoldId])
+  track      MsynTrack @relation(fields: [blockId, speciesId, scaffoldId], references: [blockId, speciesId, scaffoldId])
   blockId    String
+  speciesId  String
   scaffoldId String
 
-  group   MsynGroup @relation(fields: [groupId], references: [groupId])
+  group   MsynGroup @relation(fields: [groupId, blockId], references: [groupId, blockId])
   groupId String
 
   gene      Gene   @relation(fields: [proteinId, scaffoldId], references: [proteinId, scaffoldId])
   proteinId String
 
   //
-  @@id([blockId, scaffoldId, groupId, proteinId])
+  @@id([blockId, speciesId, scaffoldId, groupId, proteinId])
 }

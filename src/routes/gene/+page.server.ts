@@ -9,7 +9,13 @@ export const load = (async () => {
   // labels
 
   const [count, species, sources, labels] = await prisma.$transaction([
-    prisma.gene.count(),
+    prisma.gene.count({
+      where: {
+        queries: {
+          some: {},
+        },
+      },
+    }),
     prisma.species.findMany(),
     prisma.genomeSource.findMany(),
     prisma.label.findMany(),

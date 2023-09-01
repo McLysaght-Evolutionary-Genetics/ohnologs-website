@@ -16,9 +16,9 @@ export const GET = (async ({ url }) => {
 
   const exactLabels = findQueryOrError(url, "exactLabels") === "true";
 
-  const species = findQueryArray(url, "species") ?? [];
-  const scaffolds = findQueryArray(url, "scaffolds") ?? [];
   const segments = findQueryArray(url, "segments") ?? [];
+  const triplets = segments.map((e) => e.split("-"));
+
   const sources = findQueryArray(url, "sources") ?? [];
   const labels = findQueryArray(url, "labels") ?? (exactLabels ? [] : null);
 
@@ -40,6 +40,11 @@ export const GET = (async ({ url }) => {
   const [count, genes] = await prisma.$transaction([
     prisma.gene.count({
       where: {
+        // only ohnologs
+        queries: {
+          some: {},
+        },
+
         // TODO: this is terrible, refer to the TODO up top
         // pls fix this at some point!!!
         ...(exactLabels
@@ -72,16 +77,42 @@ export const GET = (async ({ url }) => {
               ],
             }),
 
-        scaffold: {
-          species: {
-            AND: [
-              ...(species.length === 0 ? [] : [{ speciesId: { in: species } }]),
-              ...(sources.length === 0 ? [] : [{ sourceId: { in: sources } }]),
-            ],
-          },
+        // scaffold: {
+        //   species: {
+        //     AND: [
+        //       ...(species.length === 0 ? [] : [{ speciesId: { in: species } }]),
+        //       ...(sources.length === 0 ? [] : [{ sourceId: { in: sources } }]),
+        //     ],
+        //   },
 
-          ...(scaffolds.length === 0 ? {} : { id: { in: scaffolds } }),
-        },
+        //   ...(scaffolds.length === 0 ? {} : { scaffoldId: { in: scaffolds } }),
+        // },
+        // segment: {
+        //   ...(segments.length === 0 ? {} : { segmentId: { in: segments } }),
+        // },
+
+        ...(triplets.length === 0
+          ? {}
+          : {
+              OR: triplets.map(([speciesId, scaffoldId, segmentId]) => ({
+                ...(speciesId == null
+                  ? {}
+                  : {
+                      speciesId,
+                    }),
+                ...(scaffoldId == null
+                  ? {}
+                  : {
+                      scaffoldId,
+                    }),
+                ...(segmentId == null
+                  ? {}
+                  : {
+                      segmentId,
+                    }),
+              })),
+            }),
+
         labels: {
           ...(exactLabels
             ? { ...(labels == null ? {} : { every: { labelId: { in: labels } }, some: {} }) }
@@ -91,15 +122,8 @@ export const GET = (async ({ url }) => {
     }),
     prisma.gene.findMany({
       include: {
-        scaffold: {
-          include: {
-            species: {
-              include: {
-                source: true,
-              },
-            },
-          },
-        },
+        species: true,
+        segment: true,
         labels: {
           include: {
             label: true,
@@ -107,6 +131,11 @@ export const GET = (async ({ url }) => {
         },
       },
       where: {
+        // only ohnologs
+        queries: {
+          some: {},
+        },
+
         // TODO: this is terrible, refer to the TODO up top
         // pls fix this at some point!!!
         ...(exactLabels
@@ -139,22 +168,56 @@ export const GET = (async ({ url }) => {
               ],
             }),
 
-        scaffold: {
-          species: {
-            AND: [
-              ...(species.length === 0 ? [] : [{ speciesId: { in: species } }]),
-              ...(sources.length === 0 ? [] : [{ sourceId: { in: sources } }]),
-            ],
-          },
+        // scaffold: {
+        //   species: {
+        //     AND: [
+        //       ...(species.length === 0 ? [] : [{ speciesId: { in: species } }]),
+        //       ...(sources.length === 0 ? [] : [{ sourceId: { in: sources } }]),
+        //     ],
+        //   },
 
-          ...(scaffolds.length === 0 ? {} : { id: { in: scaffolds } }),
-        },
+        //   ...(scaffolds.length === 0 ? {} : { scaffoldId: { in: scaffolds } }),
+        // },
+        // segment: {
+        //   ...(segments.length === 0 ? {} : { segmentId: { in: segments } }),
+        // },
+
+        ...(triplets.length === 0
+          ? {}
+          : {
+              OR: triplets.map(([speciesId, scaffoldId, segmentId]) => ({
+                ...(speciesId == null
+                  ? {}
+                  : {
+                      speciesId,
+                    }),
+                ...(scaffoldId == null
+                  ? {}
+                  : {
+                      scaffoldId,
+                    }),
+                ...(segmentId == null
+                  ? {}
+                  : {
+                      segmentId,
+                    }),
+              })),
+            }),
+
         labels: {
           ...(exactLabels
             ? { ...(labels == null ? {} : { every: { labelId: { in: labels } }, some: {} }) }
             : { ...(labels == null ? {} : { some: { labelId: { in: labels } } }) }),
         },
       },
+      orderBy: [
+        {
+          speciesId: "asc",
+        },
+        {
+          scaffoldId: "asc",
+        },
+      ],
       skip: page * perPage,
       take: perPage,
     }),
@@ -166,14 +229,14 @@ export const GET = (async ({ url }) => {
     proteinId: e.proteinId,
     // TODO: this is a problem... can we make scaffolds required?
     // alternatively, link gene directly to species
-    species: e.scaffold?.species.name ?? "",
-    source: e.scaffold?.species.source.name ?? "",
-    version: e.scaffold?.species.version ?? "",
-    completeness: e.scaffold?.species.assembly ?? "",
-    scaffold: e.scaffold?.scaffoldId ?? "",
+    species: e.speciesId,
+    source: e.species.sourceId,
+    version: e.species.version,
+    assembly: e.species.assembly,
+    scaffold: e.scaffoldId ?? "",
     // TODO: this is currently impossible to query for...
     // we need to link genes directly to scaffolds... somehow
-    segment: "",
+    segment: e.segmentId ?? "",
     labels: e.labels.map((e) => e.label.name),
   }));
 

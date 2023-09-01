@@ -28,8 +28,16 @@ export const GET = (async ({ url }) => {
 
   // TODO: will this sometimes miss homologs since im only including the subject?
   const scaffolds = await prisma.scaffold.findMany({
+    where: {
+      speciesId: query,
+    },
     include: {
       genes: {
+        where: {
+          queries: {
+            some: {},
+          },
+        },
         include: {
           family: {
             include: {
@@ -48,9 +56,6 @@ export const GET = (async ({ url }) => {
         },
       },
     },
-    where: {
-      speciesId: query,
-    },
   });
 
   const segments: Segment[] = scaffolds.map((e) => ({ id: e.scaffoldId, name: e.scaffoldId, length: e.end - e.start }));
@@ -66,7 +71,7 @@ export const GET = (async ({ url }) => {
       const start = {
         id: qGene.geneId,
         scaffold: qScaf.scaffoldId,
-        offset: (qGene.end + qGene.start) / 2,
+        offset: (qGene.end! + qGene.start!) / 2,
       };
 
       for (const sGene of qGene.family.genes) {
@@ -79,7 +84,7 @@ export const GET = (async ({ url }) => {
         const end = {
           id: sGene.geneId,
           scaffold: sScaf.scaffoldId,
-          offset: (sGene.end + sGene.start) / 2,
+          offset: (sGene.end! + sGene.start!) / 2,
         };
 
         links.push({

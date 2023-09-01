@@ -15,13 +15,13 @@ export const sourceSchema = z.object({
 
 // genes
 export const geneSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   geneId: z.string(),
   proteinId: z.string(),
   species: z.string(),
   source: z.string(),
   version: z.string(),
-  completeness: genomeCompletenessSchema,
+  assembly: genomeCompletenessSchema,
   scaffold: z.string(),
   segment: z.string(),
   labels: z.array(z.string()),
@@ -29,12 +29,12 @@ export const geneSchema = z.object({
 
 // species page
 export const speciesSchema = z.object({
-  id: z.string().uuid(),
+  id: z.string(),
   name: z.string(),
-  state: z.string(),
+  reconstruction: z.boolean(),
   source: z.string(),
   version: z.string(),
-  completeness: genomeCompletenessSchema,
+  assembly: genomeCompletenessSchema,
   scaffolds: z.number(),
   segments: z.number(),
   genes: z.number(),

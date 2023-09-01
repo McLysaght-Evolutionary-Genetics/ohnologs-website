@@ -11,8 +11,6 @@ export const GET = (async ({ url }) => {
   const page = parseInt(findQueryOrError(url, "page")) - 1;
   const perPage = parseInt(findQueryOrError(url, "perPage"));
 
-  console.log(sources);
-
   prisma.species.count({
     where: {},
   });
@@ -78,7 +76,7 @@ export const GET = (async ({ url }) => {
     return {
       id: e.speciesId,
       name: e.name,
-      state: e.reconstruction ? "reconstruction" : "current",
+      reconstruction: e.reconstruction,
       source: e.source.name,
       version: e.version,
       assembly: e.assembly,

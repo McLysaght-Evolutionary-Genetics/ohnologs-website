@@ -8,9 +8,6 @@ export const GET = (async ({ url }) => {
   const speciesIds = findQueryArray(url, "speciesIds") ?? [];
 
   const scaffolds = await prisma.scaffold.findMany({
-    include: {
-      species: true,
-    },
     where: {
       speciesId: {
         in: speciesIds,
@@ -19,8 +16,8 @@ export const GET = (async ({ url }) => {
   });
 
   const data = scaffolds.map((e) => ({
-    id: e.scaffoldId,
-    name: e.scaffoldId,
+    id: `${e.speciesId}-${e.scaffoldId}`,
+    name: `${e.speciesId}-${e.scaffoldId}`,
   }));
 
   return new Response(JSON.stringify(data));

@@ -170,26 +170,17 @@ export const actions = {
     const protIds = entries.map((e) => e.sseqid);
 
     const genes = await prisma.gene.findMany({
-      include: {
-        scaffold: {
-          include: {
-            species: {
-              include: {
-                source: true,
-              },
-            },
-            segments: true,
-          },
+      where: {
+        proteinId: {
+          in: protIds,
         },
+      },
+      include: {
+        species: true,
         labels: {
           include: {
             label: true,
           },
-        },
-      },
-      where: {
-        proteinId: {
-          in: protIds,
         },
       },
     });
@@ -200,14 +191,14 @@ export const actions = {
       proteinId: e.proteinId,
       // TODO: this is a problem... can we make scaffolds required?
       // alternatively, link gene directly to species
-      species: e.scaffold?.species.name ?? "",
-      source: e.scaffold?.species.source.name ?? "",
-      version: e.scaffold?.species.version ?? "",
-      completeness: e.scaffold?.species.assembly ?? "scaffold",
-      scaffold: e.scaffold?.scaffoldId ?? "",
+      species: e.speciesId,
+      source: e.species.sourceId,
+      version: e.species.version,
+      assembly: e.species.assembly,
+      scaffold: e.scaffoldId ?? "",
       // TODO: this is currently impossible to query for...
       // we need to link genes directly to scaffolds... somehow
-      segment: "",
+      segment: e.segmentId ?? "",
       labels: e.labels.map((e) => e.label.name),
     }));
 

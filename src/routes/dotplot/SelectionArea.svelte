@@ -16,7 +16,7 @@
   const handleMouseUp = () => {
     selected = false;
 
-    console.log("lolwat");
+    // console.log("lolwat");
   };
 </script>
 

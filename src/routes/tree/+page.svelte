@@ -90,7 +90,7 @@
 
   const updateTableEntries = async (geneIds: string[]) => {
     if (geneIds.length > 0) {
-      const { data } = await getAllGenes(geneIds, [], [], [], [], [], false, 1, perPage);
+      const { data } = await getAllGenes(geneIds, [], [], [], false, 1, perPage);
 
       entries = data;
     } else {

@@ -1,3 +1,4 @@
+# sourceId	speciesId	speciesName	genomeVersion	assemblyType	isOutgroup	isReconstruction
 refseq	amphioxus	branchiostoma_floridae	100	chromosome	true	false
 ensembl	chicken	gallus_gallus	109	chromosome	false	false
 ensembl	dog	canis_lupus_familiaris	109	chromosome	false	false
