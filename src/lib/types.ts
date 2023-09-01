@@ -24,6 +24,8 @@ export const geneSchema = z.object({
   assembly: genomeCompletenessSchema,
   scaffold: z.string(),
   segment: z.string(),
+  pvc: z.array(z.number()),
+  pgc: z.array(z.number()),
   labels: z.array(z.string()),
 });
 

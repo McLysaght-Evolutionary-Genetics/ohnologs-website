@@ -52,10 +52,12 @@
   const headers = [
     { key: "geneId", value: "Gene" },
     { key: "proteinId", value: "Protein" },
-    { key: "species", value: "Species" },
     { key: "source", value: "Source" },
+    { key: "species", value: "Species" },
     { key: "scaffold", value: "Chromosome" },
     { key: "segment", value: "Segment" },
+    { key: "pvc", value: "PVC" },
+    { key: "pgc", value: "PGC" },
     { key: "labels", value: "Labels" },
   ];
 

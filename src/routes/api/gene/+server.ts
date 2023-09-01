@@ -237,6 +237,8 @@ export const GET = (async ({ url }) => {
     // TODO: this is currently impossible to query for...
     // we need to link genes directly to scaffolds... somehow
     segment: e.segmentId ?? "",
+    pvc: e.pvc,
+    pgc: e.pgc,
     labels: e.labels.map((e) => e.label.name),
   }));
 
