@@ -53,7 +53,7 @@
     const nodes = getTreeNodes(tree.getNodes());
 
     // TODO: fix amphioxus hack
-    const maxSpLen = Math.max(...["amphioxus", ...species].map((e) => e.length));
+    // const maxSpLen = Math.max(...species.map((e) => e.length));
 
     for (const node of nodes) {
       // internal node
@@ -64,7 +64,7 @@
       const meta: { species?: string; protein?: string; pvc?: number; pgc?: number } = {};
 
       // TODO: fix amphioxus hack
-      for (const sp of ["amphioxus", ...species]) {
+      for (const sp of species) {
         if (node.data.name.startsWith(sp)) {
           meta.species = sp;
 

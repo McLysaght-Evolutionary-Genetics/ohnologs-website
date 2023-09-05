@@ -180,14 +180,14 @@
     </div>
     <div slot="below">
       <br />
-      <p>All genes in our database are displayed in the table below.</p>
+      <p>All ohnologs in our database are displayed in the table below.</p>
       <br />
       <p><u>Data filtering:</u></p>
       <p>
-        Genes can be filtered by species/chromosome/segment using the 'species', 'chromosome', and 'segment' dropdown
+        Ohnologs can be filtered by species/chromosome/segment using the 'species', 'chromosome', and 'segment' dropdown
         menus. Segments refer to breaks in macro-synteny that were used to reconstruct ancestral vertebrate/ganthostome
-        genomes. Genes can also be filtered by source database - such as Ensembl or Refseq - using the 'source' dropdown
-        menu.
+        genomes. Ohnologs can also be filtered by source database - such as Ensembl or Refseq - using the 'source'
+        dropdown menu.
       </p>
       <br />
       <p>
