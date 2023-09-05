@@ -13,7 +13,8 @@
   } from "carbon-components-svelte";
   import { Download, Launch, Scale } from "carbon-icons-svelte";
   import type { SpeciesEntry } from "./speciesTable";
-  import { downloadFile, intoQuery } from "$lib/util";
+  import { downloadFile, downloadOhnologs, intoQuery } from "$lib/util";
+  import type { DownloadData } from "$lib/types";
 
   export let title: string;
   export let description: string;
@@ -42,10 +43,10 @@
   //
   const headers = [
     { key: "name", value: "Species" },
-    { key: "reconstruction", value: "reconstruction" },
     { key: "source", value: "Source" },
     { key: "version", value: "Version" },
     { key: "assembly", value: "Assembly" },
+    { key: "reconstruction", value: "reconstruction" },
     { key: "scaffolds", value: "Chromosomes" },
     { key: "segments", value: "Segments" },
     { key: "genes", value: "Genes" },
@@ -56,19 +57,13 @@
   const handleDownloadAll = async () => {
     downloading = true;
 
-    const res = await fetch(`/ohnologs/api/download`);
-    const data = await res.json();
+    const res = await fetch(`/ohnologs/api/download`, {
+      method: "post",
+      body: JSON.stringify({ geneIds: null, speciesIds: null }),
+    });
+    const download = (await res.json()) as DownloadData;
 
-    const tsv =
-      "#query_species\tquery_gene\tquery_protein\tquery_scaffold\tquery_segment\tquery_source\tquery_pvc_(proto-vertebrate-chromosome)\tquery_pgc_(proto-gnathostome-chromosome)\tsubject_species\tsubject_gene\tohnolog_family\tohnolog_degree_(1r-vs-2r)\n" +
-      data
-        .map(
-          (e: any) =>
-            `${e.querySpecies}\t${e.queryGene}\t${e.queryProtein}\t${e.queryScaffold}\t${e.querySegment}\t${e.querySource}\t${e.queryPvc}\t${e.queryPgc}\t${e.subjectSpecies}\t${e.subjectGene}\t${e.ohnologFamily}\t${e.ohnologDegree}`,
-        )
-        .join("\n");
-
-    downloadFile("ohnologs.tsv", tsv);
+    await downloadOhnologs(download);
 
     downloading = false;
   };
@@ -76,21 +71,13 @@
   const handleDownloadSelected = async () => {
     downloading = true;
 
-    const query = intoQuery({ speciesIds: selectedRowIds });
+    const res = await fetch(`/ohnologs/api/download`, {
+      method: "post",
+      body: JSON.stringify({ geneIds: null, speciesIds: selectedRowIds }),
+    });
+    const download = (await res.json()) as DownloadData;
 
-    const res = await fetch(`/ohnologs/api/download${query}`);
-    const data = await res.json();
-
-    const tsv =
-      "#query_species\tquery_gene\tquery_protein\tquery_scaffold\tquery_segment\tquery_source\tquery_pvc_(proto-vertebrate-chromosome)\tquery_pgc_(proto-gnathostome-chromosome)\tsubject_species\tsubject_gene\tohnolog_family\tohnolog_degree_(1r-vs-2r)\n" +
-      data
-        .map(
-          (e: any) =>
-            `${e.querySpecies}\t${e.queryGene}\t${e.queryProtein}\t${e.queryScaffold}\t${e.querySegment}\t${e.querySource}\t${e.queryPvc}\t${e.queryPgc}\t${e.subjectSpecies}\t${e.subjectGene}\t${e.ohnologFamily}\t${e.ohnologDegree}`,
-        )
-        .join("\n");
-
-    downloadFile("ohnologs.tsv", tsv);
+    await downloadOhnologs(download);
 
     downloading = false;
   };
@@ -108,7 +95,27 @@
 
         <svelte:fragment slot="cell" let:cell>
           {#if cell.key === "source"}
-            <Link href="https://www.ensembl.org/{nextId.next().value}" target="_blank" icon={Launch}>{cell.value}</Link>
+            {#if cell.value === "Ensembl"}
+              <Link href="https://www.ensembl.org/{nextId.next().value}" target="_blank" icon={Launch}
+                >{cell.value}</Link
+              >
+            {/if}
+            {#if cell.value === "RefSeq"}
+              <Link
+                href="https://www.ncbi.nlm.nih.gov/genome/annotation_euk/{(() => {
+                  const id = nextId.next().value;
+
+                  // @ts-ignore
+                  const first = id[0].toUpperCase();
+                  // @ts-ignore
+                  const next = id.slice(1);
+
+                  return first + next;
+                })()}/100/"
+                target="_blank"
+                icon={Launch}>{cell.value}</Link
+              >
+            {/if}
           {:else}
             {cell.value}
           {/if}

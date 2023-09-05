@@ -122,7 +122,11 @@ export const GET = (async ({ url }) => {
     }),
     prisma.gene.findMany({
       include: {
-        species: true,
+        species: {
+          include: {
+            source: true,
+          },
+        },
         segment: true,
         labels: {
           include: {
@@ -229,8 +233,8 @@ export const GET = (async ({ url }) => {
     proteinId: e.proteinId,
     // TODO: this is a problem... can we make scaffolds required?
     // alternatively, link gene directly to species
-    species: e.speciesId,
-    source: e.species.sourceId,
+    species: e.species.name,
+    source: e.species.source.name,
     version: e.species.version,
     assembly: e.species.assembly,
     scaffold: e.scaffoldId ?? "",

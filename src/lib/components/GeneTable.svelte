@@ -15,7 +15,10 @@
   import { Download, Launch, Scale, TreeView } from "carbon-icons-svelte";
   import { get } from "svelte/store";
   import type { GeneEntry } from "./geneTable";
-  import { downloadFile, intoQuery } from "$lib/util";
+  import { downloadFile, downloadOhnologs, intoQuery } from "$lib/util";
+  import JSZip from "jszip";
+  import type { DownloadData } from "$lib/types";
+  import { saveAs } from "file-saver";
 
   //
   export let title: string;
@@ -56,8 +59,8 @@
     { key: "species", value: "Species" },
     { key: "scaffold", value: "Chromosome" },
     { key: "segment", value: "Segment" },
-    { key: "pvc", value: "PVC" },
     { key: "pgc", value: "PGC" },
+    { key: "pvc", value: "PVC" },
     { key: "labels", value: "Labels" },
   ];
 
@@ -90,19 +93,13 @@
   const handleDownloadAll = async () => {
     downloading = true;
 
-    const res = await fetch(`/ohnologs/api/download`);
-    const data = await res.json();
+    const res = await fetch(`/ohnologs/api/download`, {
+      method: "post",
+      body: JSON.stringify({ geneIds: null, speciesIds: null }),
+    });
+    const download = (await res.json()) as DownloadData;
 
-    const tsv =
-      "#query_species\tquery_gene\tquery_protein\tquery_scaffold\tquery_segment\tquery_source\tquery_pvc_(proto-vertebrate-chromosome)\tquery_pgc_(proto-gnathostome-chromosome)\tsubject_species\tsubject_gene\tohnolog_family\tohnolog_degree_(1r-vs-2r)\n" +
-      data
-        .map(
-          (e: any) =>
-            `${e.querySpecies}\t${e.queryGene}\t${e.queryProtein}\t${e.queryScaffold}\t${e.querySegment}\t${e.querySource}\t${e.queryPvc}\t${e.queryPgc}\t${e.subjectSpecies}\t${e.subjectGene}\t${e.ohnologFamily}\t${e.ohnologDegree}`,
-        )
-        .join("\n");
-
-    downloadFile("ohnologs.tsv", tsv);
+    await downloadOhnologs(download);
 
     downloading = false;
   };
@@ -110,21 +107,13 @@
   const handleDownloadSelected = async () => {
     downloading = true;
 
-    const query = intoQuery({ geneIds: selectedRowIds });
+    const res = await fetch(`/ohnologs/api/download`, {
+      method: "post",
+      body: JSON.stringify({ geneIds: selectedRowIds, speciesIds: null }),
+    });
+    const download = (await res.json()) as DownloadData;
 
-    const res = await fetch(`/ohnologs/api/download${query}`);
-    const data = await res.json();
-
-    const tsv =
-      "#query_species\tquery_gene\tquery_protein\tquery_scaffold\tquery_segment\tquery_source\tquery_pvc_(proto-vertebrate-chromosome)\tquery_pgc_(proto-gnathostome-chromosome)\tsubject_species\tsubject_gene\tohnolog_family\tohnolog_degree_(1r-vs-2r)\n" +
-      data
-        .map(
-          (e: any) =>
-            `${e.querySpecies}\t${e.queryGene}\t${e.queryProtein}\t${e.queryScaffold}\t${e.querySegment}\t${e.querySource}\t${e.queryPvc}\t${e.queryPgc}\t${e.subjectSpecies}\t${e.subjectGene}\t${e.ohnologFamily}\t${e.ohnologDegree}`,
-        )
-        .join("\n");
-
-    downloadFile("ohnologs.tsv", tsv);
+    await downloadOhnologs(download);
 
     downloading = false;
   };

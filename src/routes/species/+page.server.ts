@@ -11,12 +11,12 @@ export const load = (async () => {
     sources,
     states: [
       {
-        id: 0,
-        name: "current",
+        id: "current",
+        name: "Current",
       },
       {
-        id: 1,
-        name: "reconstruction",
+        id: "reconstruction",
+        name: "Reconstruction",
       },
     ],
   };

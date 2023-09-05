@@ -15,7 +15,7 @@ import z from "zod";
 // gene_ohnology - <gene:queryId, gene:subjectId>, ohnology:relation
 // trees - tree:treeId tree:newick
 // tree_species - <tree:treeId, species:speciesId>
-// tree_genes - <tree:tree#Id, gene:proteinId>
+// tree_genes - <tree:treeId, gene:proteinId>
 // synteny_blocks - block:blockId
 // synteny_tracks - <block:blockId, species:speciesId, scaffold:scaffoldId>, track:start, track:end
 // synteny_groups - <block:blockId> group:groupId
@@ -76,8 +76,8 @@ export const actions = {
         z.string(),
         z.string(),
         z.enum(["chromosome", "scaffold"]),
-        z.preprocess((v) => Boolean(v), z.boolean()),
-        z.preprocess((v) => Boolean(v), z.boolean()),
+        z.preprocess((v) => v === "true", z.boolean()),
+        z.preprocess((v) => v === "true", z.boolean()),
       ]),
     );
 

@@ -176,7 +176,11 @@ export const actions = {
         },
       },
       include: {
-        species: true,
+        species: {
+          include: {
+            source: true,
+          },
+        },
         labels: {
           include: {
             label: true,
@@ -191,14 +195,16 @@ export const actions = {
       proteinId: e.proteinId,
       // TODO: this is a problem... can we make scaffolds required?
       // alternatively, link gene directly to species
-      species: e.speciesId,
-      source: e.species.sourceId,
+      species: e.species.name,
+      source: e.species.source.name,
       version: e.species.version,
       assembly: e.species.assembly,
       scaffold: e.scaffoldId ?? "",
       // TODO: this is currently impossible to query for...
       // we need to link genes directly to scaffolds... somehow
       segment: e.segmentId ?? "",
+      pvc: e.pvc,
+      pgc: e.pgc,
       labels: e.labels.map((e) => e.label.name),
     }));
 

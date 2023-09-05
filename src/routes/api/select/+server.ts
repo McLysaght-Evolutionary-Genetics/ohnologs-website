@@ -49,14 +49,9 @@ export const GET = (async ({ url }) => {
       },
 
       include: {
-        scaffold: {
+        species: {
           include: {
-            species: {
-              include: {
-                source: true,
-              },
-            },
-            segments: true,
+            source: true,
           },
         },
         segment: true,
@@ -75,14 +70,16 @@ export const GET = (async ({ url }) => {
     proteinId: e.proteinId,
     // TODO: this is a problem... can we make scaffolds required?
     // alternatively, link gene directly to species
-    species: e.scaffold?.species.name ?? "",
-    source: e.scaffold?.species.source.name ?? "",
-    version: e.scaffold?.species.version ?? "",
-    assembly: e.scaffold?.species.assembly,
-    scaffold: e.scaffold?.scaffoldId ?? "",
+    species: e.species.name,
+    source: e.species.source.name,
+    version: e.species.version,
+    assembly: e.species.assembly,
+    scaffold: e.scaffoldId ?? "",
     // TODO: this is currently impossible to query for...
     // we need to link genes directly to scaffolds... somehow
-    segment: e.segment?.segmentId ?? "",
+    segment: e.segmentId ?? "",
+    pvc: e.pvc,
+    pgc: e.pgc,
     labels: e.labels.map((e) => e.label.name),
   }));
 

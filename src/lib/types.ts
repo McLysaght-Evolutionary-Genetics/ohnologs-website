@@ -1,4 +1,42 @@
+import type {
+  GenomeSource,
+  Species,
+  Scaffold,
+  Segment,
+  Gene,
+  Family,
+  Ohnology,
+  GeneLabel,
+  TreeGene,
+  TreeSpecies,
+  MsynBlock,
+  MsynTrack,
+  MsynGroup,
+  MsynGene,
+  Label,
+  Tree,
+} from "@prisma/client";
 import * as z from "zod";
+
+// download
+export type DownloadData = {
+  sources: GenomeSource[];
+  species: Species[];
+  scaffolds: Scaffold[];
+  segments: Segment[];
+  genes: Gene[];
+  families: Family[];
+  ohnologies: Ohnology[];
+  labels: Label[];
+  geneLabels: GeneLabel[];
+  trees: Tree[];
+  treeGenes: TreeGene[];
+  treeSpecies: TreeSpecies[];
+  syntenyBlocks: MsynBlock[];
+  syntenyTracks: MsynTrack[];
+  syntenyGroups: MsynGroup[];
+  syntenyGenes: MsynGene[];
+};
 
 // common
 export const genomeCompletenessSchema = z.enum(["chromosome", "scaffold"]);
