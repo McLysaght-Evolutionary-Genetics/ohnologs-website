@@ -18,6 +18,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json .
 COPY pnpm-lock.yaml .
+COPY .npmrc .
 RUN pnpm i --frozen-lockfile
 COPY . .
 
