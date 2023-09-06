@@ -105,8 +105,10 @@
                 href="https://www.ncbi.nlm.nih.gov/genome/annotation_euk/{(() => {
                   const id = nextId.next().value;
 
+                  // eslint-disable-next-line
                   // @ts-ignore
                   const first = id[0].toUpperCase();
+                  // eslint-disable-next-line
                   // @ts-ignore
                   const next = id.slice(1);
 
