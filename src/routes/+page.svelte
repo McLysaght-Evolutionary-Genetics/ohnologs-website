@@ -135,7 +135,7 @@
       <h4>I'm confused</h4>
 
       <p>
-        We have a thing for that too! You can read our comprehensive <Link href="https://docs.ohnologs/com"
+        We have a thing for that too! You can read our comprehensive <Link href="https://docs.ohnologs.com"
           >documentation</Link
         > to learn all about our features. If you don't feel like reading, visit a <Link
           href="/{randomArrayElem(pages)}">random page</Link
