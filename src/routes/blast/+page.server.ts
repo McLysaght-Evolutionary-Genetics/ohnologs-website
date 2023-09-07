@@ -171,6 +171,11 @@ export const actions = {
 
     const genes = await prisma.gene.findMany({
       where: {
+        // only ohnologs
+        queries: {
+          some: {},
+        },
+
         proteinId: {
           in: protIds,
         },

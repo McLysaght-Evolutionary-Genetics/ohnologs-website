@@ -77,6 +77,16 @@ export const GET = (async ({ url }) => {
               ],
             }),
 
+        ...(sources.length === 0
+          ? {}
+          : {
+              species: {
+                sourceId: {
+                  in: sources,
+                },
+              },
+            }),
+
         // scaffold: {
         //   species: {
         //     AND: [
@@ -170,6 +180,16 @@ export const GET = (async ({ url }) => {
                   },
                 },
               ],
+            }),
+
+        ...(sources.length === 0
+          ? {}
+          : {
+              species: {
+                sourceId: {
+                  in: sources,
+                },
+              },
             }),
 
         // scaffold: {
