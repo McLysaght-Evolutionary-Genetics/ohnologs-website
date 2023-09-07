@@ -93,7 +93,7 @@
   const handleDownloadAll = async () => {
     downloading = true;
 
-    const res = await fetch(`/ohnologs/api/download`, {
+    const res = await fetch(`/api/download`, {
       method: "post",
       body: JSON.stringify({ geneIds: null, speciesIds: null }),
     });
@@ -107,7 +107,7 @@
   const handleDownloadSelected = async () => {
     downloading = true;
 
-    const res = await fetch(`/ohnologs/api/download`, {
+    const res = await fetch(`/api/download`, {
       method: "post",
       body: JSON.stringify({ geneIds: selectedRowIds, speciesIds: null }),
     });
@@ -139,8 +139,8 @@
           {:else if cell.key === "proteinId"}
             <span
               >{cell.value}
-              <Link href="/ohnologs/tree?protein={cell.value}" icon={TreeView} />
-              <Link href="/ohnologs/synteny?queryId={cell.value}" icon={Scale} /></span
+              <Link href="/tree?protein={cell.value}" icon={TreeView} />
+              <Link href="/synteny?queryId={cell.value}" icon={Scale} /></span
             >
           {:else}{cell.value}
           {/if}

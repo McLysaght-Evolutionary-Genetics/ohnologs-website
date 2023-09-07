@@ -45,8 +45,8 @@
 
       <div class="list">
         <UnorderedList>
-          <ListItem><Link href="/ohnologs/species">Species page</Link></ListItem>
-          <ListItem><Link href="/ohnologs/gene">Gene page</Link></ListItem>
+          <ListItem><Link href="/species">Species page</Link></ListItem>
+          <ListItem><Link href="/gene">Gene page</Link></ListItem>
         </UnorderedList>
       </div>
     </Column>
@@ -63,8 +63,8 @@
 
       <div class="list">
         <UnorderedList>
-          <ListItem><Link href="/ohnologs/select">Selection page</Link></ListItem>
-          <ListItem><Link href="/ohnologs/blast">BLAST page</Link></ListItem>
+          <ListItem><Link href="/select">Selection page</Link></ListItem>
+          <ListItem><Link href="/blast">BLAST page</Link></ListItem>
         </UnorderedList>
       </div>
     </Column>
@@ -81,10 +81,10 @@
 
       <div class="list">
         <UnorderedList>
-          <ListItem><Link href="/ohnologs/circos">Circos page</Link></ListItem>
-          <ListItem><Link href="/ohnologs/dotplot">Dotplot page</Link></ListItem>
-          <ListItem><Link href="/ohnologs/tree">Phylogeny page</Link></ListItem>
-          <ListItem><Link href="/ohnologs/synteny">Microsynteny page</Link></ListItem>
+          <ListItem><Link href="/circos">Circos page</Link></ListItem>
+          <ListItem><Link href="/dotplot">Dotplot page</Link></ListItem>
+          <ListItem><Link href="/tree">Phylogeny page</Link></ListItem>
+          <ListItem><Link href="/synteny">Microsynteny page</Link></ListItem>
         </UnorderedList>
       </div>
     </Column>
@@ -101,9 +101,9 @@
       <h4>I have a favourite gene</h4>
 
       <p>
-        You can visit the <Link href="/ohnologs/blast">BLAST</Link> page to find homologs of your favourite gene that are
-        present in our database. The resulting genes can either be downloaded or selected. Any genes that are currently in
-        your selection will be highlighted across all plots on our website.
+        You can visit the <Link href="/blast">BLAST</Link> page to find homologs of your favourite gene that are present
+        in our database. The resulting genes can either be downloaded or selected. Any genes that are currently in your selection
+        will be highlighted across all plots on our website.
       </p>
     </Column>
   </Row>
@@ -113,9 +113,9 @@
       <h4>I'm interested in a specific gene family</h4>
 
       <p>
-        You can visit the <Link href="/ohnologs/select">selection</Link> page and provide a FASTA or TSV file to find any
-        matching genes that are present in our database. The results can either be downloaded or selected. Any genes that
-        are currently in your selection will be highlighted across all plots on our website.
+        You can visit the <Link href="/select">selection</Link> page and provide a FASTA or TSV file to find any matching
+        genes that are present in our database. The results can either be downloaded or selected. Any genes that are currently
+        in your selection will be highlighted across all plots on our website.
       </p>
     </Column>
   </Row>
@@ -125,11 +125,9 @@
       <h4>I like pretty graphs</h4>
 
       <p>
-        You're in luck! You can visit any of the <Link href="/ohnologs/circos">circos</Link>, <Link
-          href="/ohnologs/dotplot">dotplot</Link
-        >, <Link href="/ohnologs/tree">tree</Link>, or <Link href="/ohnologs/synteny">synteny</Link> pages and (hopefully)
-        enjoy what you see ;). If you're still not satisfied, let us know what we can do to satiate your immeasurable hunger
-        for pretty graphs.
+        You're in luck! You can visit any of the <Link href="/circos">circos</Link>, <Link href="/dotplot">dotplot</Link
+        >, <Link href="/tree">tree</Link>, or <Link href="/synteny">synteny</Link> pages and (hopefully) enjoy what you see
+        ;). If you're still not satisfied, let us know what we can do to satiate your immeasurable hunger for pretty graphs.
       </p>
     </Column>
   </Row>
@@ -139,9 +137,9 @@
       <h4>I'm confused</h4>
 
       <p>
-        We have a thing for that too! You can read our comprehensive <Link href="/ohnologs/docs">documentation</Link> to
-        learn all about our features. If you don't feel like reading, visit a <Link
-          href="/ohnologs/{randomArrayElem(pages)}">random page</Link
+        We have a thing for that too! You can read our comprehensive <Link href="/docs">documentation</Link> to learn all
+        about our features. If you don't feel like reading, visit a <Link href="/{randomArrayElem(pages)}"
+          >random page</Link
         > and go exploring. That'll work too... probably.
       </p>
     </Column>

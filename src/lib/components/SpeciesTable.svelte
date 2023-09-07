@@ -57,7 +57,7 @@
   const handleDownloadAll = async () => {
     downloading = true;
 
-    const res = await fetch(`/ohnologs/api/download`, {
+    const res = await fetch(`/api/download`, {
       method: "post",
       body: JSON.stringify({ geneIds: null, speciesIds: null }),
     });
@@ -71,7 +71,7 @@
   const handleDownloadSelected = async () => {
     downloading = true;
 
-    const res = await fetch(`/ohnologs/api/download`, {
+    const res = await fetch(`/api/download`, {
       method: "post",
       body: JSON.stringify({ geneIds: null, speciesIds: selectedRowIds }),
     });
@@ -94,7 +94,9 @@
         <span class="description" slot="description">{description}</span>
 
         <svelte:fragment slot="cell" let:cell>
-          {#if cell.key === "source"}
+          {#if cell.key === "assembly"}
+            {cell.value[0].toUpperCase()}{cell.value.slice(1)}
+          {:else if cell.key === "source"}
             {#if cell.value === "Ensembl"}
               <Link href="https://www.ensembl.org/{nextId.next().value}" target="_blank" icon={Launch}
                 >{cell.value}</Link

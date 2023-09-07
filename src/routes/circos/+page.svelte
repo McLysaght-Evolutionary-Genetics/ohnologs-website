@@ -315,7 +315,7 @@
 
     const qstr = intoQuery({ query: queryId });
 
-    const res = await fetch(`/ohnologs/api/circos${qstr}`);
+    const res = await fetch(`/api/circos${qstr}`);
     const homologies = await res.json();
 
     // TODO: gen arcs on server? how would i handle resizing then?
@@ -465,11 +465,8 @@
       </p>
       <br />
       <p>
-        View our <a
-          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
-          target="_blank"
-          rel="noreferrer"
-          on:click|stopPropagation>documentation</a
+        View our <a href="https://aoifolution.gen.tcd.ie/docs" target="_blank" rel="noreferrer" on:click|stopPropagation
+          >documentation</a
         >
         for additional info.
       </p>

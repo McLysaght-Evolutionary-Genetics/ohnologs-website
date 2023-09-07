@@ -76,7 +76,7 @@
 
     const query = intoQuery(params);
 
-    const res = await fetch(`/ohnologs/api/tree${query}`);
+    const res = await fetch(`/api/tree${query}`);
 
     const { trees, genes: treeGenes } = await res.json();
 
@@ -183,11 +183,8 @@
       </p>
       <br />
       <p>
-        View our <a
-          href="https://aoifolution.gen.tcd.ie/ohnologs/docs"
-          target="_blank"
-          rel="noreferrer"
-          on:click|stopPropagation>documentation</a
+        View our <a href="https://docs.ohnologs.com" target="_blank" rel="noreferrer" on:click|stopPropagation
+          >documentation</a
         >
         for additional info.
       </p>

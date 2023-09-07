@@ -37,41 +37,41 @@
   </svelte:fragment>
 
   <HeaderNav>
-    <HeaderNavItem href="/ohnologs" text="Home" />
+    <HeaderNavItem href="/" text="Home" />
     <HeaderNavMenu text="Data">
-      <HeaderNavItem href="/ohnologs/species" text="Species" />
-      <HeaderNavItem href="/ohnologs/gene" text="Genes" />
+      <HeaderNavItem href="/species" text="Species" />
+      <HeaderNavItem href="/gene" text="Genes" />
     </HeaderNavMenu>
     <HeaderNavMenu text="Utilities">
-      <HeaderNavItem href="/ohnologs/select" text="Selection" />
-      <HeaderNavItem href="/ohnologs/blast" text="BLAST" />
+      <HeaderNavItem href="/select" text="Selection" />
+      <HeaderNavItem href="/blast" text="BLAST" />
     </HeaderNavMenu>
     <HeaderNavMenu text="Figures">
-      <HeaderNavItem href="/ohnologs/circos" text="Circos" />
-      <HeaderNavItem href="/ohnologs/dotplot" text="Dotplot" />
-      <HeaderNavItem href="/ohnologs/tree" text="Phylogeny" />
-      <HeaderNavItem href="/ohnologs/synteny" text="Synteny" />
+      <HeaderNavItem href="/circos" text="Circos" />
+      <HeaderNavItem href="/dotplot" text="Dotplot" />
+      <HeaderNavItem href="/tree" text="Phylogeny" />
+      <HeaderNavItem href="/synteny" text="Synteny" />
     </HeaderNavMenu>
-    <HeaderNavItem href="/ohnologs/docs" text="Documentation" />
+    <HeaderNavItem href="/docs" text="Documentation" />
   </HeaderNav>
 </Header>
 
 <SideNav bind:isOpen={isSideNavOpen} rail>
   <SideNavItems>
-    <SideNavLink icon={Home} href="/ohnologs" text="Home" />
+    <SideNavLink icon={Home} href="/" text="Home" />
     <SideNavDivider />
-    <SideNavLink icon={LetterSs} href="/ohnologs/species" text="Species" />
-    <SideNavLink icon={LetterGg} href="/ohnologs/gene" text="Genes" />
+    <SideNavLink icon={LetterSs} href="/species" text="Species" />
+    <SideNavLink icon={LetterGg} href="/gene" text="Genes" />
     <SideNavDivider />
-    <SideNavLink icon={Select_02} href="/ohnologs/select" text="Selection" />
-    <SideNavLink icon={Data_2} href="/ohnologs/blast" text="BLAST" />
+    <SideNavLink icon={Select_02} href="/select" text="Selection" />
+    <SideNavLink icon={Data_2} href="/blast" text="BLAST" />
     <SideNavDivider />
-    <SideNavLink icon={CircleDash} href="/ohnologs/circos" text="Circos" />
-    <SideNavLink icon={ChartScatter} href="/ohnologs/dotplot" text="Dotplot" />
-    <SideNavLink icon={Tree} href="/ohnologs/tree" text="Phylogeny" />
-    <SideNavLink icon={QComposerEdit} href="/ohnologs/synteny" text="Synteny" />
+    <SideNavLink icon={CircleDash} href="/circos" text="Circos" />
+    <SideNavLink icon={ChartScatter} href="/dotplot" text="Dotplot" />
+    <SideNavLink icon={Tree} href="/tree" text="Phylogeny" />
+    <SideNavLink icon={QComposerEdit} href="/synteny" text="Synteny" />
     <SideNavDivider />
-    <SideNavLink icon={Catalog} href="/ohnologs/docs" text="Documentation" />
+    <SideNavLink icon={Catalog} href="/docs" text="Documentation" />
   </SideNavItems>
 </SideNav>
 
