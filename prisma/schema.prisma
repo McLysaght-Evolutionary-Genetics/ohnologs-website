@@ -108,6 +108,9 @@ model Gene {
   queries  Ohnology[] @relation("query")
   subjects Ohnology[] @relation("subject")
 
+  // user-defined data
+  tags Tag[]
+
   //
   @@unique([proteinId, scaffoldId])
 }
@@ -256,4 +259,29 @@ model MsynGene {
 
   //
   @@id([blockId, speciesId, scaffoldId, groupId, proteinId])
+}
+
+model Token {
+  id String @id
+
+  //
+  user String
+
+  //
+  tags Tag[]
+}
+
+model Tag {
+  //
+  meta String
+
+  //
+  token   Token  @relation(fields: [tokenId], references: [id])
+  tokenId String
+
+  gene   Gene   @relation(fields: [geneId], references: [geneId])
+  geneId String
+
+  //
+  @@id([tokenId, geneId])
 }

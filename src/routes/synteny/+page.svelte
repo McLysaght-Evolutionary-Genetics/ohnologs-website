@@ -7,13 +7,57 @@
   import TooltipGroup from "$lib/components/tooltip_group.svelte";
   import type { SelectionType } from "$lib/selection";
   import { selection } from "$lib/selection";
+  import { token } from "$lib/token";
   import { intoQuery } from "$lib/util";
-  import { Button, Column, ExpandableTile, Grid, PaginationNav, Row, TextInput } from "carbon-components-svelte";
+  import {
+    Button,
+    ButtonSet,
+    Column,
+    ExpandableTile,
+    Grid,
+    InlineLoading,
+    PaginationNav,
+    Row,
+    TextArea,
+    TextInput,
+  } from "carbon-components-svelte";
   import type { D3ZoomEvent } from "d3";
   import * as d3 from "d3";
   import * as z from "zod";
   import Gene from "./gene.svelte";
-  import { Information } from "carbon-icons-svelte";
+  import { Information, RestaurantFine, UpdateNow } from "carbon-icons-svelte";
+  import { enhance } from "$app/forms";
+
+  // dumb shit
+  class Konami {
+    static secret: number[] = [38, 38, 40, 40, 37, 39, 37, 39, 66, 65, 13].reverse();
+    static history: number[] = [];
+
+    static push = (code: number) => {
+      while (this.history.length >= this.secret.length) {
+        this.history.pop();
+      }
+
+      this.history.unshift(code);
+    };
+
+    static check = () => {
+      if (this.secret.length !== this.history.length) {
+        return false;
+      }
+
+      for (let i = 0; i < this.secret.length; i++) {
+        if (this.secret[i] !== this.history[i]) {
+          return false;
+        }
+      }
+
+      return true;
+    };
+  }
+
+  let inclAll = 0;
+  //
 
   //
   const preferredColours = ["#ff594f"];
@@ -79,13 +123,20 @@
     },
   };
 
-  const geneHeight = 20;
-  const trackSpacing = 100;
+  let geneHeight = 20;
+  let trackSpacing = 100;
 
   const innerWidth = dims.size.width - dims.margin.left - dims.margin.right;
   const innerHeight = dims.size.height - dims.margin.top - dims.margin.bottom;
 
   let domain_max = 50_000_000;
+
+  // secret settings
+  if ($token != null) {
+    inclAll = 1;
+    trackSpacing = 300;
+    domain_max = 5_000_000;
+  }
 
   $: scale = {
     x: d3.scaleLinear().domain([0, domain_max]).range([0, innerWidth]),
@@ -170,6 +221,8 @@
             proteinId: z.string(),
             start: z.number().gte(0),
             end: z.number().gte(0),
+            ohnolog: z.boolean(),
+            meta: z.boolean(),
           }),
         ),
       }),
@@ -305,6 +358,8 @@
     const query = intoQuery({
       queryId: currentQueryId,
       blockIdx: blockIdx - 1,
+      tokenId: $token ?? "",
+      inclAll,
     });
 
     const res = await fetch(`/api/synteny${query}`);
@@ -339,8 +394,6 @@
 
     loadingGenes = false;
   };
-
-  // ENSTGUG00000005774
 
   $: if (blockIdx !== currentBlockIdx) {
     loading = true;
@@ -389,8 +442,19 @@
     links = regenerateLinks(block!);
   };
 
-  const handleSelect = (groupId: string) => {
+  // secret
+  let lastKey: string | null = null;
+  let secretGene: string | null = null;
+
+  const handleSelect = (geneId: string, groupId: string) => {
     if (genes == null) {
+      return;
+    }
+
+    // secret
+    if (lastKey === "Control") {
+      secretGene = geneId;
+
       return;
     }
 
@@ -541,6 +605,40 @@
 
     action = { state: "none" };
   };
+
+  // secret
+  let meta = "";
+  let secretLoading = false;
+
+  const fetchSecretGene = async (tokenId: string, geneId: string) => {
+    const query = intoQuery({
+      tokenId,
+      geneId,
+    });
+
+    const res = await fetch(`/api/token/meta${query}`);
+    const data = await res.json();
+
+    const parsed = z
+      .object({
+        tag: z
+          .object({
+            meta: z.string(),
+          })
+          .nullish(),
+      })
+      .safeParse(data);
+
+    if (!parsed.success) {
+      throw new Error("fetchSecretGene - invalid gene response from api", { cause: parsed.error });
+    }
+
+    meta = parsed.data.tag?.meta ?? "";
+  };
+
+  $: if (secretGene != null && $token != null) {
+    fetchSecretGene($token, secretGene);
+  }
 </script>
 
 <!--
@@ -573,6 +671,58 @@
   bind:innerHeight={windowHeight}
   on:mousemove={handleMouseMove}
   on:keydown={handleKeyDown}
+  on:keydown={(e) => {
+    lastKey = e.key;
+  }}
+  on:keyup={(e) => {
+    lastKey = null;
+  }}
+  on:keydown={async (e) => {
+    Konami.push(e.keyCode);
+
+    if (Konami.check()) {
+      const id = prompt("owo what's this? what secrets lie beyond???") ?? "";
+
+      const query = intoQuery({
+        token: id,
+      });
+
+      const res = await fetch(`/api/token${query}`);
+      const data = await res.json();
+
+      const parsed = z
+        .object({
+          token: z
+            .object({
+              id: z.string(),
+              user: z.string(),
+            })
+            .nullish(),
+        })
+        .safeParse(data);
+
+      if (!parsed.success) {
+        throw new Error("validate token - invalid response from api", { cause: parsed.error });
+      }
+
+      if (parsed.data.token == null) {
+        alert("bad token... go away");
+
+        return;
+      }
+
+      alert("secret view unlocked ;)");
+
+      //
+      inclAll = 1;
+      trackSpacing = 300;
+      domain_max = 5_000_000;
+      loading = true;
+
+      //
+      $token = parsed.data.token.id;
+    }
+  }}
 />
 
 <Grid padding>
@@ -711,8 +861,39 @@
                           height={geneHeight}
                           colour={selected.includes(gene.groupId) ? colours[gene.groupId] : "#ebebeb"}
                           cursor={geneCursor[action.state]}
-                          on:click={() => handleSelect(gene.groupId)}
+                          on:click={() => handleSelect(gene.geneId, gene.groupId)}
                         />
+
+                        {#if inclAll !== 0 && gene.ohnolog}
+                          <g
+                            transform="translate({scale.x((gene.start + gene.end) / 2 - gene.track.start) - 2.5},{gene
+                              .track.index *
+                              trackSpacing -
+                              geneHeight +
+                              22}) scale(0.1)"
+                          >
+                            <path
+                              style="fill:#ED8A19;"
+                              d="M26.285,2.486l5.407,10.956c0.376,0.762,1.103,1.29,1.944,1.412l12.091,1.757
+                      c2.118,0.308,2.963,2.91,1.431,4.403l-8.749,8.528c-0.608,0.593-0.886,1.448-0.742,2.285l2.065,12.042
+                      c0.362,2.109-1.852,3.717-3.746,2.722l-10.814-5.685c-0.752-0.395-1.651-0.395-2.403,0l-10.814,5.685
+                      c-1.894,0.996-4.108-0.613-3.746-2.722l2.065-12.042c0.144-0.837-0.134-1.692-0.742-2.285l-8.749-8.528
+                      c-1.532-1.494-0.687-4.096,1.431-4.403l12.091-1.757c0.841-0.122,1.568-0.65,1.944-1.412l5.407-10.956
+                      C22.602,0.567,25.338,0.567,26.285,2.486z"
+                            />
+                          </g>
+                        {/if}
+
+                        {#if inclAll !== 0 && gene.meta}
+                          <g>
+                            <circle
+                              cx={scale.x((gene.start + gene.end) / 2 - gene.track.start)}
+                              cy={gene.track.index * trackSpacing - geneHeight - 5}
+                              r={2}
+                              style="fill: #000000"
+                            /></g
+                          >
+                        {/if}
                       {/each}
                     </TooltipGroup>
                   </g>
@@ -750,6 +931,53 @@
           </svg>
         {/if}
       </Column>
+    </Row>
+    {#if $token != null}
+      <Row>
+        <Column>
+          <div
+            class="rainbow rainbow-text-animated"
+            style="border-width: 2px; border-style: dotted; border-color: #ffffff;"
+          >
+            <p class="rainbow rainbow-text-animated">super secret panel</p>
+            <form
+              method="post"
+              action="?/meta"
+              use:enhance={({ data }) => {
+                secretLoading = true;
+
+                data.set("tokenId", $token ?? "");
+                data.set("geneId", secretGene ?? "");
+
+                return async ({ result, form }) => {
+                  loading = true;
+                  secretLoading = false;
+                };
+              }}
+            >
+              <Grid padding>
+                <Row>
+                  <Column>
+                    <p>Gene: {secretGene}</p>
+
+                    <TextArea labelText="Meta" name="meta" bind:value={meta} />
+
+                    <div style="padding-top: 1rem;">
+                      <ButtonSet>
+                        <Button type="submit" icon={loading || secretLoading ? InlineLoading : UpdateNow}>Update</Button
+                        >
+                      </ButtonSet>
+                    </div>
+                  </Column>
+                </Row>
+                <Row />
+              </Grid>
+            </form>
+          </div>
+        </Column>
+      </Row>
+    {/if}
+    <Row>
       <Column>
         {#if blockCount !== 0}
           <div class="pagination">
@@ -802,5 +1030,41 @@
   .pagination {
     display: flex;
     justify-content: center;
+  }
+
+  #super-secret-settings {
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.2);
+    /* Black w/opacity/see-through */
+    border: 3px solid;
+  }
+
+  .rainbow {
+    text-align: center;
+    text-decoration: underline;
+    font-size: 32px;
+    font-family: monospace;
+    letter-spacing: 5px;
+  }
+
+  .rainbow-text-animated {
+    background: linear-gradient(to right, #6666ff, #0099ff, #00ff00, #ff3399, #6666ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    animation: rainbow_animation 6s ease-in-out infinite;
+    background-size: 400% 100%;
+  }
+
+  @keyframes rainbow_animation {
+    0%,
+    100% {
+      background-position: 0 0;
+    }
+
+    50% {
+      background-position: 100% 0;
+    }
   }
 </style>

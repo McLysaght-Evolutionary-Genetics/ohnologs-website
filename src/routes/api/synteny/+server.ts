@@ -1,5 +1,5 @@
 import { PrismaClient } from "$lib/prisma";
-import { findQueryOrError } from "$lib/util";
+import { findQuery, findQueryOrError } from "$lib/util";
 import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
@@ -7,6 +7,8 @@ const prisma = new PrismaClient();
 export const GET = (async ({ url }) => {
   const queryId = findQueryOrError(url, "queryId");
   const blockIdx = parseInt(findQueryOrError(url, "blockIdx"));
+  const inclAll = parseInt(findQueryOrError(url, "inclAll")) !== 0;
+  const tokenId = findQuery(url, "tokenId");
 
   const blocks = await prisma.msynBlock.findMany({
     where: {
@@ -33,15 +35,37 @@ export const GET = (async ({ url }) => {
       groups: {
         include: {
           genes: {
-            where: {
+            ...(inclAll
+              ? {}
+              : {
+                  // only ohnologs
+                  where: {
+                    gene: {
+                      queries: {
+                        some: {},
+                      },
+                    },
+                  },
+                }),
+            include: {
               gene: {
-                queries: {
-                  some: {},
+                include: {
+                  // quick test to see if gene is an ohnolog
+                  queries: {
+                    take: 1,
+                  },
+                  // admin submitted notes
+                  ...(tokenId == null
+                    ? {}
+                    : {
+                        tags: {
+                          where: {
+                            tokenId,
+                          },
+                        },
+                      }),
                 },
               },
-            },
-            include: {
-              gene: true,
               track: true,
             },
           },
@@ -81,6 +105,8 @@ export const GET = (async ({ url }) => {
         proteinId: f.gene.proteinId,
         start: f.gene.start,
         end: f.gene.end,
+        ohnolog: f.gene.queries.length > 0,
+        meta: f.gene.tags != null && f.gene.tags.length > 0,
       };
     }),
   );
