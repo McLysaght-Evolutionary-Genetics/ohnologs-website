@@ -1,4 +1,4 @@
-FROM node:18-alpine as builder
+FROM node:22 as builder
 
 # env
 ARG DATABASE_URL
@@ -26,7 +26,7 @@ COPY . .
 RUN pnpm build
 RUN pnpm prune --prod
 
-FROM node:18-alpine
+FROM node:18
 WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY --from=builder /diamond/build/diamond /usr/bin/
