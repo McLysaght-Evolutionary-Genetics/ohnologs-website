@@ -8,7 +8,7 @@ RUN apk update
 RUN apk add git cmake make g++ zlib-dev
 
 # build diamond
-RUN git clone https://github.com/bbuchfink/diamond
+RUN git clone -b v2.1.12 https://github.com/bbuchfink/diamond
 WORKDIR /diamond/build
 RUN cmake ..
 RUN make
