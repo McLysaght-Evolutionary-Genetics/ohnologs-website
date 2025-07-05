@@ -3,40 +3,31 @@ FROM node:22 as builder
 # env
 ARG DATABASE_URL
 
-# install diamond build deps
-RUN apk update
-RUN apk add git cmake make g++ zlib-dev
-
-# build diamond
-RUN git clone -b v0.9.36 https://github.com/bbuchfink/diamond
-WORKDIR /diamond/build
-RUN cmake ..
-RUN make
-
 # install app build deps
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
 COPY package.json .
 COPY pnpm-lock.yaml .
 # COPY .npmrc .
-RUN pnpm i --frozen-lockfile
+RUN npm i -g pnpm
+RUN pnpm i --no-frozen-lockfile
 COPY . .
 
 # build app
 RUN pnpm build
 RUN pnpm prune --prod
 
-FROM node:18
+FROM node:22
 WORKDIR /app
-RUN corepack enable && corepack prepare pnpm@latest --activate
-COPY --from=builder /diamond/build/diamond /usr/bin/
+RUN wget https://github.com/bbuchfink/diamond/releases/download/v2.1.12/diamond-linux64.tar.gz
+RUN tar -xzf diamond-linux64.tar.gz
+RUN mv diamond /usr/bin
 COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/prisma prisma/
-COPY --from=builder /app/startup.ash startup.ash
+COPY --from=builder /app/startup.bash startup.bash
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production/
 
 # entry point
-CMD ["ash", "startup.ash"]
+CMD ["bash", "startup.bash"]
