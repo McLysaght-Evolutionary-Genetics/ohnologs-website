@@ -236,7 +236,7 @@ export const actions = {
 
     const geneOhnology = await readTsv(
       path.join(importPath, "gene_ohnology.tsv"),
-      z.tuple([z.string(), z.string(), z.preprocess((v) => `r${v}`, z.enum(["r1", "r2"]))]),
+      z.tuple([z.string(), z.string(), z.enum(["both", "r1", "r2", "unk"])]),
     );
 
     await prisma.ohnology.createMany({
