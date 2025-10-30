@@ -236,18 +236,27 @@ export const actions = {
 
     const geneOhnology = await readTsv(
       path.join(importPath, "gene_ohnology.tsv"),
-      z.tuple([z.string(), z.string(), z.enum(["both", "r1", "r2", "unk"])]),
+      z.tuple([z.string(), z.string(), z.enum(["both", "r1", "r2", "unk", "syn", "htf"])]),
     );
 
-    await prisma.ohnology.createMany({
-      data: geneOhnology.map(([queryId, subjectId, relation]) => ({
-        queryId,
-        subjectId,
-        relation,
-      })),
-    });
+    const batchSize = 100_000;
 
-    // ---
+    for (let i = 0; i < Math.ceil(geneOhnology.length / batchSize); i++) {
+      console.log(`${i + 1}/${Math.ceil(geneOhnology.length / batchSize)}`);
+
+      const start = i * batchSize;
+      const end = Math.min((i + 1) * batchSize, geneOhnology.length);
+
+      await prisma.ohnology.createMany({
+        data: geneOhnology.slice(start, end).map(([queryId, subjectId, relation]) => ({
+          queryId,
+          subjectId,
+          relation,
+        })),
+      });
+    }
+
+    // ---zz
 
     console.log("importing trees...");
 
@@ -358,15 +367,22 @@ export const actions = {
       z.tuple([z.string(), z.string(), z.string(), z.string(), z.string()]),
     );
 
-    await prisma.msynGene.createMany({
-      data: syntenyGenes.map(([blockId, speciesId, scaffoldId, groupId, proteinId]) => ({
-        blockId,
-        speciesId,
-        scaffoldId,
-        groupId,
-        proteinId,
-      })),
-    });
+    for (let i = 0; i < Math.ceil(syntenyGenes.length / batchSize); i++) {
+      console.log(`${i + 1}/${Math.ceil(syntenyGenes.length / batchSize)}`);
+
+      const start = i * batchSize;
+      const end = Math.min((i + 1) * batchSize, syntenyGenes.length);
+
+      await prisma.msynGene.createMany({
+        data: syntenyGenes.slice(start, end).map(([blockId, speciesId, scaffoldId, groupId, proteinId]) => ({
+          blockId,
+          speciesId,
+          scaffoldId,
+          groupId,
+          proteinId,
+        })),
+      });
+    }
 
     // ---
 

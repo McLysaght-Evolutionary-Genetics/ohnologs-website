@@ -125,10 +125,12 @@ model Family {
 }
 
 enum OhnologyRelation {
-  both
-  r1
   r2
+  r1
+  both
   unk
+  syn
+  htf
 }
 
 model Ohnology {
