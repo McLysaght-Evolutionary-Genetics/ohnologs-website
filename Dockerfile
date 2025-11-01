@@ -27,7 +27,7 @@ COPY --from=builder /app/prisma prisma/
 COPY --from=builder /app/startup.bash startup.bash
 COPY package.json .
 EXPOSE 3000
-ENV NODE_ENV=production/
+ENV NODE_ENV=production
 
 # entry point
 CMD ["bash", "startup.bash"]
