@@ -86,6 +86,9 @@
     }
   }
 
+  let empty = false;
+  let emptyStr = "";
+
   //
   let loading = false;
   let loadingGenes = false;
@@ -381,6 +384,11 @@
 
     loading = false;
     loadingGenes = true;
+
+    if (blockCount === 0) {
+      empty = true;
+      emptyStr = queryId ?? "";
+    }
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
@@ -797,6 +805,14 @@
 
   <br />
 
+  {#if loading}
+    <InlineLoading description="Loading synteny blocks..." />
+  {/if}
+
+  {#if empty}
+    <h4>No synteny blocks found for query '{currentQueryId}'</h4>
+  {/if}
+
   <!-- <div bind:this={thing}>
     <p>owo</p>
   </div>
@@ -987,7 +1003,7 @@
       </Column>
     </Row>
   {:else if block != null}
-    <p>synteny not found :(</p>
+    <!-- <h4>No synteny blocks found for query '{emptyStr}'</h4> -->
   {/if}
 
   <Row>

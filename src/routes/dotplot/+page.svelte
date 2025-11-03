@@ -11,6 +11,7 @@
     ContextMenuOption,
     ExpandableTile,
     Grid,
+    InlineLoading,
     Row,
     Select,
     SelectItem,
@@ -418,6 +419,8 @@
   let subject: string;
 
   const updateGenes = async (query: string, subject: string) => {
+    loading = true;
+
     const lookup = Object.fromEntries(data.species.map(([k, v]) => [v, k])) as Record<string, string>;
 
     const queryId = lookup[query];
@@ -545,6 +548,10 @@
 
   <br />
 
+  {#if query != null && query !== "none" && subject != null && subject !== "none" && loading}
+    <InlineLoading description="Loading dotplots..." />
+  {/if}
+
   {#if query != null && query !== "none" && subject != null && subject !== "none"}
     <Row>
       <Column>
@@ -658,6 +665,10 @@
         </svg>
       </Column>
     </Row>
+  {/if}
+
+  {#if query != null && query !== "none" && subject != null && subject !== "none" && loading}
+    <InlineLoading description="Loading dotplots..." />
   {/if}
 
   <!-- options -->

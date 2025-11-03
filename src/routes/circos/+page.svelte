@@ -9,7 +9,17 @@
   import { selection } from "$lib/selection";
   import { intoQuery } from "$lib/util";
   import { error } from "@sveltejs/kit";
-  import { Button, Column, ExpandableTile, Grid, Row, Select, SelectItem, TextInput } from "carbon-components-svelte";
+  import {
+    Button,
+    Column,
+    ExpandableTile,
+    Grid,
+    InlineLoading,
+    Row,
+    Select,
+    SelectItem,
+    TextInput,
+  } from "carbon-components-svelte";
   import { get } from "svelte/store";
   import type { Link, Segment } from "../api/circos/+server";
   import type { PageData } from "./$types";
@@ -527,6 +537,10 @@
       <!-- </Column>
     </Row> -->
     </div>
+  {/if}
+
+  {#if query != null && query !== "none" && loadingPlot}
+    <InlineLoading description="Loading circos..." />
   {/if}
 
   <!-- options -->

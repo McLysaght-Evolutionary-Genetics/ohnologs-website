@@ -1,5 +1,14 @@
 <script lang="ts">
-  import { Button, Column, ExpandableTile, Grid, Row, TextArea, TextInput } from "carbon-components-svelte";
+  import {
+    Button,
+    Column,
+    ExpandableTile,
+    Grid,
+    InlineLoading,
+    Row,
+    TextArea,
+    TextInput,
+  } from "carbon-components-svelte";
   import PhyloTree from "./PhyloTree.svelte";
   import { browser } from "$app/environment";
   import { intoQuery } from "$lib/util";
@@ -35,6 +44,9 @@
 
   let species: string | null = null;
   let queryId: string | null = null;
+
+  let empty = false;
+  let emptyStr = "";
 
   //
   let count = 0;
@@ -86,6 +98,11 @@
 
     loadingTree = false;
     loadingTable = true;
+
+    if (treeData.length === 0) {
+      empty = true;
+      emptyStr = queryId ?? "";
+    }
   };
 
   const updateTableEntries = async (geneIds: string[]) => {
@@ -192,6 +209,14 @@
   </ExpandableTile>
 
   <br />
+
+  {#if loadingTree}
+    <InlineLoading description="Loading trees..." />
+  {/if}
+
+  {#if empty}
+    <h4>No trees found for query '{emptyStr}'</h4>
+  {/if}
 
   {#if !loadingTree && treeData.length > 0}
     <Row>
