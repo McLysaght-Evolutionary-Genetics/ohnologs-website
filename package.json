@@ -46,12 +46,12 @@
   },
   "type": "module",
   "dependencies": {
-    "@prisma/client": "^4.10.0",
+    "@prisma/client": "^5",
     "@tailwindcss/ui": "^0.7.2",
     "file-saver": "^2.0.5",
     "jszip": "^3.10.1",
     "phylotree": "^1.2.3",
-    "prisma": "^4.10.0",
+    "prisma": "^5",
     "tinycolor2": "^1.6.0"
   }
 }
