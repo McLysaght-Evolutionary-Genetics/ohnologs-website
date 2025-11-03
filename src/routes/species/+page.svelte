@@ -171,11 +171,11 @@
     </Column>
   </Row>
 
-  <Row>
+  <!-- <Row>
     <Column>
       <MultiSelect bind:selectedIds={selectedStates} titleText="State" label="Select genome state..." items={states} />
     </Column>
-  </Row>
+  </Row> -->
 
   <!-- table -->
   <Row>
