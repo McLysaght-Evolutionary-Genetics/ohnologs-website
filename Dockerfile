@@ -1,4 +1,4 @@
-FROM node:22 as builder
+FROM node:24-alpine AS builder
 ARG DATABASE_URL
 WORKDIR /app
 RUN corepack enable
@@ -8,7 +8,7 @@ RUN pnpm i --no-frozen-lockfile
 COPY . .
 RUN pnpm build
 
-FROM node:22
+FROM node:24-alpine
 WORKDIR /app
 RUN corepack enable
 RUN wget https://github.com/bbuchfink/diamond/releases/download/v2.1.12/diamond-linux64.tar.gz
@@ -23,4 +23,4 @@ EXPOSE 3000
 ENV NODE_ENV=production
 
 # entry point
-CMD ["bash", "startup.bash"]
+CMD ["ash", "startup.ash"]
