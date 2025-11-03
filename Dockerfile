@@ -17,7 +17,7 @@ RUN mv diamond /usr/bin
 COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/prisma prisma/
-COPY --from=builder /app/startup.bash startup.bash
+COPY --from=builder /app/startup.sh startup.sh
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
