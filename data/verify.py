@@ -1,6 +1,7 @@
 
 def validate_scafs():
   scafs = set()
+  segs = set()
 
   entries = []
 
@@ -17,16 +18,34 @@ def validate_scafs():
 
       scafs.add(key)
 
+  with open("segments.tsv") as f:
+    for line in f:
+      line = line.rstrip()
+
+      sp, scaf, seg, _, _ = line.split("\t")
+
+      key = f"{sp}__{scaf}__{seg}"
+
+      if key in segs:
+        print("duplicate seg: " + key)
+
+      segs.add(key)
+
   with open("genes.tsv") as f:
     for line in f:
       line = line.rstrip("\n")
 
       target, scaffold, segment, family, gene, prot, start, end, pvc, pgc = line.split("\t")
 
-      key = f"{target}__{scaffold}"
+      key_scaf = f"{target}__{scaffold}"
+      key_seg = f"{target}__{scaffold}__{segment}"
 
-      if key not in scafs:
-        print(key)
+      if key_scaf not in scafs:
+        print(key_scaf)
+        continue
+
+      if segment != "" and key_seg not in segs:
+        print(key_seg)
         continue
 
       entries.append((target, scaffold, segment, family, gene, prot, start, end, pvc, pgc))
@@ -79,6 +98,8 @@ def validate_dups():
 def validate_labels():
   prots = set()
 
+  entries = []
+
   with open("genes.tsv") as f:
     for line in f:
       line = line.rstrip("\n")
@@ -91,10 +112,17 @@ def validate_labels():
     for line in f:
       line = line.rstrip()
 
-      prot, _ = line.split("\t")
+      prot, label = line.split("\t")
 
       if prot not in prots:
         print("invalid label: " + prot)
+        continue
+
+      entries.append((prot, label))
+
+  with open("gene_labels.tsv", "w") as f:
+    for prot, label in entries:
+      f.write(f"{prot}\t{label}\n")
 
 def validate_ohno():
   prots = set()
@@ -156,6 +184,8 @@ def validate_trees():
 def validate_synteny():
   prots = set()
 
+  entries = []
+
   with open("genes.tsv") as f:
     for line in f:
       line = line.rstrip("\n")
@@ -176,11 +206,21 @@ def validate_synteny():
 
       if key not in prots:
         print("invalid block protein: " + key)
+        continue
 
-# TODO: website src link only ensembl
-# TODO: no segment assigned :(
-# TODO: ohnology: no 1r/2r :((
+      entries.append((block, species, scaffold, group, protein))
+
+  with open("synteny_genes.tsv", "w") as f:
+    for block, species, scaffold, group, protein in entries:
+      f.write(f"{block}\t{species}\t{scaffold}\t{group}\t{protein}\n")
+
+# [DONE] TODO: website src link only ensembl
+# [DONE] TODO: no segment assigned :(
+# [DONE] TODO: ohnology: no 1r/2r :((
+# [DONE] TODO: website copyright auto date pls
 # TODO: blast abuse
+# TODO: protecc admin route obv
+# TODO: does download all link/downloads fuck up the site?
 if __name__ == "__main__":
   validate_scafs()
   validate_dups()

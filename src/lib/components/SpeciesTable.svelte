@@ -28,9 +28,9 @@
   //
   let downloading = false;
 
-  function* nextGeneId(i: number) {
+  function* nextGeneId(i: number): Generator<[string, string]> {
     for (let j = i; j < entries.length; j++) {
-      yield entries[j].name;
+      yield [entries[j].id, entries[j].name];
     }
   }
 
@@ -98,27 +98,26 @@
             {cell.value[0].toUpperCase()}{cell.value.slice(1)}
           {:else if cell.key === "source"}
             {#if cell.value === "Ensembl"}
-              <Link href="https://www.ensembl.org/{nextId.next().value}" target="_blank" icon={Launch}
+              <Link href="https://www.ensembl.org/{nextId.next().value[1]}" target="_blank" icon={Launch}
                 >{cell.value}</Link
               >
-            {/if}
-            {#if cell.value === "RefSeq"}
+              <!-- https://www.ncbi.nlm.nih.gov/datasets/genome/?taxon=3053191 -->
+            {:else if cell.value === "RefSeq"}
               <Link
-                href="https://www.ncbi.nlm.nih.gov/genome/annotation_euk/{(() => {
-                  const id = nextId.next().value;
+                href="https://www.ncbi.nlm.nih.gov/datasets/genome/?taxon={(() => {
+                  const id = nextId.next().value[0];
 
-                  // eslint-disable-next-line
-                  // @ts-ignore
-                  const first = id[0].toUpperCase();
-                  // eslint-disable-next-line
-                  // @ts-ignore
-                  const next = id.slice(1);
-
-                  return first + next;
-                })()}/100/"
+                  return id.replaceAll('_', ' ');
+                })()}"
                 target="_blank"
                 icon={Launch}>{cell.value}</Link
               >
+            {:else}
+              {(() => {
+                nextId.next();
+
+                return cell.value;
+              })()}
             {/if}
           {:else}
             {cell.value}
