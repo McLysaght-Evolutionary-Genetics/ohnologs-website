@@ -55,17 +55,19 @@
   let selectedRowIds: string[] = [];
 
   const handleDownloadAll = async () => {
-    downloading = true;
+    window.open("https://data.ohnologs.com/download/ohnologs.zip", "_self");
 
-    const res = await fetch(`/api/download`, {
-      method: "post",
-      body: JSON.stringify({ geneIds: null, speciesIds: null }),
-    });
-    const download = (await res.json()) as DownloadData;
+    // downloading = true;
 
-    await downloadOhnologs(download);
+    // const res = await fetch(`/api/download`, {
+    //   method: "post",
+    //   body: JSON.stringify({ geneIds: null, speciesIds: null }),
+    // });
+    // const download = (await res.json()) as DownloadData;
 
-    downloading = false;
+    // await downloadOhnologs(download);
+
+    // downloading = false;
   };
 
   const handleDownloadSelected = async () => {

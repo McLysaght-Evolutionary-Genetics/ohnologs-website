@@ -41,7 +41,8 @@
   let exactScaffolds = false;
   let exactSegments = false;
 
-  let selectedSpeciesIds: string[] = [];
+  // default to reduce initial load time
+  let selectedSpeciesIds: string[] = ["homo_sapiens"];
   let selectedScaffoldIds: string[] = [];
   let selectedLabelIds: string[] = [];
   let selectedSegmentIds: string[] = [];

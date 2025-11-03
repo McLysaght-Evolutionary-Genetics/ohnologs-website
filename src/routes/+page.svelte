@@ -37,7 +37,8 @@
       <h4>Download our data</h4>
 
       <p>
-        If you want to download our entire dataset, <Link href="https://data.ohnologs.com/ohnologs.zip">click here</Link
+        If you want to download our entire dataset, <Link href="https://data.ohnologs.com/download/ohnologs.zip"
+          >click here</Link
         >. Alternatively, you can choose what data to download by browsing to one of the following pages:
       </p>
 
