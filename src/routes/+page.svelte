@@ -63,7 +63,7 @@
       <div class="list">
         <UnorderedList>
           <ListItem><Link href="/select">Selection page</Link></ListItem>
-          <ListItem><Link href="/blast">BLAST page</Link></ListItem>
+          <!-- <ListItem><Link href="/blast">BLAST page</Link></ListItem> -->
         </UnorderedList>
       </div>
     </Column>
@@ -99,10 +99,16 @@
     <Column>
       <h4>I have a favourite gene</h4>
 
-      <p>
+      <!-- <p>
         You can visit the <Link href="/blast">BLAST</Link> page to find homologs of your favourite gene that are present
         in our database. The resulting genes can either be downloaded or selected. Any genes that are currently in your selection
         will be highlighted across all plots on our website.
+      </p> -->
+
+      <p>
+        You can visit the <Link href="/select">selection</Link> page to find your gene in our database and all of its ohnologs
+        that we have identified. The resulting genes can either be downloaded or selected. Any genes that are currently in
+        your selection will be highlighted across all plots on our website.
       </p>
     </Column>
   </Row>
