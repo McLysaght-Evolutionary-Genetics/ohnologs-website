@@ -30,7 +30,7 @@ const gnathostomes = [
 export const load = (async () => {
   const [genomes] = await prisma.$transaction([prisma.species.findMany({ where: { outgroup: false } })]);
 
-  console.log(genomes);
+  // console.log(genomes);
 
   const species = genomes
     .map((e) => [e.speciesId, e.name])

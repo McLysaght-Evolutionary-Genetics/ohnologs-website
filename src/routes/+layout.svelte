@@ -52,7 +52,7 @@
       <HeaderNavItem href="/tree" text="Phylogeny" />
       <HeaderNavItem href="/synteny" text="Synteny" />
     </HeaderNavMenu>
-    <HeaderNavItem href="https://docs.ohnologs.com" text="Documentation" />
+    <HeaderNavItem href="https://docs.ohnologs.com" text="Documentation" target="_blank" />
   </HeaderNav>
 </Header>
 
@@ -71,7 +71,7 @@
     <SideNavLink icon={Tree} href="/tree" text="Phylogeny" />
     <SideNavLink icon={QComposerEdit} href="/synteny" text="Synteny" />
     <SideNavDivider />
-    <SideNavLink icon={Catalog} href="https://docs.ohnologs.com" text="Documentation" />
+    <SideNavLink icon={Catalog} href="https://docs.ohnologs.com" text="Documentation" target="_blank" />
   </SideNavItems>
 </SideNav>
 
