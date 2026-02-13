@@ -384,7 +384,18 @@ export const actions = {
       });
     }
 
-    // ---
+    // // ---
+
+    // console.log("precomputing synteny blocks...");
+
+    // const tblock = await prisma.msynBlock.findFirst({
+    //   where: {},
+    //   orderBy: {
+    //     groups: {
+    //       _count: "desc",
+    //     },
+    //   },
+    // });
 
     console.log("imported all data!");
   },

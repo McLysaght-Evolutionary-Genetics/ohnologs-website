@@ -10,7 +10,7 @@ export const GET = (async ({ url }) => {
   const inclAll = parseInt(findQueryOrError(url, "inclAll")) !== 0;
   const tokenId = findQuery(url, "tokenId");
 
-  const blocks = await prisma.msynBlock.findMany({
+  const block = await prisma.msynBlock.findFirst({
     where: {
       groups: {
         some: {
@@ -82,12 +82,17 @@ export const GET = (async ({ url }) => {
         },
       },
     },
+    orderBy: {
+      groups: {
+        _count: "desc",
+      },
+    },
   });
 
-  // show blocks with more locs first
-  blocks.sort((a, b) => b.groups.length - a.groups.length);
+  // // show blocks with more locs first
+  // blocks.sort((a, b) => b.groups.length - a.groups.length);
 
-  const block = blocks[blockIdx];
+  // const block = blocks[blockIdx];
 
   if (block == null) {
     return new Response(JSON.stringify({ blocks: 0, tracks: [], groups: [] }));
@@ -139,5 +144,5 @@ export const GET = (async ({ url }) => {
 
   // console.log(util.inspect(tracks, false, null, true));
 
-  return new Response(JSON.stringify({ blocks: blocks.length, tracks, groups }));
+  return new Response(JSON.stringify({ blocks: 1, tracks, groups }));
 }) satisfies RequestHandler;
