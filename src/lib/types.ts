@@ -20,23 +20,26 @@ import * as z from "zod";
 
 // download
 export type DownloadData = {
-  sources: GenomeSource[];
-  species: Species[];
-  scaffolds: Scaffold[];
-  segments: Segment[];
-  genes: Gene[];
-  families: Family[];
-  ohnologies: Ohnology[];
-  labels: Label[];
-  geneLabels: GeneLabel[];
-  trees: Tree[];
-  treeGenes: TreeGene[];
-  treeSpecies: TreeSpecies[];
-  syntenyBlocks: MsynBlock[];
-  syntenyTracks: MsynTrack[];
-  syntenyGroups: MsynGroup[];
-  syntenyGenes: MsynGene[];
-};
+  geneId: string;
+  proteinId: string;
+  speciesId: string;
+  species: {
+    name: string;
+  };
+  family: {
+    genes: {
+      geneId: string;
+      proteinId: string;
+      speciesId: string;
+    }[];
+  };
+  queries: {
+    geneId: string;
+    proteinId: string;
+    speciesId: string;
+    relation: string;
+  }[];
+}[];
 
 // common
 export const genomeCompletenessSchema = z.enum(["chromosome", "scaffold"]);

@@ -137,17 +137,17 @@
       <p><u>Data filtering:</u></p>
       <p>
         Species can be filtered by source database - such as Ensembl or Refseq - using the 'source' dropdown menu.
-        Likewise, you can include/exclude present-day genomes or ancestral genome reconstructions using the 'state'
-        dropdown menu.
+        <!-- Likewise, you can include/exclude present-day genomes or ancestral genome reconstructions using the 'state'
+        dropdown menu. -->
       </p>
       <br />
-      <p><u>Data download:</u></p>
+      <!-- <p><u>Data download:</u></p>
       <p>
         All species data can be downloaded by pressing the 'download' button above the table. Alternatively, inidividual
         species data can be downloaded by selecting the desired rows. This can be done by clicking the checkbox next to
         each species name. The selection can be cleared by pressing the 'cancel' button above the table.
       </p>
-      <br />
+      <br /> -->
       <p>
         View our <a href="https://docs.ohnologs.com" target="_blank" rel="noreferrer" on:click|stopPropagation
           >documentation</a
@@ -184,7 +184,7 @@
         bind:page
         bind:loading
         title={"Species"}
-        description={"The species matching your currently selected filters are displayed below"}
+        description={"The species used for building our dataset are displayed below"}
         {perPage}
         {entries}
         total={totalPages}

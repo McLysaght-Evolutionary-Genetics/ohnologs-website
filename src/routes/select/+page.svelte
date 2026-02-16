@@ -370,7 +370,8 @@
       <p>
         You can search our database for gene or protein identifiers either a) by uploading a FASTA file or gene
         table/list or b) by pasting the content of the FASTA file or gene table/list directly into the text area. Files
-        can be uploaded by clicking on or dragging files onto the upload area below.
+        can be uploaded by clicking on or dragging files onto the upload area below. Please note that this is not a
+        sequence similarity search.
       </p>
       <br />
       <p><u>Data download:</u></p>

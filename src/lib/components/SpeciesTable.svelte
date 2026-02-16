@@ -91,7 +91,7 @@
     {#if loading}
       <DataTableSkeleton {headers} rows={perPage} />
     {:else}
-      <DataTable bind:selectedRowIds selectable {headers} rows={entries}>
+      <DataTable bind:selectedRowIds {headers} rows={entries}>
         <strong slot="title">{title}</strong>
         <span class="description" slot="description">{description}</span>
 
@@ -131,7 +131,7 @@
             <Button
               disabled={entries.length === 0 || downloading}
               icon={downloading ? InlineLoading : Download}
-              on:click={handleDownloadAll}>Download</Button
+              on:click={handleDownloadAll}>Download Database</Button
             >
           </ToolbarContent>
           <ToolbarBatchActions>

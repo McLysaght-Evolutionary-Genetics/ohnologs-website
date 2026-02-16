@@ -5,7 +5,7 @@ import type { RequestHandler } from "../$types";
 
 const prisma = new PrismaClient();
 
-const partialLabelQuerySchema = z.array(z.object({ id: z.string().uuid() }));
+const partialLabelQuerySchema = z.array(z.object({ geneId: z.string() }));
 
 export const GET = (async ({ url }) => {
   // TODO: validation
@@ -28,11 +28,11 @@ export const GET = (async ({ url }) => {
 
   if (exactLabels) {
     const raw =
-      await prisma.$queryRaw`select g.*, array_agg(gl."labelId") as labels from "Gene" g join "GeneLabel" gl on g.id = gl."geneId" group by g.id having array_agg(gl."labelId") @> ${labels};`;
+      await prisma.$queryRaw`select g.*, array_agg(gl."labelId") as labels from "Gene" g join "GeneLabel" gl on g."proteinId" = gl."proteinId" group by g."geneId" having array_agg(gl."labelId") @> ${labels};`;
 
     const parsed = partialLabelQuerySchema.parse(raw);
 
-    labelGeneIds = parsed.map((e) => e.id);
+    labelGeneIds = parsed.map((e) => e.geneId);
   }
 
   // TODO: some of the exact flags are realistically useless (just make exact the default or something)
@@ -49,9 +49,9 @@ export const GET = (async ({ url }) => {
         // pls fix this at some point!!!
         ...(exactLabels
           ? {
-              id: {
-                in: labelGeneIds,
-              },
+              // geneId: {
+              //   in: labelGeneIds,
+              // },
             }
           : {}),
 
@@ -154,7 +154,7 @@ export const GET = (async ({ url }) => {
         // pls fix this at some point!!!
         ...(exactLabels
           ? {
-              id: {
+              geneId: {
                 in: labelGeneIds,
               },
             }

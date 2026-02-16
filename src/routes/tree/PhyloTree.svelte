@@ -100,7 +100,11 @@
     });
 
     rendered.style_edges((element: any, data: any) => {
-      if (data.target.data.name !== "wgd") {
+      if (typeof data.target.data.name !== "string") {
+        return;
+      }
+
+      if (!data.target.data.name.includes("type#wgd")) {
         return;
       }
 

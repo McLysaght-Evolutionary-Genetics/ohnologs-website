@@ -319,20 +319,20 @@
   $: links = block == null ? null : regenerateLinks(block);
   $: colours = block == null ? null : regenerateColours(block);
 
+  const resetBlockIdx = () => {
+    blockIdx = 1;
+  };
+
   //
   let queryId = "";
 
-  $: if ($svpage.url.searchParams.get("queryId") != null) {
+  if ($svpage.url.searchParams.get("queryId") != null) {
     queryId = $svpage.url.searchParams.get("queryId")!;
     currentQueryId = queryId;
 
     loading = true;
     resetBlockIdx();
   }
-
-  const resetBlockIdx = () => {
-    blockIdx = 1;
-  };
 
   const resetTablePage = () => {
     page = 1;
@@ -806,11 +806,23 @@
   <br />
 
   {#if loading}
-    <InlineLoading description="Loading synteny blocks..." />
+    <div>
+      <h4 style="background-color: #c2ff99">Loading synteny blocks from database...</h4>
+      <InlineLoading description="This might take some time" />
+    </div>
   {/if}
 
   {#if empty}
-    <h4>No synteny blocks found for query '{currentQueryId}'</h4>
+    <div>
+      <h4 style="background-color: #ffaa99;">No synteny blocks found for query '{currentQueryId}'</h4>
+      <p>Possible reasons for this include:</p>
+      <ul style="padding: 0.2rem; line-height: 1.2rem;">
+        <li>- The gene is not located in any micro-synteny blocks</li>
+        <li>- The gene is not an ohnolog</li>
+        <li>- The gene does not exist in our database</li>
+      </ul>
+      <p>If you think this is an error, please report it to niezabil@tcd.ie</p>
+    </div>
   {/if}
 
   <!-- <div bind:this={thing}>
@@ -1017,14 +1029,17 @@
           resetBlockIdx();
 
           currentQueryId = queryId;
+          empty = false;
           loading = true;
+          loadingGenes = true;
+          blockCount = 0;
         }}>Search</Button
       >
     </Column>
   </Row>
 
   <!-- table -->
-  {#if entries != null && entries.length > 0 && block != null}
+  {#if entries != null && entries.length > 0 && block != null && !loading && !empty}
     <Row>
       <Column>
         <GeneTable

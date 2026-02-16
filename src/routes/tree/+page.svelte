@@ -211,11 +211,23 @@
   <br />
 
   {#if loadingTree}
-    <InlineLoading description="Loading trees..." />
+    <div>
+      <h4 style="background-color: #c2ff99">Loading trees from database...</h4>
+      <InlineLoading description="This might take some time" />
+    </div>
   {/if}
 
   {#if empty}
-    <h4>No trees found for query '{emptyStr}'</h4>
+    <div>
+      <h4 style="background-color: #ffaa99;">No trees found for query '{emptyStr}'</h4>
+      <p>Possible reasons for this include:</p>
+      <ul style="padding: 0.2rem; line-height: 1.2rem;">
+        <li>- The gene was not included in our phylogenetic analysis</li>
+        <li>- The gene is not an ohnolog</li>
+        <li>- The gene does not exist in our database</li>
+      </ul>
+      <p>If you think this is an error, please report it to niezabil@tcd.ie</p>
+    </div>
   {/if}
 
   {#if !loadingTree && treeData.length > 0}
@@ -234,14 +246,16 @@
 
       <Button
         on:click={() => {
+          empty = false;
           loadingTree = true;
+          loadingTable = true;
         }}>Search</Button
       >
     </Column>
   </Row>
 
   <!-- table -->
-  {#if entries.length > 0}
+  {#if entries.length > 0 && !loadingTree && !empty}
     <Row>
       <Column>
         <GeneTable

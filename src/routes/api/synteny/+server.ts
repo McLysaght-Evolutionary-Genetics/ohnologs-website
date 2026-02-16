@@ -10,6 +10,8 @@ export const GET = (async ({ url }) => {
   const inclAll = parseInt(findQueryOrError(url, "inclAll")) !== 0;
   const tokenId = findQuery(url, "tokenId");
 
+  // console.log(inclAll);
+
   const block = await prisma.msynBlock.findFirst({
     where: {
       groups: {
@@ -35,39 +37,44 @@ export const GET = (async ({ url }) => {
       groups: {
         include: {
           genes: {
-            ...(inclAll
-              ? {}
-              : {
-                  // only ohnologs
-                  where: {
-                    gene: {
-                      queries: {
-                        some: {},
-                      },
-                    },
-                  },
-                }),
-            include: {
+            // only ohnologs
+            where: {
               gene: {
-                include: {
-                  // quick test to see if gene is an ohnolog
-                  queries: {
-                    take: 1,
-                  },
-                  // admin submitted notes
-                  ...(tokenId == null
-                    ? {}
-                    : {
-                        tags: {
-                          where: {
-                            tokenId,
-                          },
-                        },
-                      }),
+                queries: {
+                  some: {},
                 },
               },
+            },
+            include: {
+              // gene: {
+              //   include: {
+              //     queries: {
+              //       take: 1,
+              //     },
+              //   },
+              // },
               track: true,
             },
+
+            // include: {
+            //   gene: {
+            //     // include: {
+            //     //   // quick test to see if gene is an ohnolog
+            //     //   queries: {
+            //     //     take: 1,
+            //     //   },
+            //     //   // admin submitted notes
+            //     //   ...(tokenId == null
+            //     //     ? {}
+            //     //     : {
+            //     //         tags: {
+            //     //           where: {
+            //     //             tokenId,
+            //     //           },
+            //     //         },
+            //     //       }),
+            //     // },
+            //   },
           },
         },
       },
@@ -89,29 +96,42 @@ export const GET = (async ({ url }) => {
     },
   });
 
-  // // show blocks with more locs first
-  // blocks.sort((a, b) => b.groups.length - a.groups.length);
-
-  // const block = blocks[blockIdx];
-
   if (block == null) {
     return new Response(JSON.stringify({ blocks: 0, tracks: [], groups: [] }));
   }
 
+  // fuck prisma
+  // this gets around the stack limit (presumably caused by a bug in prisma)
+  const dbGenes = await prisma.gene.findMany({
+    where: {
+      proteinId: {
+        in: block.groups.flatMap((e) => e.genes.map((f) => f.proteinId)),
+      },
+    },
+    // quick test to see if gene is an ohnolog
+    include: {
+      queries: {
+        take: 1,
+      },
+    },
+  });
+
   const genes = block.groups.flatMap((e) =>
     e.genes.map((f) => {
+      const dbGene = dbGenes.find((g) => g.proteinId === f.proteinId)!;
+
       return {
-        id: f.gene.geneId,
+        id: dbGene.geneId,
         speciesId: f.speciesId,
         blockId: f.blockId,
         trackId: f.track.scaffoldId,
         groupId: e.groupId,
-        geneId: f.gene.geneId,
-        proteinId: f.gene.proteinId,
-        start: f.gene.start,
-        end: f.gene.end,
-        ohnolog: f.gene.queries.length > 0,
-        meta: f.gene.tags != null && f.gene.tags.length > 0,
+        geneId: dbGene.geneId,
+        proteinId: dbGene.proteinId,
+        start: dbGene.start,
+        end: dbGene.end,
+        ohnolog: dbGene.queries.length > 0,
+        meta: false,
       };
     }),
   );

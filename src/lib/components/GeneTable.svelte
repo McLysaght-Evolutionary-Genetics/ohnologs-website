@@ -111,8 +111,9 @@
 
     const res = await fetch(`/api/download`, {
       method: "post",
-      body: JSON.stringify({ geneIds: selectedRowIds, speciesIds: null }),
+      body: JSON.stringify({ geneIds: selectedRowIds }),
     });
+
     const download = (await res.json()) as DownloadData;
 
     await downloadOhnologs(download);
@@ -153,14 +154,14 @@
             <Button
               disabled={entries.length === 0 || downloading}
               icon={downloading ? InlineLoading : Download}
-              on:click={handleDownloadAll}>Download</Button
+              on:click={handleDownloadAll}>Download Database</Button
             >
           </ToolbarContent>
           <ToolbarBatchActions on:cancel={handleCancel}>
             <Button
               disabled={downloading}
               icon={downloading ? InlineLoading : Download}
-              on:click={handleDownloadSelected}>Download</Button
+              on:click={handleDownloadSelected}>Download Selected</Button
             >
           </ToolbarBatchActions>
         </Toolbar>

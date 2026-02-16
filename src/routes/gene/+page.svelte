@@ -44,7 +44,7 @@
   // default to reduce initial load time
   let selectedSpeciesIds: string[] = ["homo_sapiens"];
   let selectedScaffoldIds: string[] = [];
-  let selectedLabelIds: string[] = [];
+  let selectedLabelIds: string[] = ["phylogeny", "macro-synteny", "micro-synteny"];
   let selectedSegmentIds: string[] = [];
   let selectedSourceIds: string[] = [];
 
@@ -194,9 +194,11 @@
       <p>
         The genes in our database have been classified as ohnologs based on multiple sources of evience. Ohnologs with
         support based on specific types of evidence can be filtered using the 'labels' dropdown menu. By default, any
-        genes with at least one selected label will be displayed. Alternatively, 'strict' matching an be enabled by
+        genes with at least one selected label will be displayed.
+
+        <!-- Alternatively, 'strict' matching can be enabled by
         clicking the checkbox under the label dropdown menu. This will only display genes that have all of the selected
-        labels (or a superset thereof).
+        labels (or a superset thereof). -->
       </p>
       <br />
       <p><u>Data download:</u></p>
@@ -208,7 +210,7 @@
       <br />
       <p><u>Table navigation:</u></p>
       <p>
-        The 'protein' column provides a link to the relevant pages in our microsynteny and gene tree viewer utilities
+        The 'protein' column provides a link to the relevant pages in our gene tree and microsynteny viewer utilities
         respectively. The 'source' column provides a link to the external database from which each gene was sourced.
       </p>
       <br />
@@ -267,7 +269,7 @@
         <MultiSelect bind:selectedIds={selectedLabelIds} titleText="Labels" label="Select labels..." items={labels} />
       </div>
 
-      <Checkbox bind:checked={exactLabels} labelText="Strict match" />
+      <!-- <Checkbox bind:checked={exactLabels} labelText="Strict match" /> -->
     </Column>
   </Row>
 

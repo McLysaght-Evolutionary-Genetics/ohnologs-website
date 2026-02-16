@@ -284,6 +284,7 @@
 
   let loading = false;
   let loadingPlot = false;
+  $: loadingDisableInput = false;
 
   //
   let selectedChromosome: string | null = null;
@@ -377,7 +378,9 @@
     updateTableEntries(geneIds);
   }
 
-  $: if (browser) updateGenes(query);
+  $: if (browser) {
+    updateGenes(query);
+  }
 
   let canvas: SVGElement;
   let g: SVGElement;
@@ -462,7 +465,7 @@
       <br />
       <p><u>Data download:</u></p>
       <p>
-        Genes that appear in the plot will be displayed in a table below. All ene data can be downloaded by pressing the
+        Genes that appear in the plot will be displayed in a table below. All the data can be downloaded by pressing the
         'download' button above the table. Alternatively, inidividual gene data can be downloaded by selecting the
         desired rows. This can be done by clicking the checkbox next to each gene name. The selection can be cleared by
         pressing the 'cancel' button above the table.
@@ -540,13 +543,16 @@
   {/if}
 
   {#if query != null && query !== "none" && loadingPlot}
-    <InlineLoading description="Loading circos..." />
+    <div>
+      <h4 style="background-color: #c2ff99">Loading circos plot from database...</h4>
+      <InlineLoading description="This might take some time" />
+    </div>
   {/if}
 
   <!-- options -->
   <Row>
     <Column>
-      <Select bind:selected={query} labelText="Query species">
+      <Select bind:selected={query} disabled={loadingDisableInput} labelText="Query species">
         <SelectItem value="none" />
 
         {#each species as sp}
@@ -558,7 +564,7 @@
 
   <Row>
     <Column>
-      <TextInput bind:value={altQueryId} labelText="Gene or protein ID" />
+      <TextInput bind:value={altQueryId} disabled={loadingDisableInput} labelText="Gene or protein ID" />
 
       <br />
 
@@ -571,7 +577,7 @@
   </Row>
 
   <!-- table -->
-  {#if query != null && query !== "none"}
+  {#if query != null && query !== "none" && !loading}
     <Row>
       <Column>
         <GeneTable

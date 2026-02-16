@@ -1,7 +1,7 @@
 <script lang="ts">
   import { Grid, Column, Row, ClickableTile, Link, UnorderedList, ListItem } from "carbon-components-svelte";
 
-  const pages = ["species", "gene", "select", "blast", "circos", "dotplot", "tree", "synteny"];
+  const pages = ["species", "gene", "select", "circos", "dotplot", "tree", "synteny"];
 
   const randomArrayElem = <T>(a: T[]): T => {
     const idx = Math.floor(Math.random() * pages.length);

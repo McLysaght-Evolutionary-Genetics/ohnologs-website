@@ -548,11 +548,7 @@
 
   <br />
 
-  {#if query != null && query !== "none" && subject != null && subject !== "none" && loading}
-    <InlineLoading description="Loading dotplots..." />
-  {/if}
-
-  {#if query != null && query !== "none" && subject != null && subject !== "none"}
+  {#if query != null && query !== "none" && subject != null && subject !== "none" && !loading}
     <Row>
       <Column>
         <!-- make selection shit actually work lol -->
@@ -668,7 +664,8 @@
   {/if}
 
   {#if query != null && query !== "none" && subject != null && subject !== "none" && loading}
-    <InlineLoading description="Loading dotplots..." />
+    <h4 style="background-color: #c2ff99">Loading dotplot from database...</h4>
+    <InlineLoading description="This might take some time" />
   {/if}
 
   <!-- options -->
@@ -694,7 +691,7 @@
   </Row>
 
   <!-- table -->
-  {#if query != null && subject != null && query !== "none" && subject !== "none"}
+  {#if query != null && subject != null && query !== "none" && subject !== "none" && !loading}
     <Row>
       <Column>
         <GeneTable
