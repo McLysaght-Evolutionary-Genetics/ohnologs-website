@@ -9,6 +9,7 @@ The download is split into two parts; The simple version contains ohnolog pairs 
 The simple version of the database can be found under `ohnologs/`. Each file contains the ohnolog pairs for a species, e.g., `human.tsv` in a tab-separated format. Each row contains a query and subject gene and their relationship.
 
 List of files:
+
 - `acipenser_ruthenus.tsv`
 - `amia_calva.tsv`
 - `anolis_carolinensis.tsv`
@@ -32,6 +33,7 @@ List of files:
 - `takifugu_rubripes.tsv`
 
 Relationships:
+
 - `r1` - Ohnologs are 1R-only (only 1R ohnologs have been retained in this gene family)
 - `r2` - Ohnologs are 2R-only (only 2R ohnologs have been retained in this gene family)
 - `both` - Ohnologs in this gene family have been retained after both 1R and 2R
@@ -44,6 +46,7 @@ Relationships:
 This section contain the entire database dump, located at `database/`. Ohnolog data from all species is aggregated and split into multiple tab-separated tables for easy use with SQL databases. Columns are annotated in the file headers and explained below. For a more detailed explanation, please visit [our docs](https://docs.ohnologs.com).
 
 List of files:
+
 - `sources.tsv`
 - `species.tsv`
 - `scaffolds.tsv`
@@ -66,6 +69,7 @@ List of files:
 File: `sources.tsv`
 
 Columns:
+
 - `source:sourceId` - Internal database key
 - `source:name` - The name of a genome database or publication, e.g., Ensembl
 
@@ -74,6 +78,7 @@ Columns:
 File: `species.tsv`
 
 Columns:
+
 - `source:sourceId` - Internal database key, refers to a genome source in `sources.tsv`
 - `species:speciesId` - Latin name of the species in snake_case
 - `species:name` - Species name
@@ -87,6 +92,7 @@ Columns:
 File: `scaffolds.tsv`
 
 Columns:
+
 - `species:speciesId` - Latin name of the species in snake_case
 - `scaffold:scaffoldId` - Chromosome or scaffold name as per the annotation used
 - `scaffold:start` - Chromosome or scaffold start coordinate (first feature as per the annotation used)
@@ -97,6 +103,7 @@ Columns:
 File: `segments.tsv`
 
 Columns:
+
 - `species:speciesId` - Latin name of the species in snake_case
 - `scaffold:scaffolId` - Chromosome or scaffold name as per the annotation used
 - `segment:segmentId` - Zero-indexed macro-synteny segment identifier
@@ -108,6 +115,7 @@ Columns:
 File: `families.tsv`
 
 Columns:
+
 - `family:familyId` - Internal database key
 
 ### Genes
@@ -115,6 +123,7 @@ Columns:
 File: `genes.tsv`
 
 Columns:
+
 - `species:speciesId` - Latin name of the species in snake_case
 - `scaffold:scaffoldId` - Chromosome or scaffold name as per the annotation used
 - `segment:segmentId` - Zero-indexed macro-synteny segment identifier
@@ -131,6 +140,7 @@ Columns:
 File: `labels.tsv`
 
 Columns:
+
 - `label:labelId` - Internal database key
 - `label:name` - Label describing the evidence used to determine that a gene is an ohnolog
 
@@ -139,6 +149,7 @@ Columns:
 File: `gene_labels.tsv`
 
 Columns:
+
 - `gene:proteinId` - Unique protein identifier
 - `label:labelId` - Internal database key, refers to a label in `labels.tsv`
 
@@ -147,11 +158,13 @@ Columns:
 File: `gene_ohnology.tsv`
 
 Columns:
+
 - `gene:queryId` - Unique protein identifier of the first ohnolog in this pair
 - `gene:subjectId` - Unique protein identifier of the second ohnolog in this pair
 - `ohnology:relation` - Relationship between the ohnologs in this pair
 
 Relationships:
+
 - `r1` - Ohnologs are 1R-only (only 1R ohnologs have been retained in this gene family)
 - `r2` - Ohnologs are 2R-only (only 2R ohnologs have been retained in this gene family)
 - `both` - Ohnologs in this gene family have been retained after both 1R and 2R
@@ -164,6 +177,7 @@ Relationships:
 File: `trees.tsv`
 
 Columns:
+
 - `tree:treeId` - Internal database key
 - `tree:newick` - Newick representation of the gene tree
 
@@ -172,6 +186,7 @@ Columns:
 File: `tree_species.tsv`
 
 Columns:
+
 - `tree:treeId` - Internal database key, refers to a gene tree in `trees.tsv`
 - `species:speciesId` - Latin name of the species in snake_case
 
@@ -180,6 +195,7 @@ Columns:
 File: `tree_genes.tsv`
 
 Columns:
+
 - `tree:treeId` - Internal database key, refers to a gene tree in `trees.tsv`
 - `gene:proteinId` - Unique protein identifier
 
@@ -188,6 +204,7 @@ Columns:
 File: `synteny_blocks.tsv`
 
 Columns:
+
 - `block:blockId` - Internal database key
 
 ### Synteny Tracks
@@ -195,6 +212,7 @@ Columns:
 File: `synteny_tracks.tsv`
 
 Columns:
+
 - `block:blockId` - Internal database key, refers to a synteny block in `synteny_blocks.tsv`
 - `species:speciesId` - Latin name of the species in snake_case
 - `scaffold:scaffoldId` - Chromosome or scaffold name as per the annotation used
@@ -206,6 +224,7 @@ Columns:
 File: `synteny_groups.tsv`
 
 Columns:
+
 - `block:blockId` - Internal database key, refers to a synteny block in `synteny_blocks.tsv`
 - `group:groupId` - Internal database key
 
@@ -214,6 +233,7 @@ Columns:
 File: `synteny_genes.tsv`
 
 Columns:
+
 - `block:blockId` - Internal database key, refers to a synteny block in `synteny_blocks.tsv`
 - `species:speciesId` - Latin name of the species in snake_case
 - `scaffold:scaffoldId` - Chromosome or scaffold name as per the annotation used
