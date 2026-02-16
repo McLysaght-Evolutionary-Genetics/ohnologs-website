@@ -69,7 +69,7 @@
   <h2>Under construction...</h2>
 
   <!-- search -->
-  <!-- <Row>
+  <Row>
     <Column>
       <form
         method="post"
@@ -111,10 +111,10 @@
         </div>
       </form>
     </Column>
-  </Row> -->
+  </Row>
 
   <!-- table -->
-  <!-- <Row>
+  <Row>
     <Column>
       <GeneTable
         bind:page
@@ -127,7 +127,7 @@
         shown={shownPages}
       />
     </Column>
-  </Row> -->
+  </Row>
 </Grid>
 
 <style>

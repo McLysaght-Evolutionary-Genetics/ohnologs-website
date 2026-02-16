@@ -3,7 +3,7 @@ import type { DownloadData } from "./types";
 import saveAs from "file-saver";
 import JSZip from "jszip";
 
-const downloadReadmeText: string = `# Ohnologs.com download
+const downloadReadmeText = `# Ohnologs.com download
 
 A summary of the data contained in each file can be found below.
 
