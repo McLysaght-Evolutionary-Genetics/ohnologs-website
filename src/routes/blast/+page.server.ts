@@ -95,6 +95,8 @@ const execDiamond = async (
   // ensure database exists
   const dbpath = path.join(process.cwd(), "static", `${database}.dmnd`);
 
+  console.log(dbpath);
+
   if (!existsSync(dbpath)) {
     throw error(400, "invalid database name");
   }

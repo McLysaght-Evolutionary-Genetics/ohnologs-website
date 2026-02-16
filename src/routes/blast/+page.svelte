@@ -66,7 +66,7 @@
 
   <br />
 
-  <h2>Under construction...</h2>
+  <!-- <h2>Under construction...</h2> -->
 
   <!-- search -->
   <Row>

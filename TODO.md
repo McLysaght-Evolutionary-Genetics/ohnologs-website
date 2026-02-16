@@ -76,8 +76,8 @@ ESSENTIAL:
 - WONTFIX (TODO) [4] some ohnologs unlabelled
 - WONTFIX (REMOVED) [4] species table selection/download
 
+- DONE [5] update paper figure
 - [5] new downloads | database dump (fix dataset first)
-- [5] update paper figure
 - [5] update deployment | docs
 - [5] update deployment | website
 ```
