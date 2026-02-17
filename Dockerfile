@@ -17,7 +17,7 @@ RUN cmake --version
 RUN git clone https://github.com/bbuchfink/diamond
 WORKDIR /app/diamond
 RUN cmake .
-RUN make -j $(sysctl -n hw.ncpu)
+RUN make -j
 
 FROM node:24
 WORKDIR /app
