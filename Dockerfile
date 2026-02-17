@@ -15,9 +15,9 @@ RUN apt -y install build-essential
 RUN apt -y install cmake
 RUN cmake --version
 RUN git clone https://github.com/bbuchfink/diamond
-RUN cmake diamond
-RUN make diamond
-RUN ls diamond
+WORKDIR /app/diamond
+RUN cmake .
+RUN make -j $(sysctl -n hw.ncpu)
 
 FROM node:24
 WORKDIR /app
@@ -26,7 +26,7 @@ COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/prisma prisma/
 COPY --from=builder /app/startup.sh startup.sh
-COPY --from=diamond /app/diamond/... /usr/bin
+COPY --from=diamond /app/diamond/diamond /usr/bin
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
