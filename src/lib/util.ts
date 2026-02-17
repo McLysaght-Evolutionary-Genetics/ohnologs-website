@@ -187,10 +187,16 @@ export const downloadOhnologs = async (genes: DownloadData) => {
           .join("\t");
 
         // relationship will be the same for all ohnolog pairs in the family
-        const relationship = queries.at(0)?.relation ?? "";
+        const relationship = queries.at(0)?.relation ?? null;
+
+        // exclude non ohnologs, i.e., genes without a relationship annotation
+        if (relationship == null) {
+          return null;
+        }
 
         return `${geneId}\t${proteinId}\t${speciesId}\t${speciesName}\t${relationship}\t${ohnologs}`;
       })
+      .filter((e) => e != null)
       .join("\n");
 
   // const sourcesTsv = "#sourceId\tname\n" + sources.map(({ sourceId, name }) => `${sourceId}\t${name}\n`).join("");
