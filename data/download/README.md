@@ -6,9 +6,9 @@ The download is split into two parts; The simple version contains ohnolog pairs 
 
 ## Simple ohnolog lists
 
-The simple version of the database can be found under `ohnologs/`. Each file contains the ohnolog pairs for a species, e.g., `human.tsv` in a tab-separated format. Each row contains a query and subject gene and their relationship.
+The simple version of the database can be found under `ohnologs/`. Each file contains the list of ohnologs for a species, e.g., `homo_sapiens.tsv` in a tab-separated format. Each row contains an ohnolog and its retention category:
 
-List of files:
+Files:
 
 - `acipenser_ruthenus.tsv`
 - `amia_calva.tsv`
@@ -32,12 +32,13 @@ List of files:
 - `taeniopygia_guttata.tsv`
 - `takifugu_rubripes.tsv`
 
-Relationships:
+Categories:
 
-- `r1` - Ohnologs are 1R-only (only 1R ohnologs have been retained in this gene family)
-- `r2` - Ohnologs are 2R-only (only 2R ohnologs have been retained in this gene family)
+- `all` - All ohnologs
+- `1r` - Ohnologs are 1R-only (only 1R ohnologs have been retained in this gene family)
+- `1r` - Ohnologs are 2R-only (only 2R ohnologs have been retained in this gene family)
 - `both` - Ohnologs in this gene family have been retained after both 1R and 2R
-- `unk` - Ohnologs are either 1R-only `r1` or 2R-only `r2`, but it is unclear which
+- `unk` - Ohnologs are either 1R-only `1r` or 2R-only `1r`, but it is unclear which
 - `syn` - Ohnologs were identified using a micro-synteny analysis
 - `htf` - Ohnologs are part of the 'hard-to-find' set
 

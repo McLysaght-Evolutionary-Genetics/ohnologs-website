@@ -91,3 +91,19 @@ ROISIN:
 - remove species table selection
 - remove exact option on gene page
 ```
+
+```
+TOFIX:
+- [DONE] download species + readme (back to what it was supposed to be)
+- select all button
+- blast
+- some ohnologs unlabelled
+- reviewer comments
+- outgroup species on gene page
+- pvc col
+- homepage browse to species
+- sort genes
+- screenshots
+- circos lookup gene thats not in the database
+- circos lookup gene thats not available as a circos
+```
