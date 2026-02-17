@@ -100,15 +100,18 @@ TOFIX:
 - [DONE] outgroup species on gene page
 - [DONE] homepage browse to species
 - [DONE] blast
+- [DONE] simple download remove 'all' category
 
-- simple download remove 'all' category
-- screenshots
-- reviewer comments
+- [DONE] reviewer comments
+- [DONE] screenshots
+
+- circos lookup gene thats not in the database
+- circos lookup gene thats not available as a circos
+
+- blast on server
 
 - select all button
 - non-ensembl links
-- circos lookup gene thats not in the database
-- circos lookup gene thats not available as a circos
 - some ohnologs unlabelled
 - blast abuse
 ```

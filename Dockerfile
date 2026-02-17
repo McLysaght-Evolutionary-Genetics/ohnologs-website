@@ -8,16 +8,25 @@ RUN pnpm i --no-frozen-lockfile
 COPY . .
 RUN pnpm build
 
+FROM node:24 AS diamond
+WORKDIR /app
+RUN apt update
+RUN apt -y install build-essential
+RUN apt -y install cmake
+RUN cmake --version
+RUN git clone https://github.com/bbuchfink/diamond
+RUN cmake diamond
+RUN make diamond
+RUN ls diamond
+
 FROM node:24
 WORKDIR /app
 RUN corepack enable
-RUN wget https://github.com/bbuchfink/diamond/releases/download/v2.1.12/diamond-linux64.tar.gz
-RUN tar -xzf diamond-linux64.tar.gz
-RUN mv diamond /usr/bin
 COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/prisma prisma/
 COPY --from=builder /app/startup.sh startup.sh
+COPY --from=diamond /app/diamond/... /usr/bin
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
