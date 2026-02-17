@@ -241,6 +241,9 @@ export const GET = (async ({ url }) => {
         {
           scaffoldId: "asc",
         },
+        {
+          geneId: "asc",
+        },
       ],
       skip: page * perPage,
       take: perPage,

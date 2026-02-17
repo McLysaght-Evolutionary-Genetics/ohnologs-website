@@ -12,7 +12,7 @@
     ToolbarContent,
   } from "carbon-components-svelte";
   import type { DataTableRow } from "carbon-components-svelte/types/DataTable/DataTable.svelte";
-  import { Download, Launch, Scale, TreeView } from "carbon-icons-svelte";
+  import { Download, Launch, Scale, Select_02, TreeView } from "carbon-icons-svelte";
   import { get } from "svelte/store";
   import type { GeneEntry } from "./geneTable";
   import { downloadFile, downloadOhnologs, intoQuery } from "$lib/util";
@@ -60,7 +60,7 @@
     { key: "scaffold", value: "Chromosome" },
     { key: "segment", value: "Segment" },
     { key: "pgc", value: "PGC" },
-    { key: "pvc", value: "PVC" },
+    // { key: "pvc", value: "PVC" },
     { key: "labels", value: "Labels" },
   ];
 
@@ -151,13 +151,18 @@
 
         <Toolbar>
           <ToolbarContent>
+            <!-- <Button kind="tertiary" disabled={entries.length === 0 || downloading} icon={Select_02}>Select All</Button> -->
             <Button
+              kind="primary"
               disabled={entries.length === 0 || downloading}
               icon={downloading ? InlineLoading : Download}
               on:click={handleDownloadAll}>Download Database</Button
             >
           </ToolbarContent>
           <ToolbarBatchActions on:cancel={handleCancel}>
+            <!-- <Button kind="tertiary" disabled={entries.length === 0 || downloading} icon={Select_02}
+              >Add Table to Selection</Button
+            > -->
             <Button
               disabled={downloading}
               icon={downloading ? InlineLoading : Download}

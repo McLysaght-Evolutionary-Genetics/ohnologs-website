@@ -34,7 +34,6 @@ Files:
 
 Categories:
 
-- `all` - All ohnologs
 - `1r` - Ohnologs are 1R-only (only 1R ohnologs have been retained in this gene family)
 - `1r` - Ohnologs are 2R-only (only 2R ohnologs have been retained in this gene family)
 - `both` - Ohnologs in this gene family have been retained after both 1R and 2R

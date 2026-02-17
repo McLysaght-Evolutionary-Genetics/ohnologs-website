@@ -3,18 +3,36 @@
   import GeneTable from "$lib/components/GeneTable.svelte";
   import { geneSchema } from "$lib/types";
   import { error } from "@sveltejs/kit";
-  import { Button, ButtonSet, Column, ExpandableTile, Grid, Row, TextArea } from "carbon-components-svelte";
+  import {
+    Button,
+    ButtonSet,
+    Column,
+    ExpandableTile,
+    Grid,
+    InlineLoading,
+    Link,
+    Row,
+    TextArea,
+  } from "carbon-components-svelte";
   import { Information } from "carbon-icons-svelte";
   import * as z from "zod";
+
+  const exampleSequence = ">XP_066550145\nMASVGCSEVAEEEPGSLPLDIDDVHLLLQGQCSPRLGGHSNTRPLTHRQTHAERTHRQSQLREREQ";
 
   //
   const shownPages = 1;
   const totalPages = 1;
 
   let loading = false;
+  let initial = true;
 
   let page = 1;
+
   let entries: z.infer<typeof geneSchema>[] | undefined = [];
+
+  let failure: string | null = null;
+
+  let textAreaContent: string;
 </script>
 
 <Grid padding>
@@ -68,6 +86,41 @@
 
   <!-- <h2>Under construction...</h2> -->
 
+  {#if loading}
+    <div>
+      <h4 style="background-color: #c2ff99">Loading trees from database...</h4>
+      <InlineLoading description="This might take some time" />
+    </div>
+  {/if}
+
+  {#if entries && !failure && !loading && !initial}
+    <div>
+      <h4 style="background-color: #c2ff99">Ohnolog hits found: {entries.length}</h4>
+    </div>
+  {/if}
+
+  {#if failure}
+    <div>
+      <h4 style="background-color: #ffaa99;">BLAST search failed with error '{failure}'</h4>
+      <p>Please read the error message and ensure the following:</p>
+      <ul style="padding: 0.2rem; line-height: 1.2rem;">
+        <li>- Your input data is in FASTA format</li>
+        <li>- Your input data is a valid protein sequence</li>
+        <li>- There are no unexpected symbols in your input</li>
+      </ul>
+      <p>If you think this is an error, please report it to niezabil@tcd.ie</p>
+    </div>
+  {/if}
+
+  <br />
+
+  <Link
+    href=""
+    on:click={() => {
+      textAreaContent = exampleSequence;
+    }}>Click here to try an example</Link
+  >
+
   <!-- search -->
   <Row>
     <Column>
@@ -77,6 +130,8 @@
         use:enhance={() => {
           entries = [];
           loading = true;
+          failure = null;
+          initial = false;
 
           return async ({ result, form }) => {
             if (result.type === "success") {
@@ -90,14 +145,24 @@
 
               entries = parsed.data;
               loading = false;
+
+              await applyAction(result);
             }
 
-            await applyAction(result);
+            if (result.type === "error") {
+              failure = result.error?.message ?? "";
+              loading = false;
+
+              return;
+            }
+
+            textAreaContent = "";
           };
         }}
       >
         <div class="textarea-padding">
           <TextArea
+            bind:value={textAreaContent}
             labelText="Protein sequence"
             placeholder={"Paste a protein sequence to search the database with BLAST.\n\n>ENSGALP00010007403\nMEKVSATLAESTQRNLSMQDQRIDTRLHPGVAVGGKHSSWKEEAGMLRASTRYL..."}
             name="sequence"

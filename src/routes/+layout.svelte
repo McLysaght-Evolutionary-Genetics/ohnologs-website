@@ -44,7 +44,7 @@
     </HeaderNavMenu>
     <HeaderNavMenu text="Utilities">
       <HeaderNavItem href="/select" text="Selection" />
-      <!-- <HeaderNavItem href="/blast" text="BLAST" /> -->
+      <HeaderNavItem href="/blast" text="BLAST" />
     </HeaderNavMenu>
     <HeaderNavMenu text="Figures">
       <HeaderNavItem href="/circos" text="Circos" />
@@ -64,7 +64,7 @@
     <SideNavLink icon={LetterGg} href="/gene" text="Genes" />
     <SideNavDivider />
     <SideNavLink icon={Select_02} href="/select" text="Selection" />
-    <!-- <SideNavLink icon={Data_2} href="/blast" text="BLAST" /> -->
+    <SideNavLink icon={Data_2} href="/blast" text="BLAST" />
     <SideNavDivider />
     <SideNavLink icon={CircleDash} href="/circos" text="Circos" />
     <SideNavLink icon={ChartScatter} href="/dotplot" text="Dotplot" />

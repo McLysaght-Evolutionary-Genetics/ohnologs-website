@@ -39,7 +39,8 @@
       <p>
         If you want to download our entire dataset, <Link href="https://data.ohnologs.com/download/ohnologs.zip"
           >click here</Link
-        >. Alternatively, you can choose what data to download by browsing to one of the following pages:
+        >. Alternatively, you can see what data is included in our database or download individual ohnolog sets by
+        browsing to the following pages:
       </p>
 
       <div class="list">
@@ -63,7 +64,7 @@
       <div class="list">
         <UnorderedList>
           <ListItem><Link href="/select">Selection page</Link></ListItem>
-          <!-- <ListItem><Link href="/blast">BLAST page</Link></ListItem> -->
+          <ListItem><Link href="/blast">BLAST page</Link></ListItem>
         </UnorderedList>
       </div>
     </Column>

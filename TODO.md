@@ -95,15 +95,25 @@ ROISIN:
 ```
 TOFIX:
 - [DONE] download species + readme (back to what it was supposed to be)
-- select all button
-- blast
-- some ohnologs unlabelled
-- reviewer comments
-- outgroup species on gene page
-- pvc col
-- homepage browse to species
-- sort genes
+- [DONE] pvc col
+- [DONE] sort genes
+- [DONE] outgroup species on gene page
+- [DONE] homepage browse to species
+- [DONE] blast
+
+- simple download remove 'all' category
 - screenshots
+- reviewer comments
+
+- select all button
+- non-ensembl links
 - circos lookup gene thats not in the database
 - circos lookup gene thats not available as a circos
+- some ohnologs unlabelled
+- blast abuse
 ```
+
+thu
+
+- [DONE/push] select no readme
+- [DONE/cache] update readme re ohnolog pairs
