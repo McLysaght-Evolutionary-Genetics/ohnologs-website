@@ -28,7 +28,7 @@ COPY --from=builder /app/build build/
 COPY --from=builder /app/node_modules node_modules/
 COPY --from=builder /app/prisma prisma/
 COPY --from=builder /app/startup.sh startup.sh
-COPY bin/diamond /usr/bin
+COPY --from=diamond /app/diamond/diamond /usr/bin
 COPY package.json .
 EXPOSE 3000
 ENV NODE_ENV=production
