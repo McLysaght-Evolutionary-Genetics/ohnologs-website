@@ -88,7 +88,7 @@
 
   {#if loading}
     <div>
-      <h4 style="background-color: #c2ff99">Loading trees from database...</h4>
+      <h4 style="background-color: #c2ff99">Running BLAST search...</h4>
       <InlineLoading description="This might take some time" />
     </div>
   {/if}
