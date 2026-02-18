@@ -13,8 +13,8 @@ WORKDIR /app
 RUN apt update
 RUN apt -y install build-essential
 RUN apt -y install cmake
-RUN apt -y zlib1g-dev
-RUN apt -y libsqlite3-dev
+RUN apt -y install zlib1g-devz
+RUN apt -y install libsqlite3-dev
 RUN cmake --version
 RUN git clone https://github.com/bbuchfink/diamond
 WORKDIR /app/diamond
