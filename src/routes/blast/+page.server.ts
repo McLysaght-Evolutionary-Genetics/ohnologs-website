@@ -166,7 +166,7 @@ export const actions = {
     const str = form.get("sequence")?.toString() ?? "";
     const [id, seq] = parseFastaEntry(str);
 
-    const entries = await execDiamond(id, seq, "dataset", 24, 0);
+    const entries = await execDiamond(id, seq, "dataset", 1, 0);
 
     // find matching entries in our database
     const protIds = entries.map((e) => e.sseqid);

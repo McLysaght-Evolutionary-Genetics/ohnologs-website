@@ -8,16 +8,18 @@ RUN pnpm i --no-frozen-lockfile
 COPY . .
 RUN pnpm build
 
-# FROM node:24 AS diamond
-# WORKDIR /app
-# RUN apt update
-# RUN apt -y install build-essential
-# RUN apt -y install cmake
-# RUN cmake --version
-# RUN git clone https://github.com/bbuchfink/diamond
-# WORKDIR /app/diamond
-# RUN cmake .
-# RUN make -j
+FROM node:24 AS diamond
+WORKDIR /app
+RUN apt update
+RUN apt -y install build-essential
+RUN apt -y install cmake
+RUN apt -y zlib1g-dev
+RUN apt -y libsqlite3-dev
+RUN cmake --version
+RUN git clone https://github.com/bbuchfink/diamond
+WORKDIR /app/diamond
+RUN cmake .
+RUN make -j 4
 
 FROM node:24
 WORKDIR /app
