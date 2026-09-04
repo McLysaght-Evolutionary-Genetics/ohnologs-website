@@ -4,8 +4,7 @@ WORKDIR /app
 RUN corepack enable
 COPY package.json .
 COPY pnpm-lock.yaml .
-COPY .npmrc .
-RUN pnpm i --no-frozen-lockfile
+RUN pnpm i --no-frozen-lockfile --only-built-dependencies=all
 COPY . .
 RUN pnpm build
 
