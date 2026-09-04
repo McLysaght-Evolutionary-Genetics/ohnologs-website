@@ -43,6 +43,7 @@
   //
   const headers = [
     { key: "name", value: "Species" },
+    { key: "id", value: "Latin Name" },
     { key: "source", value: "Source" },
     { key: "version", value: "Version" },
     { key: "assembly", value: "Assembly" },
@@ -96,7 +97,9 @@
         <span class="description" slot="description">{description}</span>
 
         <svelte:fragment slot="cell" let:cell>
-          {#if cell.key === "assembly"}
+          {#if cell.key === "id"}
+            <em>{cell.value.split("_").join(" ")}</em>
+          {:else if cell.key === "assembly"}
             {cell.value[0].toUpperCase()}{cell.value.slice(1)}
           {:else if cell.key === "source"}
             {#if cell.value === "Ensembl"}

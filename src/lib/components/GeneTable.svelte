@@ -57,6 +57,7 @@
     { key: "proteinId", value: "Protein" },
     { key: "source", value: "Source" },
     { key: "species", value: "Species" },
+    { key: "speciesId", value: "Latin Name" },
     { key: "scaffold", value: "Chromosome" },
     { key: "segment", value: "Segment" },
     { key: "pgc", value: "PGC" },
@@ -135,7 +136,9 @@
         <span class="description" slot="description">{description}</span>
 
         <svelte:fragment slot="cell" let:cell>
-          {#if cell.key === "source"}
+          {#if cell.key === "speciesId"}
+            <em>{cell.value.split("_").join(" ")}</em>
+          {:else if cell.key === "source"}
             <Link href="https://www.ensembl.org/Gene/Summary?g={nextId.next().value}" target="_blank" icon={Launch}
               >{cell.value}</Link
             >

@@ -256,6 +256,7 @@ export const GET = (async ({ url }) => {
     proteinId: e.proteinId,
     // TODO: this is a problem... can we make scaffolds required?
     // alternatively, link gene directly to species
+    speciesId: e.speciesId,
     species: e.species.name,
     source: e.species.source.name,
     version: e.species.version,

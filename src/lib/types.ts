@@ -59,6 +59,7 @@ export const geneSchema = z.object({
   id: z.string(),
   geneId: z.string(),
   proteinId: z.string(),
+  speciesId: z.string(),
   species: z.string(),
   source: z.string(),
   version: z.string(),
