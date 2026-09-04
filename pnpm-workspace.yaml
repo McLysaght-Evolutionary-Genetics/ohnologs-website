@@ -1,8 +1,8 @@
-onlyBuiltDependencies:
-  - "@parcel/watcher"
-  - "@prisma/client"
-  - "@prisma/engines"
-  - "@sveltejs/kit"
-  - esbuild
-  - prisma
-  - svelte-preprocess
+allowBuilds:
+  "@parcel/watcher": true
+  "@prisma/client": true
+  "@prisma/engines": true
+  "@sveltejs/kit": true
+  "esbuild": true
+  "prisma": true
+  "svelte-preprocess": true
